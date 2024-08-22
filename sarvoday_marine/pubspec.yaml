@@ -1,0 +1,82 @@
+name: sarvoday_marine
+description: "A new Flutter project."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.4.1 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+  #  State Management
+  flutter_bloc: ^8.1.6
+  #  Model-driven forms
+  reactive_forms: ^17.0.1
+  flutter_typeahead: ^5.2.0
+  #  Routing
+  auto_route: ^8.2.0
+  #  DateTime Formatting
+  intl: ^0.19.0
+  #  Reactive streams
+  rxdart: ^0.28.0
+  font_awesome_flutter: ^10.7.0
+  table_calendar: ^3.1.2
+  flutter_svg: ^2.0.10+1
+  shimmer: ^3.0.0
+  fluttertoast: ^8.2.6
+  shared_preferences: ^2.2.3
+  flutter_slidable: ^3.1.1
+
+  file_picker: ^8.0.6
+  image_picker: ^1.1.2
+
+  #  API calling
+  dio: ^5.5.0+1
+  #  Secondary Thread Process
+  flutter_isolate: ^2.0.4
+  equatable: ^2.0.5
+  #  Functional Programming
+  dartz: ^0.10.1
+  #  Dependency Injection
+  get_it: ^7.7.0
+  jwt_decoder: ^2.0.1
+  connectivity_plus: ^6.0.3
+  country_picker: ^2.0.26
+
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^4.0.0
+  auto_route_generator: ^8.0.0
+  build_runner: ^2.4.11
+
+
+flutter:
+
+  uses-material-design: true
+
+  #  local assets
+  assets:
+    - assets/icons/
+    - assets/images/
+
+  #  font family
+  fonts:
+    - family: SourceSans
+      fonts:
+        - asset: fonts/SourceSans3-Light.ttf
+          weight: 300
+        - asset: fonts/SourceSans3-Regular.ttf
+          weight: 400
+        - asset: fonts/SourceSans3-Medium.ttf
+          weight: 500
+        - asset: fonts/SourceSans3-SemiBold.ttf
+          weight: 600
+        - asset: fonts/SourceSans3-Bold.ttf
+          weight: 700

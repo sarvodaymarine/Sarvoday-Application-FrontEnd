@@ -1,0 +1,13 @@
+import 'package:dartz/dartz.dart';
+import 'package:sarvoday_marine/core/failure/common_failure.dart';
+import 'package:sarvoday_marine/features/employee_module/domain/repositories/employee_repository.dart';
+
+class DeleteEmployeeUseCase {
+  final EmployeeRepository employeeRepository;
+
+  DeleteEmployeeUseCase(this.employeeRepository);
+
+  Future<Either<bool, CommonFailure>> call(String employeeId) async {
+    return await employeeRepository.deleteEmployee(employeeId);
+  }
+}
