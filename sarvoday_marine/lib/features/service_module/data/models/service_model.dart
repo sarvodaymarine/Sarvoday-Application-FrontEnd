@@ -1,3 +1,5 @@
+import 'package:sarvoday_marine/features/report_module/data/models/image_config_model.dart';
+
 class ServiceModel {
   ServiceModel(
       {String? id,
@@ -6,7 +8,7 @@ class ServiceModel {
       double? container2Price,
       double? container3Price,
       double? container4Price,
-      List<ServiceImageConfig>? serviceImage,
+      List<ImageConfig>? serviceImage,
       String? updatedAt,
       String? createdAt}) {
     _id = id;
@@ -38,7 +40,7 @@ class ServiceModel {
         ? double.parse(json['container4Price'].toString())
         : json['container4Price'];
     _serviceImage = (json['serviceImage'] as List<dynamic>?)
-        ?.map((item) => ServiceImageConfig.fromJson(item))
+        ?.map((item) => ImageConfig.fromJson(item))
         .toList();
   }
 
@@ -48,7 +50,7 @@ class ServiceModel {
   double? _container2Price;
   double? _container3Price;
   double? _container4Price;
-  List<ServiceImageConfig>? _serviceImage;
+  List<ImageConfig>? _serviceImage;
   String? _updatedAt;
   String? _createdAt;
 
@@ -59,7 +61,7 @@ class ServiceModel {
           double? container2Price,
           double? container3Price,
           double? container4Price,
-          List<ServiceImageConfig>? serviceImage,
+          List<ImageConfig>? serviceImage,
           String? updatedAt,
           String? createdAt}) =>
       ServiceModel(
@@ -77,7 +79,7 @@ class ServiceModel {
 
   String? get serviceName => _serviceName;
 
-  List<ServiceImageConfig>? get serviceImage => _serviceImage;
+  List<ImageConfig>? get serviceImage => _serviceImage;
 
   double? get container1Price => _container1Price;
 
@@ -102,30 +104,6 @@ class ServiceModel {
     map['serviceImage'] = _serviceImage?.map((item) => item.toJson()).toList();
     map['createdAt'] = _createdAt;
     map['updatedAt'] = _updatedAt;
-    return map;
-  }
-}
-
-class ServiceImageConfig {
-  ServiceImageConfig({
-    this.imageName,
-    this.imageCount,
-  });
-
-  String? imageName;
-  int? imageCount;
-
-  factory ServiceImageConfig.fromJson(Map<String, dynamic> json) {
-    return ServiceImageConfig(
-      imageName: json['imageName'],
-      imageCount: json['imageCount'],
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    final map = <String, dynamic>{};
-    map['imageName'] = imageName;
-    map['imageCount'] = imageCount;
     return map;
   }
 }

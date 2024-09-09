@@ -29,7 +29,7 @@ class CommonAppBar {
           text: TextSpan(
               text: title,
               style: TextStyle(
-                fontSize: SmTextTheme.getResponsiveSize(context, 24),
+                fontSize: SmTextTheme.getResponsiveSize(context, 20),
                 color: SmAppTheme.isDarkMode(context)
                     ? SmColorDarkTheme.textColor
                     : SmColorLightTheme.textColor,

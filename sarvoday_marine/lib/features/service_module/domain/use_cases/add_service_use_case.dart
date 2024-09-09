@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:sarvoday_marine/core/failure/common_failure.dart';
+import 'package:sarvoday_marine/features/report_module/data/models/image_config_model.dart';
 import 'package:sarvoday_marine/features/service_module/data/models/service_model.dart';
 import 'package:sarvoday_marine/features/service_module/domain/repositories/service_repository.dart';
 
@@ -20,7 +21,7 @@ class AddServiceParam {
   double? container2Price;
   double? container3Price;
   double? container4Price;
-  List<ServiceImageConfig> images;
+  List<ImageConfig> images;
 
   AddServiceParam(this.serviceName, this.container1Price, this.container2Price,
       this.container3Price, this.container4Price, this.images);

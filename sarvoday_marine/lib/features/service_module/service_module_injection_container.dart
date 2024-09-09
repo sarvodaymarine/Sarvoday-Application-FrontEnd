@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:sarvoday_marine/features/service_module/data/data_sources/service_data_source.dart';
 import 'package:sarvoday_marine/features/service_module/data/data_sources/service_data_source_impl.dart';

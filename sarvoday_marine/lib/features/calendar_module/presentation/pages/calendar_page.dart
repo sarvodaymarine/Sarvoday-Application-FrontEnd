@@ -77,7 +77,8 @@ class _CalendarPageState extends State<CalendarPage> {
         }
         return Scaffold(
           appBar: CommonAppBar(context: context, title: "Dashboard").appBar(),
-          drawer: DrawerWidget(),
+          drawer: DrawerWidget(
+              userRole: context.read<CalendarCubit>().userType ?? ""),
           drawerEnableOpenDragGesture: true,
           floatingActionButton: isClientOREmployee
               ? null

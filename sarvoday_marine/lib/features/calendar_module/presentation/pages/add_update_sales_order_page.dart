@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:intl/intl.dart';
 import 'package:reactive_forms/reactive_forms.dart';
+import 'package:sarvoday_marine/core/navigation/app_route.gr.dart';
 import 'package:sarvoday_marine/core/theme/sm_app_theme.dart';
 import 'package:sarvoday_marine/core/theme/sm_color_theme.dart';
 import 'package:sarvoday_marine/core/theme/sm_text_theme.dart';
@@ -69,6 +70,7 @@ class _AddUpdateSalesOrderPageState extends State<AddUpdateSalesOrderPage> {
   final TextEditingController controller3 = TextEditingController();
   final TextEditingController controller4 = TextEditingController();
   DateTime? selectedDate;
+  bool isEditEnabled = false;
   final List priceTypeList = [
     'container1Price',
     'container2Price',
@@ -102,11 +104,11 @@ class _AddUpdateSalesOrderPageState extends State<AddUpdateSalesOrderPage> {
       'services': FormArray([], validators: [Validators.minLength(1)]),
       'employees':
           FormArray<SoEmployeeParam>([], validators: [Validators.minLength(1)]),
-      'otherExpenses': FormArray([], validators: [Validators.minLength(1)]),
+      'otherExpenses': FormArray([]),
       'comments': FormControl<String>(value: widget.salesOrderModel?.comments),
       'tax': FormArray([], validators: [Validators.minLength(1)]),
     });
-    if (widget.isDisabled) {
+    if (widget.isDisabled || (widget.isFromEdit && !isEditEnabled)) {
       form.markAsDisabled();
     }
     if (widget.isFromEdit) {
@@ -122,462 +124,268 @@ class _AddUpdateSalesOrderPageState extends State<AddUpdateSalesOrderPage> {
   @override
   Widget build(BuildContext context) {
     SmTextTheme.init(context);
-    return Scaffold(
-      appBar: CommonAppBar(
-        context: context,
-        title: widget.isFromEdit ? "Edit Sales Order" : "Create Sales Order",
-      ).appBar(),
-      body: BlocConsumer<CalendarCubit, CalendarState>(
-        listener: (context, state) {
-          if (state is CMStateNoData) {
-            showLoadingDialog(context);
-          } else if (state is CMStateOnCrudSuccess) {
-            hideLoadingDialog(context);
-            CommonMethods.showToast(context, state.response);
-            Navigator.of(context).pop(true);
-          } else if (state is CMStateErrorGeneral) {
-            hideLoadingDialog(context);
-            CommonMethods.showCommonDialog(context, "Error", state.errorMsg);
-          }
-        },
-        builder: (context, calendarState) {
-          return BlocConsumer<SalesOrderCubit, SalesOrderState>(
-            listener: (context, state) {},
-            builder: (context, state) {
-              if (state.employeesLoading ||
-                  state.clientsLoading ||
-                  state.locationsLoading) {
-                return const Center(child: CircularProgressIndicator());
-              } else if (state.employeesError != null ||
-                  state.clientsError != null ||
-                  state.locationsError != null) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      if (state.employeesError != null)
-                        Text(
-                            'Failed to load employees: ${state.employeesError}'),
-                      if (state.clientsError != null)
-                        Text('Failed to load clients: ${state.clientsError}'),
-                      if (state.locationsError != null)
-                        Text(
-                            'Failed to load locations: ${state.locationsError}'),
-                      ElevatedButton(
-                        onPressed: () =>
-                            context.read<SalesOrderCubit>().fetchData(),
-                        child: RichText(
-                            text: TextSpan(
-                                text: 'Retry',
-                                style: SmTextTheme.confirmButtonTextStyle(
-                                    context))),
-                      ),
-                    ],
-                  ),
-                );
-              }
-
-              return Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: ReactiveForm(
-                  formGroup: form,
-                  child: SingleChildScrollView(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (bool didPop, Object? result) async {
+        if (didPop) {
+          return;
+        }
+        final bool shouldPop = _showBackDialog();
+        if (context.mounted && shouldPop) {
+          Navigator.pop(context);
+        }
+      },
+      child: Scaffold(
+        appBar: CommonAppBar(
+          context: context,
+          title: widget.isDisabled || (widget.isFromEdit && !isEditEnabled)
+              ? "Sales Order"
+              : widget.isFromEdit
+                  ? "Edit Sales Order"
+                  : "Create Sales Order",
+          actionList: [
+            widget.isDisabled || !widget.isFromEdit
+                ? const SizedBox.shrink()
+                : Visibility(
+                    visible: !widget.isDisabled &&
+                        (widget.isFromEdit && !isEditEnabled),
+                    child: IconButton(
+                        color: SmCommonColors.secondaryColor,
+                        icon: const Icon(Icons.edit),
+                        onPressed: () {
+                          setState(() {
+                            isEditEnabled = true;
+                          });
+                        }),
+                  )
+          ],
+        ).appBar(),
+        body: BlocConsumer<CalendarCubit, CalendarState>(
+          listener: (context, state) {
+            if (state is CMStateNoData) {
+              showLoadingDialog(context);
+            } else if (state is CMStateOnCrudSuccess) {
+              hideLoadingDialog(context);
+              CommonMethods.showToast(context, state.response);
+              Navigator.of(context).pop(true);
+            } else if (state is CMStateErrorGeneral) {
+              hideLoadingDialog(context);
+              CommonMethods.showCommonDialog(context, "Error", state.errorMsg);
+            }
+          },
+          builder: (context, calendarState) {
+            return BlocConsumer<SalesOrderCubit, SalesOrderState>(
+              listener: (context, state) {},
+              builder: (context, state) {
+                if (state.employeesLoading ||
+                    state.clientsLoading ||
+                    state.locationsLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (state.employeesError != null ||
+                    state.clientsError != null ||
+                    state.locationsError != null) {
+                  return Center(
                     child: Column(
-                      children: <Widget>[
-                        SizedBox(
-                            height:
-                                SmTextTheme.getResponsiveSize(context, 16.0)),
-                        GestureDetector(
-                          onTap: () {
-                            context
-                                .read<SalesOrderCubit>()
-                                .setFieldReadOnly(false, 'client');
-                          },
-                          child: AbsorbPointer(
-                            absorbing: state.clientSelected,
-                            // Disable input if read-only
-                            child: TypeAheadField<ClientModel>(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        if (state.employeesError != null)
+                          Text(
+                              'Failed to load employees: ${state.employeesError}'),
+                        if (state.clientsError != null)
+                          Text('Failed to load clients: ${state.clientsError}'),
+                        if (state.locationsError != null)
+                          Text(
+                              'Failed to load locations: ${state.locationsError}'),
+                        ElevatedButton(
+                          onPressed: () =>
+                              context.read<SalesOrderCubit>().fetchData(),
+                          child: RichText(
+                              text: TextSpan(
+                                  text: 'Retry',
+                                  style: SmTextTheme.confirmButtonTextStyle(
+                                      context))),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                return Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: ReactiveForm(
+                    formGroup: form,
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: <Widget>[
+                          SizedBox(
+                              height:
+                                  SmTextTheme.getResponsiveSize(context, 16.0)),
+                          GestureDetector(
+                            onTap: () {
+                              context
+                                  .read<SalesOrderCubit>()
+                                  .setFieldReadOnly(false, 'client');
+                            },
+                            child: AbsorbPointer(
+                              absorbing: state.clientSelected,
+                              // Disable input if read-only
+                              child: TypeAheadField<ClientModel>(
+                                controller: controller,
+                                builder: (context, controller, focusNode) =>
+                                    TextField(
+                                  controller: controller,
+                                  enabled: !(widget.isDisabled ||
+                                      (widget.isFromEdit && !isEditEnabled)),
+                                  focusNode: focusNode,
+                                  style: SmTextTheme.confirmButtonTextStyle(
+                                          context)
+                                      .copyWith(
+                                          fontSize:
+                                              SmTextTheme.getResponsiveSize(
+                                                  context, 12)),
+                                  decoration: InputDecoration(
+                                    errorText: form.control('client').valid ||
+                                            widget.isDisabled ||
+                                            (widget.isFromEdit &&
+                                                !isEditEnabled)
+                                        ? null
+                                        : 'Please add client',
+                                    prefix: const Icon(Icons.search),
+                                    border: OutlineInputBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(16.0)),
+                                    labelText: "Client",
+                                    hintText: "Search Client",
+                                    labelStyle: TextStyle(
+                                        fontSize: SmTextTheme.getResponsiveSize(
+                                            context, 16.0),
+                                        fontWeight: FontWeight.w400,
+                                        color: SmAppTheme.isDarkMode(context)
+                                            ? SmColorDarkTheme
+                                                .secondaryTextColor
+                                            : SmColorLightTheme
+                                                .secondaryTextColor),
+                                  ),
+                                  readOnly: state
+                                      .clientSelected, // Make text field read-only if needed
+                                ),
+                                decorationBuilder: (context, child) => Material(
+                                  type: MaterialType.card,
+                                  elevation: 4,
+                                  borderRadius: BorderRadius.circular(16.0),
+                                  child: child,
+                                ),
+                                itemBuilder: (context, client) => ListTile(
+                                  title: RichText(
+                                    text: TextSpan(
+                                        text:
+                                            '${client.firstName} ${client.lastName}',
+                                        style:
+                                            SmTextTheme.confirmButtonTextStyle(
+                                                    context)
+                                                .copyWith(
+                                                    fontSize: SmTextTheme
+                                                        .getResponsiveSize(
+                                                            context, 12))),
+                                  ),
+                                ),
+                                onSelected: (value) {
+                                  form.patchValue({'client': value.id});
+                                  controller.text =
+                                      '${value.firstName} ${value.lastName}';
+                                  context
+                                      .read<SalesOrderCubit>()
+                                      .setFieldReadOnly(true, 'client');
+                                },
+                                suggestionsCallback: (String search) {
+                                  return state.clients;
+                                },
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                              height:
+                                  SmTextTheme.getResponsiveSize(context, 20.0)),
+                          TypeAheadField<ClientServiceModel>(
+                            controller: controller2,
+                            builder: (context, controller, focusNode) =>
+                                TextField(
                               controller: controller,
-                              builder: (context, controller, focusNode) =>
-                                  TextField(
-                                controller: controller,
-                                enabled: !widget.isDisabled,
-                                focusNode: focusNode,
-                                style:
-                                    SmTextTheme.confirmButtonTextStyle(context)
+                              focusNode: focusNode,
+                              enabled: !(widget.isDisabled ||
+                                  (widget.isFromEdit && !isEditEnabled)),
+                              style: SmTextTheme.confirmButtonTextStyle(context)
+                                  .copyWith(
+                                      fontSize: SmTextTheme.getResponsiveSize(
+                                          context, 12)),
+                              decoration: InputDecoration(
+                                errorText: form.control('services').valid ||
+                                        widget.isDisabled ||
+                                        (widget.isFromEdit && !isEditEnabled)
+                                    ? null
+                                    : 'Please add services',
+                                prefix: const Icon(Icons.search),
+                                border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(16.0)),
+                                hintText: "Search Services",
+                                labelText: "Services",
+                                labelStyle: TextStyle(
+                                    fontSize: SmTextTheme.getResponsiveSize(
+                                        context, 16.0),
+                                    fontWeight: FontWeight.w400,
+                                    color: SmAppTheme.isDarkMode(context)
+                                        ? SmColorDarkTheme.secondaryTextColor
+                                        : SmColorLightTheme.secondaryTextColor),
+                              ),
+                            ),
+                            decorationBuilder: (context, child) => Material(
+                              type: MaterialType.card,
+                              elevation: 4,
+                              borderRadius: BorderRadius.circular(16.0),
+                              child: child,
+                            ),
+                            itemBuilder: (context, product) => ListTile(
+                              title: RichText(
+                                text: TextSpan(
+                                    text: product.serviceName,
+                                    style: SmTextTheme.confirmButtonTextStyle(
+                                            context)
                                         .copyWith(
                                             fontSize:
                                                 SmTextTheme.getResponsiveSize(
-                                                    context, 12)),
-                                decoration: InputDecoration(
-                                  errorText: form.control('client').valid ||
-                                          widget.isDisabled
-                                      ? null
-                                      : 'Please add client',
-                                  prefix: const Icon(Icons.search),
-                                  border: OutlineInputBorder(
-                                      borderRadius:
-                                          BorderRadius.circular(16.0)),
-                                  labelText: "Client",
-                                  hintText: "Search Client",
-                                  labelStyle: TextStyle(
-                                      fontSize: SmTextTheme.getResponsiveSize(
-                                          context, 16.0),
-                                      fontWeight: FontWeight.w400,
-                                      color: SmAppTheme.isDarkMode(context)
-                                          ? SmColorDarkTheme.secondaryTextColor
-                                          : SmColorLightTheme
-                                              .secondaryTextColor),
-                                ),
-                                readOnly: state
-                                    .clientSelected, // Make text field read-only if needed
+                                                    context, 12))),
                               ),
-                              decorationBuilder: (context, child) => Material(
-                                type: MaterialType.card,
-                                elevation: 4,
-                                borderRadius: BorderRadius.circular(16.0),
-                                child: child,
-                              ),
-                              itemBuilder: (context, client) => ListTile(
-                                title: RichText(
-                                  text: TextSpan(
-                                      text:
-                                          '${client.firstName} ${client.lastName}',
-                                      style: SmTextTheme.confirmButtonTextStyle(
-                                              context)
-                                          .copyWith(
-                                              fontSize:
-                                                  SmTextTheme.getResponsiveSize(
-                                                      context, 12))),
-                                ),
-                              ),
-                              onSelected: (value) {
-                                form.patchValue({'client': value.id});
-                                controller.text =
-                                    '${value.firstName} ${value.lastName}';
-                                context
-                                    .read<SalesOrderCubit>()
-                                    .setFieldReadOnly(true, 'client');
-                              },
-                              suggestionsCallback: (String search) {
-                                return state.clients;
-                              },
                             ),
-                          ),
-                        ),
-                        SizedBox(
-                            height:
-                                SmTextTheme.getResponsiveSize(context, 20.0)),
-                        TypeAheadField<ClientServiceModel>(
-                          controller: controller2,
-                          builder: (context, controller, focusNode) =>
-                              TextField(
-                            controller: controller,
-                            focusNode: focusNode,
-                            enabled: !widget.isDisabled,
-                            style: SmTextTheme.confirmButtonTextStyle(context)
-                                .copyWith(
-                                    fontSize: SmTextTheme.getResponsiveSize(
-                                        context, 12)),
-                            decoration: InputDecoration(
-                              errorText: form.control('services').valid ||
-                                      widget.isDisabled
-                                  ? null
-                                  : 'Please add services',
-                              prefix: const Icon(Icons.search),
-                              border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(16.0)),
-                              hintText: "Search Services",
-                              labelText: "Services",
-                              labelStyle: TextStyle(
-                                  fontSize: SmTextTheme.getResponsiveSize(
-                                      context, 16.0),
-                                  fontWeight: FontWeight.w400,
-                                  color: SmAppTheme.isDarkMode(context)
-                                      ? SmColorDarkTheme.secondaryTextColor
-                                      : SmColorLightTheme.secondaryTextColor),
-                            ),
-                          ),
-                          decorationBuilder: (context, child) => Material(
-                            type: MaterialType.card,
-                            elevation: 4,
-                            borderRadius: BorderRadius.circular(16.0),
-                            child: child,
-                          ),
-                          itemBuilder: (context, product) => ListTile(
-                            title: RichText(
-                              text: TextSpan(
-                                  text: product.serviceName,
-                                  style: SmTextTheme.confirmButtonTextStyle(
-                                          context)
-                                      .copyWith(
-                                          fontSize:
-                                              SmTextTheme.getResponsiveSize(
-                                                  context, 12))),
-                            ),
-                          ),
-                          onSelected: (value) {
-                            setState(() {
-                              (form.control('services') as FormArray)
-                                  .add(FormGroup({
-                                'id':
-                                    FormControl<String>(value: value.serviceId),
-                                'serviceName': FormControl<String>(
-                                    value: value.serviceName),
-                                'priceType': FormControl<String>(
-                                    validators: [Validators.required]),
-                              }));
-                            });
-                          },
-                          suggestionsCallback: (String search) {
-                            return state.clients
-                                ?.firstWhere((client) =>
-                                    client.id == form.control('client').value)
-                                .services;
-                          },
-                        ),
-                        _buildServiceFields(),
-                        SizedBox(
-                            height:
-                                SmTextTheme.getResponsiveSize(context, 20.0)),
-                        ReactiveTextField<String>(
-                          formControlName: "products",
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16.0)),
-                            labelText: "Product",
-                            labelStyle: TextStyle(
-                                fontSize: SmTextTheme.getResponsiveSize(
-                                    context, 16.0),
-                                fontWeight: FontWeight.w400,
-                                color: SmAppTheme.isDarkMode(context)
-                                    ? SmColorDarkTheme.secondaryTextColor
-                                    : SmColorLightTheme.secondaryTextColor),
-                          ),
-                          validationMessages: {
-                            ValidationMessage.required: (error) =>
-                                'Product detail is required'
-                          },
-                        ),
-                        SizedBox(
-                            height:
-                                SmTextTheme.getResponsiveSize(context, 16.0)),
-                        ReactiveTextField<int>(
-                          formControlName: "noOfContainer",
-                          keyboardType: TextInputType.number,
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16.0)),
-                            labelText: "Total Container",
-                            labelStyle: TextStyle(
-                                fontSize: SmTextTheme.getResponsiveSize(
-                                    context, 16.0),
-                                fontWeight: FontWeight.w400,
-                                color: SmAppTheme.isDarkMode(context)
-                                    ? SmColorDarkTheme.secondaryTextColor
-                                    : SmColorLightTheme.secondaryTextColor),
-                          ),
-                          validationMessages: {
-                            ValidationMessage.required: (error) =>
-                                'Total No of container is required'
-                          },
-                        ),
-                        SizedBox(
-                            height:
-                                SmTextTheme.getResponsiveSize(context, 16.0)),
-                        GestureDetector(
-                          onTap: () {
-                            context
-                                .read<SalesOrderCubit>()
-                                .setFieldReadOnly(false, 'location');
-                          },
-                          child: AbsorbPointer(
-                            absorbing: state.locationSelected,
-                            // Disable input if read-only
-                            child: TypeAheadField<LocationModel>(
-                              controller: controller3,
-                              builder: (context, controller, focusNode) =>
-                                  TextField(
-                                enabled: !widget.isDisabled,
-                                controller: controller,
-                                focusNode: focusNode,
-                                style:
-                                    SmTextTheme.confirmButtonTextStyle(context)
-                                        .copyWith(
-                                            fontSize:
-                                                SmTextTheme.getResponsiveSize(
-                                                    context, 12)),
-                                decoration: InputDecoration(
-                                  errorText: form.control('location').valid ||
-                                          widget.isDisabled
-                                      ? null
-                                      : 'location is Required',
-                                  prefix: const Icon(Icons.search),
-                                  border: OutlineInputBorder(
-                                      borderRadius:
-                                          BorderRadius.circular(16.0)),
-                                  labelText: "Port Location",
-                                  hintText: "Search Location",
-                                  labelStyle: TextStyle(
-                                      fontSize: SmTextTheme.getResponsiveSize(
-                                          context, 16.0),
-                                      fontWeight: FontWeight.w400,
-                                      color: SmAppTheme.isDarkMode(context)
-                                          ? SmColorDarkTheme.secondaryTextColor
-                                          : SmColorLightTheme
-                                              .secondaryTextColor),
-                                ),
-                                readOnly: state
-                                    .locationSelected, // Make text field read-only if needed
-                              ),
-                              decorationBuilder: (context, child) => Material(
-                                type: MaterialType.card,
-                                elevation: 4,
-                                borderRadius: BorderRadius.circular(16.0),
-                                child: child,
-                              ),
-                              itemBuilder: (context, location) => ListTile(
-                                title: RichText(
-                                  text: TextSpan(
-                                      text: location.locationName,
-                                      style: SmTextTheme.confirmButtonTextStyle(
-                                              context)
-                                          .copyWith(
-                                              fontSize:
-                                                  SmTextTheme.getResponsiveSize(
-                                                      context, 12))),
-                                ),
-                              ),
-                              onSelected: (value) {
-                                form.patchValue(
-                                    {'location': value.locationName});
-                                controller3.text = value.locationName ?? "";
-                                context
-                                    .read<SalesOrderCubit>()
-                                    .setFieldReadOnly(true, 'location');
-                              },
-                              suggestionsCallback: (String search) {
-                                return state.locations;
-                              },
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                            height:
-                                SmTextTheme.getResponsiveSize(context, 16.0)),
-                        TypeAheadField<EmployeeModel>(
-                          controller: controller4,
-                          builder: (context, controller, focusNode) =>
-                              TextField(
-                            enabled: !widget.isDisabled,
-                            controller: controller,
-                            focusNode: focusNode,
-                            style: SmTextTheme.confirmButtonTextStyle(context)
-                                .copyWith(
-                                    fontSize: SmTextTheme.getResponsiveSize(
-                                        context, 12)),
-                            decoration: InputDecoration(
-                              errorText: form.control('employees').valid ||
-                                      widget.isDisabled
-                                  ? null
-                                  : 'Please add Employee',
-                              prefix: const Icon(Icons.search),
-                              border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(16.0)),
-                              labelText: "Employee",
-                              hintText: "Search Employee",
-                              labelStyle: TextStyle(
-                                  fontSize: SmTextTheme.getResponsiveSize(
-                                      context, 16.0),
-                                  fontWeight: FontWeight.w400,
-                                  color: SmAppTheme.isDarkMode(context)
-                                      ? SmColorDarkTheme.secondaryTextColor
-                                      : SmColorLightTheme.secondaryTextColor),
-                            ),
-                          ),
-                          decorationBuilder: (context, child) => Material(
-                            type: MaterialType.card,
-                            elevation: 4,
-                            borderRadius: BorderRadius.circular(16.0),
-                            child: child,
-                          ),
-                          itemBuilder: (context, product) => ListTile(
-                            title: RichText(
-                              text: TextSpan(
-                                  text:
-                                      '${product.firstName} ${product.lastName}',
-                                  style: SmTextTheme.confirmButtonTextStyle(
-                                          context)
-                                      .copyWith(
-                                          fontSize:
-                                              SmTextTheme.getResponsiveSize(
-                                                  context, 12))),
-                            ),
-                          ),
-                          onSelected: (value) {
-                            setState(() {
-                              final selectedServices =
-                                  form.controls['employees'] as FormArray;
-                              selectedServices.add(FormControl<SoEmployeeParam>(
-                                value: SoEmployeeParam(
-                                    employeeId: value.id,
-                                    employeeName:
-                                        '${value.firstName} ${value.lastName}',
-                                    isAssigned: false),
-                              ));
-                            });
-                          },
-                          suggestionsCallback: (String search) {
-                            return state.employees;
-                          },
-                        ),
-                        SizedBox(
-                            height:
-                                SmTextTheme.getResponsiveSize(context, 16.0)),
-                        _buildEmployeeFields(),
-                        SizedBox(
-                            height:
-                                SmTextTheme.getResponsiveSize(context, 16.0)),
-                        InkWell(
-                          onTap: () async {},
-                          child: ReactiveTextField<DateTime>(
-                            formControlName: "orderDate",
-                            onTap: (value) {
-                              SchedulerBinding.instance
-                                  .addPostFrameCallback((_) async {
-                                final pickedDate = await showDatePicker(
-                                  context: context,
-                                  initialDate: selectedDate ?? DateTime.now(),
-                                  firstDate: DateTime(2020),
-                                  lastDate: DateTime(2100),
-                                  builder: (context, child) {
-                                    return Theme(
-                                      data: ThemeData.light().copyWith(
-                                        colorScheme: const ColorScheme.light(
-                                          primary:
-                                              SmColorLightTheme.primaryColor,
-                                          onPrimary:
-                                              SmColorLightTheme.cardColor,
-                                          onSurface:
-                                              SmColorLightTheme.onPrimary,
-                                        ),
-                                        dialogBackgroundColor: Colors.white,
-                                      ),
-                                      child: child!,
-                                    );
-                                  },
-                                );
-                                if (pickedDate != null) {
-                                  form
-                                      .control("orderDate")
-                                      .patchValue(pickedDate);
-                                }
+                            onSelected: (value) {
+                              setState(() {
+                                (form.control('services') as FormArray)
+                                    .add(FormGroup({
+                                  'id': FormControl<String>(
+                                      value: value.serviceId),
+                                  'serviceName': FormControl<String>(
+                                      value: value.serviceName),
+                                  'priceType': FormControl<String>(
+                                      validators: [Validators.required]),
+                                }));
                               });
                             },
+                            suggestionsCallback: (String search) {
+                              return state.clients
+                                  ?.firstWhere((client) =>
+                                      client.id == form.control('client').value)
+                                  .services;
+                            },
+                          ),
+                          _buildServiceFields(),
+                          SizedBox(
+                              height:
+                                  SmTextTheme.getResponsiveSize(context, 20.0)),
+                          ReactiveTextField<String>(
+                            formControlName: "products",
                             decoration: InputDecoration(
                               border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(16.0)),
-                              labelText: "Select Order Date",
+                              labelText: "Product",
                               labelStyle: TextStyle(
                                   fontSize: SmTextTheme.getResponsiveSize(
                                       context, 16.0),
@@ -591,141 +399,406 @@ class _AddUpdateSalesOrderPageState extends State<AddUpdateSalesOrderPage> {
                                   'Product detail is required'
                             },
                           ),
-                        ),
-                        SizedBox(
-                            height:
-                                SmTextTheme.getResponsiveSize(context, 20.0)),
-                        ReactiveTextField<String>(
-                          formControlName: "comments",
-                          minLines: 3,
-                          maxLines: 5,
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16.0)),
-                            labelText: "Comment",
-                            labelStyle: TextStyle(
-                                fontSize: SmTextTheme.getResponsiveSize(
-                                    context, 16.0),
-                                fontWeight: FontWeight.w400,
-                                color: SmAppTheme.isDarkMode(context)
-                                    ? SmColorDarkTheme.secondaryTextColor
-                                    : SmColorLightTheme.secondaryTextColor),
-                          ),
-                        ),
-                        SizedBox(
-                            height:
-                                SmTextTheme.getResponsiveSize(context, 20.0)),
-                        addIconForTaxAndExpenses(false),
-                        _buildOtherExpensesFields(),
-                        SizedBox(
-                            height:
-                                SmTextTheme.getResponsiveSize(context, 20.0)),
-                        addIconForTaxAndExpenses(true),
-                        _buildTaxFields(),
-                        SizedBox(
-                            height:
-                                SmTextTheme.getResponsiveSize(context, 16.0)),
-                        SizedBox(
-                          width: double.infinity,
-                          child: CustomSmButton(
-                            text: widget.isFromEdit ? "Update" : "Add",
-                            onTap: () {
-                              if (form.valid) {
-                                final List<SoServiceParam>? services = (form
-                                        .control("services")
-                                        .value as List?)
-                                    ?.map<SoServiceParam>((element) =>
-                                        SoServiceParam(
-                                            serviceName: element['serviceName'],
-                                            priceType: element['priceType'],
-                                            serviceId: element['id']))
-                                    .toList();
-                                final List<SoEmployeeParam> employees = form
-                                    .control("employees")
-                                    .value
-                                    ?.where((element) => element != null)
-                                    .cast<SoEmployeeParam>()
-                                    .toList();
-                                final ClientModel? client = state.clients
-                                    ?.firstWhere((client) =>
-                                        client.id ==
-                                        form.control('client').value);
-                                final String products =
-                                    form.control('products').value;
-                                final int? noOfContainer =
-                                    form.control('noOfContainer').value;
-                                final LocationModel? location = state.locations
-                                    ?.firstWhere((location) =>
-                                        location.locationName ==
-                                        form.control('location').value);
-                                final DateTime? orderDate =
-                                    form.control('orderDate').value;
-                                final List<ExpenseParam>? otherExpense = (form
-                                        .control('otherExpenses')
-                                        .value as List?)
-                                    ?.map<ExpenseParam>((element) =>
-                                        ExpenseParam(
-                                            expenseName: element['expenseName'],
-                                            price: element['expensePrice']))
-                                    .toList();
-                                final String? comment =
-                                    form.control('comments').value;
-                                final List<TaxParam>? taxList =
-                                    (form.control('tax').value as List?)
-                                        ?.map<TaxParam>((element) => TaxParam(
-                                            taxName: element['taxName'],
-                                            description: element['description'],
-                                            sGST: element['sGST'],
-                                            cGST: element['cGST']))
-                                        .toList();
-                                if (widget.isFromEdit) {
-                                  context.read<CalendarCubit>().updateSalesOrders(
-                                      widget.salesOrderModel!.id!,
-                                      location?.locationName ?? "",
-                                      location?.address ?? "",
-                                      comment ?? "",
-                                      client?.id ?? "",
-                                      orderDate!,
-                                      products,
-                                      noOfContainer ?? 0,
-                                      services ?? [],
-                                      employees,
-                                      otherExpense ?? [],
-                                      taxList ?? [],
-                                      '${client?.firstName ?? ""} ${client?.lastName ?? ""}'
-                                          .trim());
-                                } else {
-                                  context.read<CalendarCubit>().addSalesOrders(
-                                      location?.locationName ?? "",
-                                      location?.address ?? "",
-                                      comment ?? "",
-                                      client?.id ?? "",
-                                      orderDate!,
-                                      products,
-                                      noOfContainer ?? 0,
-                                      services ?? [],
-                                      employees,
-                                      otherExpense ?? [],
-                                      taxList ?? [],
-                                      '${client?.firstName ?? ""} ${client?.lastName ?? ""}'
-                                          .trim());
-                                }
-                              } else {
-                                form.markAllAsTouched();
-                              }
+                          SizedBox(
+                              height:
+                                  SmTextTheme.getResponsiveSize(context, 16.0)),
+                          ReactiveTextField<int>(
+                            formControlName: "noOfContainer",
+                            keyboardType: TextInputType.number,
+                            decoration: InputDecoration(
+                              border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(16.0)),
+                              labelText: "Total Container",
+                              labelStyle: TextStyle(
+                                  fontSize: SmTextTheme.getResponsiveSize(
+                                      context, 16.0),
+                                  fontWeight: FontWeight.w400,
+                                  color: SmAppTheme.isDarkMode(context)
+                                      ? SmColorDarkTheme.secondaryTextColor
+                                      : SmColorLightTheme.secondaryTextColor),
+                            ),
+                            validationMessages: {
+                              ValidationMessage.required: (error) =>
+                                  'Total No of container is required'
                             },
                           ),
-                        ),
-                      ],
+                          SizedBox(
+                              height:
+                                  SmTextTheme.getResponsiveSize(context, 16.0)),
+                          GestureDetector(
+                            onTap: () {
+                              context
+                                  .read<SalesOrderCubit>()
+                                  .setFieldReadOnly(false, 'location');
+                            },
+                            child: AbsorbPointer(
+                              absorbing: state.locationSelected,
+                              // Disable input if read-only
+                              child: TypeAheadField<LocationModel>(
+                                controller: controller3,
+                                builder: (context, controller, focusNode) =>
+                                    TextField(
+                                  enabled: !(widget.isDisabled ||
+                                      (widget.isFromEdit && !isEditEnabled)),
+                                  controller: controller,
+                                  focusNode: focusNode,
+                                  style: SmTextTheme.confirmButtonTextStyle(
+                                          context)
+                                      .copyWith(
+                                          fontSize:
+                                              SmTextTheme.getResponsiveSize(
+                                                  context, 12)),
+                                  decoration: InputDecoration(
+                                    errorText: form.control('location').valid ||
+                                            widget.isDisabled ||
+                                            (widget.isFromEdit &&
+                                                !isEditEnabled)
+                                        ? null
+                                        : 'location is Required',
+                                    prefix: const Icon(Icons.search),
+                                    border: OutlineInputBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(16.0)),
+                                    labelText: "Port Location",
+                                    hintText: "Search Location",
+                                    labelStyle: TextStyle(
+                                        fontSize: SmTextTheme.getResponsiveSize(
+                                            context, 16.0),
+                                        fontWeight: FontWeight.w400,
+                                        color: SmAppTheme.isDarkMode(context)
+                                            ? SmColorDarkTheme
+                                                .secondaryTextColor
+                                            : SmColorLightTheme
+                                                .secondaryTextColor),
+                                  ),
+                                  readOnly: state
+                                      .locationSelected, // Make text field read-only if needed
+                                ),
+                                decorationBuilder: (context, child) => Material(
+                                  type: MaterialType.card,
+                                  elevation: 4,
+                                  borderRadius: BorderRadius.circular(16.0),
+                                  child: child,
+                                ),
+                                itemBuilder: (context, location) => ListTile(
+                                  title: RichText(
+                                    text: TextSpan(
+                                        text: location.locationName,
+                                        style:
+                                            SmTextTheme.confirmButtonTextStyle(
+                                                    context)
+                                                .copyWith(
+                                                    fontSize: SmTextTheme
+                                                        .getResponsiveSize(
+                                                            context, 12))),
+                                  ),
+                                ),
+                                onSelected: (value) {
+                                  form.patchValue(
+                                      {'location': value.locationName});
+                                  controller3.text = value.locationName ?? "";
+                                  context
+                                      .read<SalesOrderCubit>()
+                                      .setFieldReadOnly(true, 'location');
+                                },
+                                suggestionsCallback: (String search) {
+                                  return state.locations;
+                                },
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                              height:
+                                  SmTextTheme.getResponsiveSize(context, 16.0)),
+                          TypeAheadField<EmployeeModel>(
+                            controller: controller4,
+                            builder: (context, controller, focusNode) =>
+                                TextField(
+                              enabled: !(widget.isDisabled ||
+                                  (widget.isFromEdit && !isEditEnabled)),
+                              controller: controller,
+                              focusNode: focusNode,
+                              style: SmTextTheme.confirmButtonTextStyle(context)
+                                  .copyWith(
+                                      fontSize: SmTextTheme.getResponsiveSize(
+                                          context, 12)),
+                              decoration: InputDecoration(
+                                errorText: form.control('employees').valid ||
+                                        widget.isDisabled ||
+                                        (widget.isFromEdit && !isEditEnabled)
+                                    ? null
+                                    : 'Please add Employee',
+                                prefix: const Icon(Icons.search),
+                                border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(16.0)),
+                                labelText: "Employee",
+                                hintText: "Search Employee",
+                                labelStyle: TextStyle(
+                                    fontSize: SmTextTheme.getResponsiveSize(
+                                        context, 16.0),
+                                    fontWeight: FontWeight.w400,
+                                    color: SmAppTheme.isDarkMode(context)
+                                        ? SmColorDarkTheme.secondaryTextColor
+                                        : SmColorLightTheme.secondaryTextColor),
+                              ),
+                            ),
+                            decorationBuilder: (context, child) => Material(
+                              type: MaterialType.card,
+                              elevation: 4,
+                              borderRadius: BorderRadius.circular(16.0),
+                              child: child,
+                            ),
+                            itemBuilder: (context, product) => ListTile(
+                              title: RichText(
+                                text: TextSpan(
+                                    text:
+                                        '${product.firstName} ${product.lastName}',
+                                    style: SmTextTheme.confirmButtonTextStyle(
+                                            context)
+                                        .copyWith(
+                                            fontSize:
+                                                SmTextTheme.getResponsiveSize(
+                                                    context, 12))),
+                              ),
+                            ),
+                            onSelected: (value) {
+                              setState(() {
+                                final selectedServices =
+                                    form.controls['employees'] as FormArray;
+                                selectedServices
+                                    .add(FormControl<SoEmployeeParam>(
+                                  value: SoEmployeeParam(
+                                      employeeId: value.id,
+                                      employeeName:
+                                          '${value.firstName} ${value.lastName}',
+                                      isAssigned: false),
+                                ));
+                              });
+                            },
+                            suggestionsCallback: (String search) {
+                              return state.employees;
+                            },
+                          ),
+                          SizedBox(
+                              height:
+                                  SmTextTheme.getResponsiveSize(context, 16.0)),
+                          _buildEmployeeFields(),
+                          SizedBox(
+                              height:
+                                  SmTextTheme.getResponsiveSize(context, 16.0)),
+                          InkWell(
+                            onTap: () async {},
+                            child: ReactiveTextField<DateTime>(
+                              formControlName: "orderDate",
+                              onTap: (value) {
+                                SchedulerBinding.instance
+                                    .addPostFrameCallback((_) async {
+                                  final pickedDate = await showDatePicker(
+                                    context: context,
+                                    initialDate: selectedDate ?? DateTime.now(),
+                                    firstDate: DateTime(2020),
+                                    lastDate: DateTime(2100),
+                                    builder: (context, child) {
+                                      return Theme(
+                                        data: ThemeData.light().copyWith(
+                                          colorScheme: const ColorScheme.light(
+                                            primary:
+                                                SmColorLightTheme.primaryColor,
+                                            onPrimary:
+                                                SmColorLightTheme.cardColor,
+                                            onSurface:
+                                                SmColorLightTheme.onPrimary,
+                                          ),
+                                          dialogBackgroundColor: Colors.white,
+                                        ),
+                                        child: child!,
+                                      );
+                                    },
+                                  );
+                                  if (pickedDate != null) {
+                                    form
+                                        .control("orderDate")
+                                        .patchValue(pickedDate);
+                                  }
+                                });
+                              },
+                              decoration: InputDecoration(
+                                border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(16.0)),
+                                labelText: "Select Order Date",
+                                labelStyle: TextStyle(
+                                    fontSize: SmTextTheme.getResponsiveSize(
+                                        context, 16.0),
+                                    fontWeight: FontWeight.w400,
+                                    color: SmAppTheme.isDarkMode(context)
+                                        ? SmColorDarkTheme.secondaryTextColor
+                                        : SmColorLightTheme.secondaryTextColor),
+                              ),
+                              validationMessages: {
+                                ValidationMessage.required: (error) =>
+                                    'Product detail is required'
+                              },
+                            ),
+                          ),
+                          SizedBox(
+                              height:
+                                  SmTextTheme.getResponsiveSize(context, 20.0)),
+                          ReactiveTextField<String>(
+                            formControlName: "comments",
+                            minLines: 3,
+                            maxLines: 5,
+                            decoration: InputDecoration(
+                              border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(16.0)),
+                              labelText: "Comment",
+                              labelStyle: TextStyle(
+                                  fontSize: SmTextTheme.getResponsiveSize(
+                                      context, 16.0),
+                                  fontWeight: FontWeight.w400,
+                                  color: SmAppTheme.isDarkMode(context)
+                                      ? SmColorDarkTheme.secondaryTextColor
+                                      : SmColorLightTheme.secondaryTextColor),
+                            ),
+                          ),
+                          SizedBox(
+                              height:
+                                  SmTextTheme.getResponsiveSize(context, 20.0)),
+                          addIconForTaxAndExpenses(false),
+                          _buildOtherExpensesFields(),
+                          SizedBox(
+                              height:
+                                  SmTextTheme.getResponsiveSize(context, 20.0)),
+                          addIconForTaxAndExpenses(true),
+                          _buildTaxFields(),
+                          SizedBox(
+                              height:
+                                  SmTextTheme.getResponsiveSize(context, 16.0)),
+                          SizedBox(
+                            width: double.infinity,
+                            child: CustomSmButton(
+                              text: widget.isDisabled ||
+                                      (widget.isFromEdit && !isEditEnabled)
+                                  ? "Survey"
+                                  : widget.isFromEdit
+                                      ? "Update"
+                                      : "Add",
+                              onTap: () {
+                                if (widget.isDisabled ||
+                                    (widget.isFromEdit && !isEditEnabled)) {
+                                  context.router.push(ReportRoute(
+                                      orderId:
+                                          widget.salesOrderModel!.orderId!));
+                                } else if (form.valid) {
+                                  final List<SoServiceParam>? services = (form
+                                          .control("services")
+                                          .value as List?)
+                                      ?.map<SoServiceParam>((element) =>
+                                          SoServiceParam(
+                                              serviceName:
+                                                  element['serviceName'],
+                                              priceType: element['priceType'],
+                                              serviceId: element['id']))
+                                      .toList();
+                                  final List<SoEmployeeParam> employees = form
+                                      .control("employees")
+                                      .value
+                                      ?.where((element) => element != null)
+                                      .cast<SoEmployeeParam>()
+                                      .toList();
+                                  final ClientModel? client = state.clients
+                                      ?.firstWhere((client) =>
+                                          client.id ==
+                                          form.control('client').value);
+                                  final String products =
+                                      form.control('products').value;
+                                  final int? noOfContainer =
+                                      form.control('noOfContainer').value;
+                                  final LocationModel? location =
+                                      state.locations?.firstWhere((location) =>
+                                          location.locationName ==
+                                          form.control('location').value);
+                                  final DateTime? orderDate =
+                                      form.control('orderDate').value;
+                                  final List<ExpenseParam>? otherExpense = (form
+                                          .control('otherExpenses')
+                                          .value as List?)
+                                      ?.map<ExpenseParam>((element) =>
+                                          ExpenseParam(
+                                              expenseName:
+                                                  element['expenseName'],
+                                              price: element['expensePrice']))
+                                      .toList();
+                                  final String? comment =
+                                      form.control('comments').value;
+                                  final List<TaxParam>? taxList = (form
+                                          .control('tax')
+                                          .value as List?)
+                                      ?.map<TaxParam>((element) => TaxParam(
+                                          taxName: element['taxName'],
+                                          description: element['description'],
+                                          sGST: element['sGST'],
+                                          cGST: element['cGST']))
+                                      .toList();
+                                  if (widget.isFromEdit) {
+                                    context.read<CalendarCubit>().updateSalesOrders(
+                                        widget.salesOrderModel!.id!,
+                                        location?.locationName ?? "",
+                                        location?.address ?? "",
+                                        comment ?? "",
+                                        client?.id ?? "",
+                                        orderDate!,
+                                        products,
+                                        noOfContainer ?? 0,
+                                        services ?? [],
+                                        employees,
+                                        otherExpense ?? [],
+                                        taxList ?? [],
+                                        '${client?.firstName ?? ""} ${client?.lastName ?? ""}'
+                                            .trim());
+                                  } else {
+                                    context.read<CalendarCubit>().addSalesOrders(
+                                        location?.locationName ?? "",
+                                        location?.address ?? "",
+                                        comment ?? "",
+                                        client?.id ?? "",
+                                        orderDate!,
+                                        products,
+                                        noOfContainer ?? 0,
+                                        services ?? [],
+                                        employees,
+                                        otherExpense ?? [],
+                                        taxList ?? [],
+                                        '${client?.firstName ?? ""} ${client?.lastName ?? ""}'
+                                            .trim());
+                                  }
+                                } else {
+                                  form.markAllAsTouched();
+                                }
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              );
-            },
-          );
-        },
+                );
+              },
+            );
+          },
+        ),
       ),
     );
+  }
+
+  bool _showBackDialog() {
+    if (isEditEnabled) {
+      setState(() {
+        isEditEnabled = false;
+      });
+      return false;
+    } else {
+      return true;
+    }
   }
 
   Widget addIconForTaxAndExpenses(bool isForTax) {
@@ -737,10 +810,10 @@ class _AddUpdateSalesOrderPageState extends State<AddUpdateSalesOrderPage> {
             setState(() {
               if (isForTax) {
                 (form.control('tax') as FormArray).add(FormGroup({
-                  'taxName':
-                      FormControl<String>(validators: [Validators.required]),
-                  'description':
-                      FormControl<String>(validators: [Validators.required]),
+                  'taxName': FormControl<String>(
+                      /*validators: [Validators.required]*/),
+                  'description': FormControl<String>(
+                      /*validators: [Validators.required]*/),
                   'sGST':
                       FormControl<double>(validators: [Validators.required]),
                   'cGST':
@@ -784,7 +857,7 @@ class _AddUpdateSalesOrderPageState extends State<AddUpdateSalesOrderPage> {
         formArrayName: 'services',
         builder: (context, formArray, child) {
           final formArrayControls = formArray as FormArray;
-          if (widget.isDisabled) {
+          if (widget.isDisabled || (widget.isFromEdit && !isEditEnabled)) {
             formArray.markAsDisabled();
           }
           return ListView.builder(
@@ -820,7 +893,8 @@ class _AddUpdateSalesOrderPageState extends State<AddUpdateSalesOrderPage> {
                           Expanded(
                             flex: 1,
                             child: Visibility(
-                              visible: !widget.isDisabled,
+                              visible: !widget.isDisabled ||
+                                  (widget.isFromEdit && !isEditEnabled),
                               child: Padding(
                                 padding: EdgeInsets.symmetric(
                                     horizontal: SmTextTheme.getResponsiveSize(
@@ -829,7 +903,9 @@ class _AddUpdateSalesOrderPageState extends State<AddUpdateSalesOrderPage> {
                                     color: SmCommonColors.errorColor,
                                     icon: const Icon(Icons.clear_outlined),
                                     onPressed: () {
-                                      if (!widget.isDisabled) {
+                                      if (!widget.isDisabled &&
+                                          (widget.isFromEdit &&
+                                              isEditEnabled)) {
                                         setState(() {
                                           selectedServices.remove(serviceGroup);
                                         });
@@ -843,7 +919,8 @@ class _AddUpdateSalesOrderPageState extends State<AddUpdateSalesOrderPage> {
                       SizedBox(
                           height: SmTextTheme.getResponsiveSize(context, 8)),
                       ReactiveDropdownField<String>(
-                        readOnly: widget.isDisabled,
+                        readOnly: widget.isDisabled ||
+                            (widget.isFromEdit && !isEditEnabled),
                         items: priceTypeList
                             .map((e) => DropdownMenuItem(
                                 value: e.toString(), child: Text(e)))
@@ -906,9 +983,11 @@ class _AddUpdateSalesOrderPageState extends State<AddUpdateSalesOrderPage> {
       for (var tax in order.tax!) {
         taxesArray.add(FormGroup({
           'taxName': FormControl<String>(
-              value: tax.taxName, validators: [Validators.required]),
+            value: tax.taxName, /*validators: [Validators.required]*/
+          ),
           'description': FormControl<String>(
-              value: tax.description, validators: [Validators.required]),
+            value: tax.description, /*validators: [Validators.required]*/
+          ),
           'sGST': FormControl<double>(
               value: tax.sGST, validators: [Validators.required]),
           'cGST': FormControl<double>(
@@ -932,202 +1011,216 @@ class _AddUpdateSalesOrderPageState extends State<AddUpdateSalesOrderPage> {
   }
 
   Widget _buildTaxFields() {
-    return Card(
-      child: ReactiveFormArray(
-          formArrayName: 'tax',
-          builder: (context, formArray, child) {
-            final formArrayControls = formArray as FormArray;
-            if (widget.isDisabled) {
-              formArray.markAsDisabled();
-            }
-            return ListView.builder(
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: formArrayControls.controls.length,
-                shrinkWrap: true,
-                itemBuilder: (context, index) {
-                  final taxGroup =
-                      formArrayControls.controls[index] as FormGroup;
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(
-                          height: SmTextTheme.getResponsiveSize(context, 20.0)),
-                      ReactiveTextField<String>(
-                        formControl:
-                            taxGroup.control('taxName') as FormControl<String>,
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16.0)),
-                          labelText: "Tax Name",
-                          hintText: 'Please enter Tax Name',
-                          labelStyle: TextStyle(
-                              fontSize:
-                                  SmTextTheme.getResponsiveSize(context, 16.0),
-                              fontWeight: FontWeight.w400,
-                              color: SmAppTheme.isDarkMode(context)
-                                  ? SmColorDarkTheme.secondaryTextColor
-                                  : SmColorLightTheme.secondaryTextColor),
+    final taxList = form.controls['tax'] as FormArray;
+    return ReactiveFormArray(
+        formArrayName: 'tax',
+        builder: (context, formArray, child) {
+          final formArrayControls = formArray as FormArray;
+          if (widget.isDisabled || (widget.isFromEdit && !isEditEnabled)) {
+            formArray.markAsDisabled();
+          }
+          return ListView.builder(
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: formArrayControls.controls.length,
+              shrinkWrap: true,
+              itemBuilder: (context, index) {
+                final taxGroup = formArrayControls.controls[index] as FormGroup;
+                return Card(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                        horizontal: SmTextTheme.getResponsiveSize(context, 6)),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Align(
+                          alignment: Alignment.topRight,
+                          child: Visibility(
+                            visible: !widget.isDisabled ||
+                                (widget.isFromEdit && !isEditEnabled),
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: SmTextTheme.getResponsiveSize(
+                                      context, 4)),
+                              child: IconButton(
+                                  color: SmCommonColors.errorColor,
+                                  icon: const Icon(Icons.clear_outlined),
+                                  onPressed: () {
+                                    if (!widget.isDisabled &&
+                                        (widget.isFromEdit && isEditEnabled)) {
+                                      setState(() {
+                                        taxList.remove(taxGroup);
+                                      });
+                                    }
+                                  }),
+                            ),
+                          ),
                         ),
-                        validationMessages: {
-                          ValidationMessage.required: (error) =>
-                              'Tax name is required'
-                        },
-                      ),
-                      SizedBox(
-                          height: SmTextTheme.getResponsiveSize(context, 20.0)),
-                      ReactiveTextField<String>(
-                        formControl: taxGroup.control('description')
-                            as FormControl<String>,
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16.0)),
-                          labelText: "Tax Description",
-                          labelStyle: TextStyle(
-                              fontSize:
-                                  SmTextTheme.getResponsiveSize(context, 16.0),
-                              fontWeight: FontWeight.w400,
-                              color: SmAppTheme.isDarkMode(context)
-                                  ? SmColorDarkTheme.secondaryTextColor
-                                  : SmColorLightTheme.secondaryTextColor),
+                        SizedBox(
+                            height:
+                                SmTextTheme.getResponsiveSize(context, 20.0)),
+                        ReactiveTextField<double>(
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
+                          formControl:
+                              taxGroup.control('sGST') as FormControl<double>,
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16.0)),
+                            labelText: "SGST",
+                            labelStyle: TextStyle(
+                                fontSize: SmTextTheme.getResponsiveSize(
+                                    context, 16.0),
+                                fontWeight: FontWeight.w400,
+                                color: SmAppTheme.isDarkMode(context)
+                                    ? SmColorDarkTheme.secondaryTextColor
+                                    : SmColorLightTheme.secondaryTextColor),
+                          ),
+                          validationMessages: {
+                            ValidationMessage.required: (error) =>
+                                'SGST is required'
+                          },
                         ),
-                        validationMessages: {
-                          ValidationMessage.required: (error) =>
-                              'Tax Description is required'
-                        },
-                      ),
-                      SizedBox(
-                          height: SmTextTheme.getResponsiveSize(context, 20.0)),
-                      ReactiveTextField<double>(
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                        ],
-                        formControl:
-                            taxGroup.control('sGST') as FormControl<double>,
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16.0)),
-                          labelText: "SGST",
-                          labelStyle: TextStyle(
-                              fontSize:
-                                  SmTextTheme.getResponsiveSize(context, 16.0),
-                              fontWeight: FontWeight.w400,
-                              color: SmAppTheme.isDarkMode(context)
-                                  ? SmColorDarkTheme.secondaryTextColor
-                                  : SmColorLightTheme.secondaryTextColor),
+                        SizedBox(
+                            height:
+                                SmTextTheme.getResponsiveSize(context, 20.0)),
+                        ReactiveTextField<double>(
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
+                          formControl:
+                              taxGroup.control('cGST') as FormControl<double>,
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16.0)),
+                            labelText: "CGST",
+                            labelStyle: TextStyle(
+                                fontSize: SmTextTheme.getResponsiveSize(
+                                    context, 16.0),
+                                fontWeight: FontWeight.w400,
+                                color: SmAppTheme.isDarkMode(context)
+                                    ? SmColorDarkTheme.secondaryTextColor
+                                    : SmColorLightTheme.secondaryTextColor),
+                          ),
+                          validationMessages: {
+                            ValidationMessage.required: (error) =>
+                                'Product detail is required'
+                          },
                         ),
-                        validationMessages: {
-                          ValidationMessage.required: (error) =>
-                              'SGST is required'
-                        },
-                      ),
-                      SizedBox(
-                          height: SmTextTheme.getResponsiveSize(context, 20.0)),
-                      ReactiveTextField<double>(
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                        ],
-                        formControl:
-                            taxGroup.control('cGST') as FormControl<double>,
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16.0)),
-                          labelText: "CGST",
-                          labelStyle: TextStyle(
-                              fontSize:
-                                  SmTextTheme.getResponsiveSize(context, 16.0),
-                              fontWeight: FontWeight.w400,
-                              color: SmAppTheme.isDarkMode(context)
-                                  ? SmColorDarkTheme.secondaryTextColor
-                                  : SmColorLightTheme.secondaryTextColor),
-                        ),
-                        validationMessages: {
-                          ValidationMessage.required: (error) =>
-                              'Product detail is required'
-                        },
-                      ),
-                      SizedBox(
-                          height: SmTextTheme.getResponsiveSize(context, 16)),
-                    ],
-                  );
-                });
-          }),
-    );
+                        SizedBox(
+                            height: SmTextTheme.getResponsiveSize(context, 16)),
+                      ],
+                    ),
+                  ),
+                );
+              });
+        });
   }
 
   Widget _buildOtherExpensesFields() {
-    return Card(
-      child: ReactiveFormArray(
-          formArrayName: 'otherExpenses',
-          builder: (context, formArray, child) {
-            final formArrayControls = formArray as FormArray;
-            if (widget.isDisabled) {
-              formArray.markAsDisabled();
-            }
-            return ListView.builder(
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: formArrayControls.controls.length,
-                shrinkWrap: true,
-                itemBuilder: (context, index) {
-                  final taxGroup =
-                      formArrayControls.controls[index] as FormGroup;
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(
-                          height: SmTextTheme.getResponsiveSize(context, 20.0)),
-                      ReactiveTextField<String>(
-                        formControl: taxGroup.control('expenseName')
-                            as FormControl<String>,
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16.0)),
-                          labelText: "Expense Information",
-                          hintText: 'Please enter Expense Information',
-                          labelStyle: TextStyle(
-                              fontSize:
-                                  SmTextTheme.getResponsiveSize(context, 16.0),
-                              fontWeight: FontWeight.w400,
-                              color: SmAppTheme.isDarkMode(context)
-                                  ? SmColorDarkTheme.secondaryTextColor
-                                  : SmColorLightTheme.secondaryTextColor),
+    final expenseList = form.controls['otherExpenses'] as FormArray;
+    return ReactiveFormArray(
+        formArrayName: 'otherExpenses',
+        builder: (context, formArray, child) {
+          final formArrayControls = formArray as FormArray;
+          if (widget.isDisabled || (widget.isFromEdit && !isEditEnabled)) {
+            formArray.markAsDisabled();
+          }
+          return ListView.builder(
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: formArrayControls.controls.length,
+              shrinkWrap: true,
+              itemBuilder: (context, index) {
+                final expenseGroup =
+                    formArrayControls.controls[index] as FormGroup;
+                return Card(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                        horizontal: SmTextTheme.getResponsiveSize(context, 6)),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Align(
+                          alignment: Alignment.topRight,
+                          child: Visibility(
+                            visible: !widget.isDisabled ||
+                                (widget.isFromEdit && !isEditEnabled),
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: SmTextTheme.getResponsiveSize(
+                                      context, 4)),
+                              child: IconButton(
+                                  color: SmCommonColors.errorColor,
+                                  icon: const Icon(Icons.clear_outlined),
+                                  onPressed: () {
+                                    if (!widget.isDisabled &&
+                                        (widget.isFromEdit && isEditEnabled)) {
+                                      setState(() {
+                                        expenseList.remove(expenseGroup);
+                                      });
+                                    }
+                                  }),
+                            ),
+                          ),
                         ),
-                        validationMessages: {
-                          ValidationMessage.required: (error) =>
-                              'Expense information is required'
-                        },
-                      ),
-                      SizedBox(
-                          height: SmTextTheme.getResponsiveSize(context, 20.0)),
-                      ReactiveTextField<double>(
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                        ],
-                        formControl: taxGroup.control('expensePrice')
-                            as FormControl<double>,
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16.0)),
-                          labelText: "Price",
-                          labelStyle: TextStyle(
-                              fontSize:
-                                  SmTextTheme.getResponsiveSize(context, 16.0),
-                              fontWeight: FontWeight.w400,
-                              color: SmAppTheme.isDarkMode(context)
-                                  ? SmColorDarkTheme.secondaryTextColor
-                                  : SmColorLightTheme.secondaryTextColor),
+                        SizedBox(
+                            height:
+                                SmTextTheme.getResponsiveSize(context, 20.0)),
+                        ReactiveTextField<String>(
+                          formControl: expenseGroup.control('expenseName')
+                              as FormControl<String>,
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16.0)),
+                            labelText: "Expense Information",
+                            hintText: 'Please enter Expense Information',
+                            labelStyle: TextStyle(
+                                fontSize: SmTextTheme.getResponsiveSize(
+                                    context, 16.0),
+                                fontWeight: FontWeight.w400,
+                                color: SmAppTheme.isDarkMode(context)
+                                    ? SmColorDarkTheme.secondaryTextColor
+                                    : SmColorLightTheme.secondaryTextColor),
+                          ),
+                          validationMessages: {
+                            ValidationMessage.required: (error) =>
+                                'Expense information is required'
+                          },
                         ),
-                        validationMessages: {
-                          ValidationMessage.required: (error) =>
-                              'SGST is required'
-                        },
-                      ),
-                      SizedBox(
-                          height: SmTextTheme.getResponsiveSize(context, 16)),
-                    ],
-                  );
-                });
-          }),
-    );
+                        SizedBox(
+                            height:
+                                SmTextTheme.getResponsiveSize(context, 20.0)),
+                        ReactiveTextField<double>(
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
+                          formControl: expenseGroup.control('expensePrice')
+                              as FormControl<double>,
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16.0)),
+                            labelText: "Price",
+                            labelStyle: TextStyle(
+                                fontSize: SmTextTheme.getResponsiveSize(
+                                    context, 16.0),
+                                fontWeight: FontWeight.w400,
+                                color: SmAppTheme.isDarkMode(context)
+                                    ? SmColorDarkTheme.secondaryTextColor
+                                    : SmColorLightTheme.secondaryTextColor),
+                          ),
+                          validationMessages: {
+                            ValidationMessage.required: (error) =>
+                                'SGST is required'
+                          },
+                        ),
+                        SizedBox(
+                            height: SmTextTheme.getResponsiveSize(context, 16)),
+                      ],
+                    ),
+                  ),
+                );
+              });
+        });
   }
 
   Widget _buildEmployeeFields() {
@@ -1165,7 +1258,8 @@ class _AddUpdateSalesOrderPageState extends State<AddUpdateSalesOrderPage> {
               Expanded(
                 flex: 2,
                 child: Visibility(
-                  visible: !widget.isDisabled,
+                  visible: !widget.isDisabled ||
+                      (widget.isFromEdit && !isEditEnabled),
                   child: SizedBox(
                     height: SmTextTheme.getResponsiveSize(context, 28),
                     child: CustomSmButton(
@@ -1189,7 +1283,8 @@ class _AddUpdateSalesOrderPageState extends State<AddUpdateSalesOrderPage> {
               Expanded(
                 flex: 1,
                 child: Visibility(
-                  visible: !widget.isDisabled,
+                  visible: !widget.isDisabled ||
+                      (widget.isFromEdit && !isEditEnabled),
                   child: Padding(
                     padding: EdgeInsets.symmetric(
                         horizontal: SmTextTheme.getResponsiveSize(context, 4)),
@@ -1197,7 +1292,8 @@ class _AddUpdateSalesOrderPageState extends State<AddUpdateSalesOrderPage> {
                         color: SmCommonColors.errorColor,
                         icon: const Icon(Icons.clear_outlined),
                         onPressed: () {
-                          if (!widget.isDisabled) {
+                          if (!widget.isDisabled &&
+                              (widget.isFromEdit && isEditEnabled)) {
                             setState(() {
                               selectedEmployee.remove(employeeControl);
                             });

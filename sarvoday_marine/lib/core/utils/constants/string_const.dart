@@ -17,6 +17,7 @@ class StringConst {
   static String smEmployeeTitle = 'Employee';
   static String smPasswordChangeTitle = 'Change Password';
   static String smLocationTitle = 'Port Locations';
+  static String smReportTitle = 'Reports';
   static String editActionTxt = 'Edit';
   static String provideAuth = '\tAccess\nAccount';
   static String disableAccount = 'Disable\nAccount';
@@ -24,5 +25,7 @@ class StringConst {
   static String loadingTxt = 'Loading...';
 
   static String backEndBaseURL = /*'http://10.0.2.2:3000/api/'*/
-      'http://192.168.53.75:3000/api/' /*'http://192.168.43.82:3000/api/'*/;
+      'http://192.168.101.75:3000/api/'
+
+  /*'http://192.168.43.82:3000/api/'*/;
 }

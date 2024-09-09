@@ -28,4 +28,5 @@ class SmCommonColors {
   static const secondaryColor = Color(0xFFffc107);
   static const errorColor = Colors.red;
   static const fieldFillColor = Colors.white10;
+  static const greenColor = Colors.green;
 }

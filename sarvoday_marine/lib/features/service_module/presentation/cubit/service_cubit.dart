@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sarvoday_marine/core/utils/common/common_methods.dart';
+import 'package:sarvoday_marine/features/report_module/data/models/image_config_model.dart';
 import 'package:sarvoday_marine/features/service_module/data/models/service_model.dart';
 import 'package:sarvoday_marine/features/service_module/domain/use_cases/add_service_use_case.dart';
 import 'package:sarvoday_marine/features/service_module/domain/use_cases/delete_service_use_case.dart';
@@ -40,7 +41,7 @@ class ServiceCubit extends Cubit<ServiceState> {
       double container2Price,
       double container3Price,
       double container4Price,
-      List<ServiceImageConfig> images) async {
+      List<ImageConfig> images) async {
     emit(StateNoData());
     var res = await addServiceUseCase.call(AddServiceParam(
         serviceName,
@@ -75,7 +76,7 @@ class ServiceCubit extends Cubit<ServiceState> {
       double container2Price,
       double container3Price,
       double container4Price,
-      List<ServiceImageConfig> images) async {
+      List<ImageConfig> images) async {
     emit(StateNoData());
     if (serviceId.isNotEmpty) {
       if (serviceName.isEmpty &&

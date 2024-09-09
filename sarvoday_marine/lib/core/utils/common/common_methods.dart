@@ -2,13 +2,13 @@ import 'dart:io';
 
 import 'package:country_picker/country_picker.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:reactive_forms/reactive_forms.dart';
 import 'package:sarvoday_marine/core/failure/common_failure.dart';
 import 'package:sarvoday_marine/core/theme/sm_color_theme.dart';
 import 'package:sarvoday_marine/core/theme/sm_text_theme.dart';
+import 'package:sarvoday_marine/core/utils/constants/image_path_const.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CommonMethods {
@@ -21,6 +21,42 @@ class CommonMethods {
       backgroundColor: SmCommonColors.secondaryColor,
       textColor: SmColorLightTheme.textColor,
       fontSize: SmTextTheme.getResponsiveSize(context, 14.0),
+    );
+  }
+
+  static getImageFromLocalPath(String imagePath) {
+    return Image.file(
+      File(imagePath),
+      errorBuilder:
+          (BuildContext context, Object error, StackTrace? stackTrace) {
+        return Image.asset(ImagePathConst.imageHolder);
+      },
+      fit: BoxFit.fill,
+    );
+  }
+
+  static getNetworkImage(String imageUrl) {
+    return Image.network(
+      imageUrl,
+      loadingBuilder: (BuildContext context, Widget child,
+          ImageChunkEvent? loadingProgress) {
+        if (loadingProgress == null) {
+          return child;
+        } else {
+          return Center(
+              child: CircularProgressIndicator(
+            value: loadingProgress.expectedTotalBytes != null
+                ? loadingProgress.cumulativeBytesLoaded /
+                    (loadingProgress.expectedTotalBytes ?? 1)
+                : null,
+          ));
+        }
+      },
+      errorBuilder:
+          (BuildContext context, Object error, StackTrace? stackTrace) {
+        return Image.asset(ImagePathConst.imageHolder);
+      },
+      fit: BoxFit.fill,
     );
   }
 

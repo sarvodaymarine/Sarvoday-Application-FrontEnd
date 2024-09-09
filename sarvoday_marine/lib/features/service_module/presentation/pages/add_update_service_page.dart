@@ -11,6 +11,7 @@ import 'package:sarvoday_marine/core/utils/common/common_loading_dialog.dart';
 import 'package:sarvoday_marine/core/utils/common/common_methods.dart';
 import 'package:sarvoday_marine/core/utils/widgets/common_app_bar.dart';
 import 'package:sarvoday_marine/core/utils/widgets/custom_sm_button.dart';
+import 'package:sarvoday_marine/features/report_module/data/models/image_config_model.dart';
 import 'package:sarvoday_marine/features/service_module/data/models/service_model.dart';
 import 'package:sarvoday_marine/features/service_module/presentation/cubit/service_cubit.dart';
 import 'package:sarvoday_marine/features/service_module/service_module_injection_container.dart';
@@ -27,7 +28,7 @@ class AddUpdateServicePage extends StatefulWidget implements AutoRouteWrapper {
   });
 
   @override
-  _AddUpdateServicePageState createState() => _AddUpdateServicePageState();
+  AddUpdateServicePageState createState() => AddUpdateServicePageState();
 
   @override
   Widget wrappedRoute(BuildContext context) {
@@ -38,7 +39,7 @@ class AddUpdateServicePage extends StatefulWidget implements AutoRouteWrapper {
   }
 }
 
-class _AddUpdateServicePageState extends State<AddUpdateServicePage> {
+class AddUpdateServicePageState extends State<AddUpdateServicePage> {
   late FormGroup form;
   List<String> imageList = ["Image1", "Image2", "Image3", "Image4", "Image5"];
   final TextEditingController controller = TextEditingController();
@@ -317,9 +318,9 @@ class _AddUpdateServicePageState extends State<AddUpdateServicePage> {
         text: widget.isEdit ? "Update" : "Add",
         onTap: () async {
           if (form.valid) {
-            final List<ServiceImageConfig>? images =
+            final List<ImageConfig>? images =
                 (form.control("serviceImage").value as List?)
-                    ?.map<ServiceImageConfig>((element) => ServiceImageConfig(
+                    ?.map<ImageConfig>((element) => ImageConfig(
                         imageName: element['imageName'],
                         imageCount: element['imageCount']))
                     .toList();
@@ -353,7 +354,7 @@ class _AddUpdateServicePageState extends State<AddUpdateServicePage> {
   }
 
   void _initializeFormWithExistingData(
-      FormGroup form, List<ServiceImageConfig>? imageConfig) {
+      FormGroup form, List<ImageConfig>? imageConfig) {
     FormArray servicesArray = form.control('serviceImage') as FormArray;
 
     if (imageConfig != null) {
