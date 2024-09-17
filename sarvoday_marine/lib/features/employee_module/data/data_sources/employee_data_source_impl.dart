@@ -1,6 +1,5 @@
 import 'package:dartz/dartz.dart';
-import 'package:dio/dio.dart';
-import 'package:sarvoday_marine/core/failure/common_failure.dart';
+import 'package:sarvoday_marine/core/api_handler/api_handler_helper.dart';
 import 'package:sarvoday_marine/core/utils/common/common_methods.dart';
 import 'package:sarvoday_marine/core/utils/constants/string_const.dart';
 import 'package:sarvoday_marine/features/employee_module/data/data_sources/employee_data_source.dart';
@@ -9,13 +8,12 @@ import 'package:sarvoday_marine/features/employee_module/domain/use_cases/add_em
 import '../models/employee_model.dart';
 
 class EmployeeDataSourceImpl implements EmployeeDataSource {
-  final Dio dio;
+  final DioClient dio;
 
   EmployeeDataSourceImpl(this.dio);
 
   @override
-  Future<Either<bool, CommonFailure>> addEmployee(
-      EmployeeParam employeeParam) async {
+  Future<Either<bool, String>> addEmployee(EmployeeParam employeeParam) async {
     try {
       Map<String, dynamic> data = {
         'firstName': employeeParam.firstName,
@@ -31,30 +29,30 @@ class EmployeeDataSourceImpl implements EmployeeDataSource {
       if (response.statusCode == 200) {
         return left(true);
       } else {
-        return right(ErrorFailure(response.statusMessage.toString()));
+        return right(CommonMethods.commonErrorHandler(response));
       }
     } catch (error) {
-      return right(ErrorFailure(error.toString()));
+      return right(CommonMethods.commonErrorHandler(error));
     }
   }
 
   @override
-  Future<Either<bool, CommonFailure>> deleteEmployee(String employeeId) async {
+  Future<Either<bool, String>> deleteEmployee(String employeeId) async {
     try {
       final response = await dio.delete(
           '${StringConst.backEndBaseURL}employees/deleteEmployee/$employeeId');
       if (response.statusCode == 200) {
         return left(true);
       } else {
-        return right(ErrorFailure(response.statusMessage.toString()));
+        return right(CommonMethods.commonErrorHandler(response));
       }
     } catch (error) {
-      return right(ErrorFailure(error.toString()));
+      return right(CommonMethods.commonErrorHandler(error));
     }
   }
 
   @override
-  Future<Either<List<EmployeeModel>, CommonFailure>> getAllEmployees() async {
+  Future<Either<List<EmployeeModel>, String>> getAllEmployees() async {
     try {
       final response = await dio
           .get('${StringConst.backEndBaseURL}employees/getAllEmployeeDetails');
@@ -66,16 +64,15 @@ class EmployeeDataSourceImpl implements EmployeeDataSource {
         }
         return left(employees);
       } else {
-        return right(ErrorFailure("Not found"));
+        return right("Not found");
       }
     } catch (error) {
-      return right(
-          (ErrorFailure(CommonMethods.commonValidation(error.toString()))));
+      return right(CommonMethods.commonErrorHandler(error));
     }
   }
 
   @override
-  Future<Either<EmployeeModel, CommonFailure>> updateEmployee(
+  Future<Either<EmployeeModel, String>> updateEmployee(
       String employeeId, EmployeeParam employeeParam) async {
     try {
       Map<String, dynamic> data = {};
@@ -108,38 +105,36 @@ class EmployeeDataSourceImpl implements EmployeeDataSource {
           final EmployeeModel employee = EmployeeModel.fromJson(response.data);
           return left(employee);
         } else {
-          return right(ErrorFailure(CommonMethods.commonValidation(
-              response.statusMessage.toString())));
+          return right(CommonMethods.commonErrorHandler(response));
         }
       } else {
-        return right(ErrorFailure('There is no changes Detected'));
+        return right('There is no changes Detected');
       }
     } catch (error) {
-      return right(
-          CommonMethods.commonValidation(ErrorFailure(error.toString())));
+      return right(CommonMethods.commonErrorHandler(error));
     }
   }
 
   @override
-  Future<Either<bool, CommonFailure>> disableEnableEmployee(
+  Future<Either<bool, String>> disableEnableEmployee(
       String employeeId, bool isActive) async {
     try {
       Map<String, dynamic> data = {'isActive': isActive};
 
       if (data.isNotEmpty) {
         final response = await dio.put(
-            '${StringConst.backEndBaseURL}employees/updateEmployee/$employeeId',
+            '${StringConst.backEndBaseURL}users/enableDisable/$employeeId',
             data: data);
         if (response.statusCode == 200) {
           return left(true);
         } else {
-          return right(ErrorFailure(response.statusMessage.toString()));
+          return right(CommonMethods.commonErrorHandler(response));
         }
       } else {
-        return right(ErrorFailure('There is no changes Detected'));
+        return right('There is no changes Detected');
       }
     } catch (error) {
-      return right(ErrorFailure(error.toString()));
+      return right(CommonMethods.commonErrorHandler(error));
     }
   }
 }

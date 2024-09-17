@@ -7,7 +7,7 @@ class ChangePasswordUseCase {
 
   ChangePasswordUseCase(this.signInRepository);
 
-  Future<Either<CommonFailure, bool>> call(String password) async {
+  Future<Either<String, bool>> call(String password) async {
     return await signInRepository.changePassword(password);
   }
 }

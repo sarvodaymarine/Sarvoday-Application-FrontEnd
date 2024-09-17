@@ -9,7 +9,6 @@ import 'package:sarvoday_marine/core/utils/common/common_methods.dart';
 import 'package:sarvoday_marine/core/utils/widgets/common_app_bar.dart';
 import 'package:sarvoday_marine/core/utils/widgets/custom_sm_button.dart';
 import 'package:sarvoday_marine/core/utils/widgets/custom_text_form_field.dart';
-import 'package:sarvoday_marine/core/utils/widgets/image_upload_service.dart';
 import 'package:sarvoday_marine/features/report_module/data/models/container_model.dart';
 import 'package:sarvoday_marine/features/report_module/data/models/image_config_model.dart';
 import 'package:sarvoday_marine/features/report_module/data/models/service_report.dart';
@@ -43,7 +42,7 @@ class ServiceDetailPage extends StatefulWidget implements AutoRouteWrapper {
 
 class _ServiceDetailPageState extends State<ServiceDetailPage> {
   String userRole = '';
-  List<Map<String, dynamic>> imageList = [];
+  Map<String, dynamic> imageList = {};
   List<FormGroup> formGroupList = [];
   ServiceContainerModel? serviceReportDetail;
   List<ContainerModel> containerList = [];
@@ -61,6 +60,11 @@ class _ServiceDetailPageState extends State<ServiceDetailPage> {
       listener: (context, state) {
         if (state is StateNoData) {
           showLoadingDialog(context);
+        } else if (state is StateImageUploaded) {
+          hideLoadingDialog(context);
+          if (state.response != "") {
+            CommonMethods.showToast(context, state.response);
+          }
         } else if (state is StateOnCrudSuccess) {
           hideLoadingDialog(context);
           CommonMethods.showToast(context, "Report updated successfully");
@@ -78,6 +82,9 @@ class _ServiceDetailPageState extends State<ServiceDetailPage> {
           userRole = context.read<ReportCubit>().user;
           imageList = context.read<ReportCubit>().images;
           serviceReportDetail = state.response;
+          loadFormData();
+        } else if (state is StateImageUploaded) {
+          imageList = context.read<ReportCubit>().images;
         }
         return Scaffold(
             appBar: CommonAppBar(
@@ -96,103 +103,56 @@ class _ServiceDetailPageState extends State<ServiceDetailPage> {
                       final containerReport =
                           serviceReportDetail?.containerReports?[index];
                       return ContainerCard(
+                        reportId: widget.reportId,
                         containerReport: containerReport,
                         serviceName: serviceReportDetail?.serviceName ?? "",
                         orderId: widget.orderId,
                         index: index,
                         userRole: userRole,
-                        imageList: imageList,
+                        imageList: imageList[containerReport!.containerId!],
                         formGroupList: formGroupList,
                         containerList: containerList,
+                        serviceId: widget.serviceId,
                       );
                     },
                   ),
                   SizedBox(
                     height: SmTextTheme.getResponsiveSize(context, 12),
                   ),
-                  Padding(
-                    padding: EdgeInsets.symmetric(
-                        horizontal: SmTextTheme.getResponsiveSize(context, 12)),
-                    child: SizedBox(
-                        width: double.infinity,
-                        child: CustomSmButton(
-                            text: formGroupList.every((form) => form.valid)
-                                ? "Submit"
-                                : "save",
-                            onTap: () async {
-                              for (var element in formGroupList) {
-                                final formValues = {
-                                  'containerNo':
-                                      element.control('containerNo').value,
-                                  'maxGrossWeight':
-                                      element.control('maxGrossWeight').value,
-                                  'tareWeight':
-                                      element.control('tareWeight').value,
-                                  'containerSize':
-                                      element.control('containerSize').value,
-                                  'batchNo': element.control('batchNo').value,
-                                  'lineSealNo':
-                                      element.control('lineSealNo').value,
-                                  'customSealNo':
-                                      element.control('customSealNo').value,
-                                  'typeOfBaggage':
-                                      element.control('typeOfBaggage').value,
-                                  'baggageName':
-                                      element.control('baggageName').value,
-                                  'quantity': element.control('quantity').value,
-                                  'noOfPkg': element.control('noOfPkg').value,
-                                  'netWeight':
-                                      element.control('netWeight').value,
-                                  'comment': element.control('comment').value,
-                                  'background':
-                                      element.control('background').value,
-                                  'survey': element.control('survey').value,
-                                  'packing': element.control('packing').value,
-                                  'baggageCondition':
-                                      element.control('baggageCondition').value,
-                                  'conclusion':
-                                      element.control('conclusion').value,
-                                };
+                  Visibility(
+                    visible: userRole != "client",
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                          horizontal:
+                              SmTextTheme.getResponsiveSize(context, 12)),
+                      child: SizedBox(
+                          width: double.infinity,
+                          child: CustomSmButton(
+                              text: formGroupList.every((form) => form.valid)
+                                  ? "Submit"
+                                  : "save",
+                              onTap: () async {
+                                final containerModels =
+                                    await _createContainerModels(formGroupList);
 
-                                final containerModel = ContainerModel(
-                                  containerImages: imageList
-                                      .map((element) =>
-                                          ContainerImageModel.fromJson(element))
-                                      .toList(),
-                                  containerNo: formValues['containerNo'],
-                                  maxGrossWeight: formValues['maxGrossWeight'],
-                                  tareWeight: formValues['tareWeight'],
-                                  containerSize: formValues['containerSize'],
-                                  batchNo: formValues['batchNo'],
-                                  lineSealNo: formValues['lineSealNo'],
-                                  customSealNo: formValues['customSealNo'],
-                                  typeOfBaggage: formValues['typeOfBaggage'],
-                                  baggageName: formValues['baggageName'],
-                                  quantity: formValues['quantity'],
-                                  noOfPkg: formValues['noOfPkg'],
-                                  netWeight: formValues['netWeight'],
-                                  comment: formValues['comment'],
-                                  background: formValues['background'],
-                                  survey: formValues['survey'],
-                                  packing: formValues['packing'],
-                                  baggageCondition:
-                                      formValues['baggageCondition'],
-                                  conclusion: formValues['conclusion'],
+                                final serviceReportResponse =
+                                    ServiceContainerModel(
+                                  serviceName: serviceReportDetail?.serviceName,
+                                  containerReports: containerModels,
+                                  reportStatus:
+                                      serviceReportDetail?.reportStatus,
                                 );
-                                containerList.add(containerModel);
-                              }
-                              final ServiceContainerModel
-                                  serviceReportResponse = ServiceContainerModel(
-                                      serviceName:
-                                          serviceReportDetail?.serviceName,
-                                      containerReports: containerList,
-                                      reportStatus:
-                                          serviceReportDetail?.reportStatus);
-                              context.read<ReportCubit>().updateServiceReport(
-                                  widget.serviceId,
-                                  widget.reportId,
-                                  serviceReportResponse);
-                            })),
+                                if (context.mounted) {
+                                  context
+                                      .read<ReportCubit>()
+                                      .updateServiceReport(
+                                        widget.serviceId,
+                                        widget.reportId,
+                                        serviceReportResponse,
+                                      );
+                                }
+                              })),
+                    ),
                   ),
                 ],
               ),
@@ -200,25 +160,178 @@ class _ServiceDetailPageState extends State<ServiceDetailPage> {
       },
     );
   }
+
+  loadFormData() {
+    if (serviceReportDetail != null &&
+        serviceReportDetail?.containerReports != null) {
+      for (var containerDetails in serviceReportDetail!.containerReports!) {
+        formGroupList.add(FormGroup({
+          'id': FormControl<String>(
+            value: containerDetails.containerId ?? "",
+          ),
+          'containerNo': FormControl<String>(
+              value: containerDetails.containerNo ?? "",
+              validators: [Validators.required]),
+          'maxGrossWeight': FormControl<String>(
+              value: containerDetails.maxGrossWeight ?? "",
+              validators: [Validators.required]),
+          'tareWeight': FormControl<String>(
+              value: containerDetails.tareWeight ?? "",
+              validators: [Validators.required]),
+          'containerSize': FormControl<String>(
+              value: containerDetails.containerSize ?? "",
+              validators: [Validators.required]),
+          'batchNo': FormControl<String>(
+              value: containerDetails.batchNo ?? "",
+              validators: [Validators.required]),
+          'lineSealNo': FormControl<String>(
+              value: containerDetails.lineSealNo ?? "",
+              validators: [Validators.required]),
+          'customSealNo': FormControl<String>(
+              value: containerDetails.customSealNo ?? "",
+              validators: [Validators.required]),
+          'typeOfBaggage': FormControl<String>(
+              value: containerDetails.typeOfBaggage ?? "",
+              validators: [Validators.required]),
+          'quantity': FormControl<int>(
+              value: containerDetails.quantity,
+              validators: [Validators.required]),
+          'noOfPkg': FormControl<int>(
+              value: containerDetails.noOfPkg,
+              validators: [Validators.required]),
+          'netWeight': FormControl<String>(
+              value: containerDetails.netWeight ?? "",
+              validators: [Validators.required]),
+          'comment': FormControl<String>(
+              value: containerDetails.comment ?? "",
+              validators: (userRole == "admin" || userRole == "superAdmin")
+                  ? [Validators.required]
+                  : []),
+          'baggageName': FormControl<String>(
+              value: containerDetails.baggageName ?? "",
+              validators: [Validators.required]),
+          'background': FormControl<String>(
+              value: containerDetails.background ?? "",
+              validators: (userRole == "admin" || userRole == "superAdmin")
+                  ? [Validators.required]
+                  : []),
+          'survey': FormControl<String>(
+              value: containerDetails.survey ?? "",
+              validators: (userRole == "admin" || userRole == "superAdmin")
+                  ? [Validators.required]
+                  : []),
+          'packing': FormControl<String>(
+              value: containerDetails.packing ?? "",
+              validators: (userRole == "admin" || userRole == "superAdmin")
+                  ? [Validators.required]
+                  : []),
+          'baggageCondition': FormControl<String>(
+              value: containerDetails.baggageCondition ?? "",
+              validators: [Validators.required]),
+          'conclusion': FormControl<String>(
+              value: containerDetails.conclusion ?? "",
+              validators: (userRole == "admin" || userRole == "superAdmin")
+                  ? [Validators.required]
+                  : []),
+        }));
+      }
+    }
+    if (userRole == "client") {
+      disableAllFormGroups(formGroupList);
+    }
+  }
+
+  Future<List<ContainerModel>> _createContainerModels(
+      List<FormGroup> formGroupList) async {
+    final List<ContainerModel> containerModels = [];
+
+    for (var element in formGroupList) {
+      final formValues = _extractFormValues(element);
+
+      final containerModel = ContainerModel(
+        containerImages: (imageList[formValues['id']] as List<dynamic>)
+            .map((element) =>
+                ContainerImageModel.fromJson((element as Map<String, dynamic>)))
+            .toList(),
+        containerId: formValues['id'],
+        containerNo: formValues['containerNo'],
+        maxGrossWeight: formValues['maxGrossWeight'],
+        tareWeight: formValues['tareWeight'],
+        containerSize: formValues['containerSize'],
+        batchNo: formValues['batchNo'],
+        lineSealNo: formValues['lineSealNo'],
+        customSealNo: formValues['customSealNo'],
+        typeOfBaggage: formValues['typeOfBaggage'],
+        baggageName: formValues['baggageName'],
+        quantity: formValues['quantity'],
+        noOfPkg: formValues['noOfPkg'],
+        netWeight: formValues['netWeight'],
+        comment: formValues['comment'],
+        background: formValues['background'],
+        survey: formValues['survey'],
+        packing: formValues['packing'],
+        baggageCondition: formValues['baggageCondition'],
+        conclusion: formValues['conclusion'],
+      );
+
+      containerModels.add(containerModel);
+    }
+
+    return containerModels;
+  }
+
+  Map<String, dynamic> _extractFormValues(FormGroup element) {
+    return {
+      'id': element.control('id').value,
+      'containerNo': element.control('containerNo').value,
+      'maxGrossWeight': element.control('maxGrossWeight').value,
+      'tareWeight': element.control('tareWeight').value,
+      'containerSize': element.control('containerSize').value,
+      'batchNo': element.control('batchNo').value,
+      'lineSealNo': element.control('lineSealNo').value,
+      'customSealNo': element.control('customSealNo').value,
+      'typeOfBaggage': element.control('typeOfBaggage').value,
+      'baggageName': element.control('baggageName').value,
+      'quantity': element.control('quantity').value,
+      'noOfPkg': element.control('noOfPkg').value,
+      'netWeight': element.control('netWeight').value,
+      'comment': element.control('comment').value,
+      'background': element.control('background').value,
+      'survey': element.control('survey').value,
+      'packing': element.control('packing').value,
+      'baggageCondition': element.control('baggageCondition').value,
+      'conclusion': element.control('conclusion').value,
+    };
+  }
+
+  void disableAllFormGroups(List<FormGroup> formGrpList) {
+    for (var formGroup in formGrpList) {
+      formGroup.markAsDisabled();
+    }
+  }
 }
 
 class ContainerCard extends StatelessWidget {
   ContainerCard(
       {super.key,
       required this.containerReport,
+      required this.reportId,
       required this.serviceName,
       required this.orderId,
       required this.index,
       required this.userRole,
       required this.imageList,
+      required this.serviceId,
       required this.formGroupList,
       required this.containerList});
 
   final ContainerModel? containerReport;
+  final String reportId;
   List<FormGroup> formGroupList = [];
   final String serviceName;
   final String orderId;
   final int index;
+  final String serviceId;
   final String userRole;
   final List<Map<String, dynamic>> imageList;
   List<ContainerModel> containerList = [];
@@ -232,12 +345,15 @@ class ContainerCard extends StatelessWidget {
         children: [
           ReactiveFormComponent(
             containerDetails: containerReport,
+            serviceId: serviceId,
             serviceName: serviceName,
             orderId: orderId,
             imageList: imageList,
             userRole: userRole,
             formGroupList: formGroupList,
+            form: formGroupList[index],
             containerList: containerList,
+            reportId: reportId,
           ),
         ],
       ),
@@ -248,28 +364,33 @@ class ContainerCard extends StatelessWidget {
 class ReactiveFormComponent extends StatefulWidget {
   ReactiveFormComponent(
       {super.key,
+      required this.reportId,
+      required this.serviceId,
       required this.containerDetails,
       required this.serviceName,
       required this.orderId,
       required this.userRole,
       required this.imageList,
       required this.formGroupList,
+      required this.form,
       required this.containerList});
 
   final ContainerModel? containerDetails;
+  final String reportId;
+  final String serviceId;
   final String serviceName;
   final String orderId;
   final String userRole;
   final List<Map<String, dynamic>> imageList;
   List<ContainerModel> containerList = [];
   List<FormGroup> formGroupList = [];
+  final FormGroup form;
 
   @override
   State<ReactiveFormComponent> createState() => _ReactiveFormComponentState();
 }
 
 class _ReactiveFormComponentState extends State<ReactiveFormComponent> {
-  late FormGroup _form;
   String currentTypeOfBaggage = "";
   final List<String> baggageOptions = [
     'Baggage1',
@@ -281,118 +402,44 @@ class _ReactiveFormComponentState extends State<ReactiveFormComponent> {
   @override
   void initState() {
     super.initState();
-    _form = FormGroup({
-      'containerNo': FormControl<String>(
-          value: widget.containerDetails?.containerNo ?? "",
-          validators: [Validators.required]),
-      'maxGrossWeight': FormControl<String>(
-          value: widget.containerDetails?.maxGrossWeight ?? "",
-          validators: [Validators.required]),
-      'tareWeight': FormControl<String>(
-          value: widget.containerDetails?.tareWeight ?? "",
-          validators: [Validators.required]),
-      'containerSize': FormControl<String>(
-          value: widget.containerDetails?.containerSize ?? "",
-          validators: [Validators.required]),
-      'batchNo': FormControl<String>(
-          value: widget.containerDetails?.batchNo ?? "",
-          validators: [Validators.required]),
-      'lineSealNo': FormControl<String>(
-          value: widget.containerDetails?.lineSealNo ?? "",
-          validators: [Validators.required]),
-      'customSealNo': FormControl<String>(
-          value: widget.containerDetails?.customSealNo ?? "",
-          validators: [Validators.required]),
-      'typeOfBaggage': FormControl<String>(
-          value: widget.containerDetails?.typeOfBaggage ?? "",
-          validators: [Validators.required]),
-      'quantity': FormControl<int>(
-          value: widget.containerDetails?.quantity,
-          validators: [Validators.required]),
-      'noOfPkg': FormControl<int>(
-          value: widget.containerDetails?.noOfPkg,
-          validators: [Validators.required]),
-      'netWeight': FormControl<String>(
-          value: widget.containerDetails?.netWeight ?? "",
-          validators: [Validators.required]),
-      'comment': FormControl<String>(
-          value: widget.containerDetails?.comment ?? "",
-          validators:
-              (widget.userRole == "admin" || widget.userRole == "superAdmin")
-                  ? [Validators.required]
-                  : []),
-      'baggageName': FormControl<String>(
-          value: widget.containerDetails?.baggageName ?? "",
-          validators: [Validators.required]),
-      'background': FormControl<String>(
-          value: widget.containerDetails?.background ?? "",
-          validators:
-              (widget.userRole == "admin" || widget.userRole == "superAdmin")
-                  ? [Validators.required]
-                  : []),
-      'survey': FormControl<String>(
-          value: widget.containerDetails?.survey ?? "",
-          validators:
-              (widget.userRole == "admin" || widget.userRole == "superAdmin")
-                  ? [Validators.required]
-                  : []),
-      'packing': FormControl<String>(
-          value: widget.containerDetails?.packing ?? "",
-          validators:
-              (widget.userRole == "admin" || widget.userRole == "superAdmin")
-                  ? [Validators.required]
-                  : []),
-      'baggageCondition': FormControl<String>(
-          value: widget.containerDetails?.baggageCondition ?? "",
-          validators: [Validators.required]),
-      'conclusion': FormControl<String>(
-          value: widget.containerDetails?.conclusion ?? "",
-          validators:
-              (widget.userRole == "admin" || widget.userRole == "superAdmin")
-                  ? [Validators.required]
-                  : []),
-    });
-    if (widget.userRole == "client") {
-      _form.markAsDisabled();
-    }
-    widget.formGroupList.add(_form);
   }
 
   @override
   Widget build(BuildContext context) {
     return ReactiveForm(
-      formGroup: _form,
+      formGroup: widget.form,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildTextFormField(_form, "containerNo", "Container No"),
-            _buildDropdown(
-                _form, "typeOfBaggage", "Type of Baggage", baggageOptions),
-            _buildTextFormField(_form, "containerSize", "Container Size",
+            _buildTextFormField(widget.form, "containerNo", "Container No"),
+            _buildDropdown(widget.form, "typeOfBaggage", "Type of Baggage",
+                baggageOptions),
+            _buildTextFormField(widget.form, "containerSize", "Container Size",
                 keyboardType: TextInputType.number,
                 baggageName: ["Baggage1", "Baggage2", "Baggage3", "Baggage4"]),
-            _buildTextFormField(_form, "batchNo", "Batch No",
+            _buildTextFormField(widget.form, "batchNo", "Batch No",
                 baggageName: ["Baggage1", "Baggage2", "Baggage3", "Baggage4"]),
-            _buildTextFormField(_form, "noOfPkg", "No of Packages",
+            _buildTextFormField(widget.form, "noOfPkg", "No of Packages",
                 keyboardType: TextInputType.number,
                 baggageName: ["Baggage1", "Baggage2", "Baggage3", "Baggage4"]),
-            _buildTextFormField(_form, "maxGrossWeight", "Max Gross Weight",
+            _buildTextFormField(
+                widget.form, "maxGrossWeight", "Max Gross Weight",
                 baggageName: ["Baggage1", "Baggage2", "Baggage3", "Baggage4"],
                 keyboardType: TextInputType.number),
-            _buildTextFormField(_form, "tareWeight", "Tare Weight",
+            _buildTextFormField(widget.form, "tareWeight", "Tare Weight",
                 keyboardType: TextInputType.number,
                 baggageName: ["Baggage1", "Baggage2", "Baggage3", "Baggage4"]),
-            _buildTextFormField(_form, "lineSealNo", "Line Seal No",
+            _buildTextFormField(widget.form, "lineSealNo", "Line Seal No",
                 baggageName: ["Baggage1", "Baggage2"]),
-            _buildTextFormField(_form, "customSealNo", "Custom Seal No",
+            _buildTextFormField(widget.form, "customSealNo", "Custom Seal No",
                 baggageName: ["Baggage2", "Baggage3"]),
-            _buildTextFormField(_form, "baggageName", "Baggage Name",
+            _buildTextFormField(widget.form, "baggageName", "Baggage Name",
                 baggageName: ["Baggage1", "Baggage2", "Baggage3", "Baggage4"]),
-            _buildTextFormField(_form, "quantity", "Quantity",
+            _buildTextFormField(widget.form, "quantity", "Quantity",
                 keyboardType: TextInputType.number, baggageName: ["Baggage1"]),
-            _buildTextFormField(_form, "netWeight", "Net Weight",
+            _buildTextFormField(widget.form, "netWeight", "Net Weight",
                 keyboardType: TextInputType.number,
                 baggageName: ["Baggage1", "Baggage2", "Baggage3", "Baggage4"]),
             SizedBox(height: SmTextTheme.getResponsiveSize(context, 16)),
@@ -400,17 +447,20 @@ class _ReactiveFormComponentState extends State<ReactiveFormComponent> {
               visible: widget.imageList.isNotEmpty,
               child: RichText(
                   text: TextSpan(
-                      text: 'Upload Images:',
+                      text: 'Inspection Images:',
                       style: SmTextTheme.confirmButtonTextStyle(context))),
             ),
             SizedBox(height: SmTextTheme.getResponsiveSize(context, 10)),
-            ImageGridWidget(imageList: widget.imageList),
+            ImageGridWidget(
+              imageList: widget.imageList,
+              userRole: widget.userRole,
+            ),
             SizedBox(height: SmTextTheme.getResponsiveSize(context, 10)),
             Visibility(
                 visible: widget.userRole == 'admin' ||
                     widget.userRole == 'superAdmin' ||
                     widget.userRole == 'client',
-                child: _buildTextFormField(_form, "comment", "Comment",
+                child: _buildTextFormField(widget.form, "comment", "Comment",
                     minLine: 3,
                     maxLine: 5,
                     baggageName: [
@@ -423,7 +473,8 @@ class _ReactiveFormComponentState extends State<ReactiveFormComponent> {
               visible: widget.userRole == 'admin' ||
                   widget.userRole == 'superAdmin' ||
                   widget.userRole == 'client',
-              child: _buildTextFormField(_form, "background", "Background",
+              child: _buildTextFormField(
+                  widget.form, "background", "Background",
                   minLine: 3,
                   maxLine: 5,
                   baggageName: ["Baggage1", "Baggage2", "Baggage3"]),
@@ -432,7 +483,7 @@ class _ReactiveFormComponentState extends State<ReactiveFormComponent> {
                 visible: widget.userRole == 'admin' ||
                     widget.userRole == 'superAdmin' ||
                     widget.userRole == 'client',
-                child: _buildTextFormField(_form, "survey", "Survey",
+                child: _buildTextFormField(widget.form, "survey", "Survey",
                     minLine: 3,
                     maxLine: 5,
                     baggageName: [
@@ -445,7 +496,7 @@ class _ReactiveFormComponentState extends State<ReactiveFormComponent> {
                 visible: widget.userRole == 'admin' ||
                     widget.userRole == 'superAdmin' ||
                     widget.userRole == 'client',
-                child: _buildTextFormField(_form, "packing", "Packing",
+                child: _buildTextFormField(widget.form, "packing", "Packing",
                     minLine: 3,
                     maxLine: 5,
                     baggageName: ["Baggage1", "Baggage4"])),
@@ -454,7 +505,7 @@ class _ReactiveFormComponentState extends State<ReactiveFormComponent> {
                     widget.userRole == 'superAdmin' ||
                     widget.userRole == 'client',
                 child: _buildTextFormField(
-                    _form, "baggageCondition", "Baggage Condition",
+                    widget.form, "baggageCondition", "Baggage Condition",
                     minLine: 3,
                     maxLine: 5,
                     baggageName: ["Baggage2", "Baggage3"])),
@@ -462,7 +513,8 @@ class _ReactiveFormComponentState extends State<ReactiveFormComponent> {
                 visible: widget.userRole == 'admin' ||
                     widget.userRole == 'superAdmin' ||
                     widget.userRole == 'client',
-                child: _buildTextFormField(_form, "conclusion", "Conclusion",
+                child: _buildTextFormField(
+                    widget.form, "conclusion", "Conclusion",
                     minLine: 5,
                     maxLine: 7,
                     baggageName: [
@@ -471,30 +523,26 @@ class _ReactiveFormComponentState extends State<ReactiveFormComponent> {
                       "Baggage3",
                       "Baggage4"
                     ])),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  if (_form.valid) {
-                    List<String> filePaths = widget.imageList
-                        .map((element) =>
-                            (element['imagePath'] ?? "").toString())
-                        .toList();
-                    List<String> fileNames = widget.imageList
-                        .map((element) => element['imageName'].toString())
-                        .toList();
-                    S3Service().uploadMultipleImages(filePaths, fileNames);
-                  } else {
-                    _form.markAllAsTouched();
-                  }
-                },
-                style: ButtonStyle(
-                    backgroundColor:
-                        WidgetStateProperty.all(SmColorLightTheme.onPrimary)),
-                child: RichText(
-                    text: TextSpan(
-                        text: 'Upload',
-                        style: SmTextTheme.cancelButtonTextStyle(context))),
+            Visibility(
+              visible: widget.userRole != "client",
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    await context.read<ReportCubit>().uploadImageService(
+                        widget.reportId,
+                        widget.serviceId,
+                        widget.containerDetails?.containerId ?? "",
+                        widget.imageList);
+                  },
+                  style: ButtonStyle(
+                      backgroundColor:
+                          WidgetStateProperty.all(SmColorLightTheme.onPrimary)),
+                  child: RichText(
+                      text: TextSpan(
+                          text: 'Upload',
+                          style: SmTextTheme.cancelButtonTextStyle(context))),
+                ),
               ),
             ),
           ],

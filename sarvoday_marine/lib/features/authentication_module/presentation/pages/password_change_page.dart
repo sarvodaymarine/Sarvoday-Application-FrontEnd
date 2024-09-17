@@ -45,7 +45,7 @@ class ChangePasswordPage extends StatelessWidget implements AutoRouteWrapper {
             hideLoadingDialog(context);
             CommonMethods.showCommonDialog(context, "Error", state.errorMsg);
           } else if (state is StateNoData) {
-            context.router.replaceAll([CalendarRoute()]);
+            context.router.replaceAll([const CalendarRoute()]);
           }
         },
         builder: (context, state) {
@@ -119,7 +119,6 @@ class ChangePasswordPage extends StatelessWidget implements AutoRouteWrapper {
                                   ? Icons.visibility_off
                                   : Icons.visibility),
                               onTap: () {
-                                ;
                                 context
                                     .read<SignInCubit>()
                                     .obSecureEventChange2(

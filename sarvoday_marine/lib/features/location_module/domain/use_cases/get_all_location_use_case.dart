@@ -8,7 +8,7 @@ class GetAllLocationsUseCase {
 
   GetAllLocationsUseCase(this.locationRepository);
 
-  Future<Either<List<LocationModel>, CommonFailure>> call() async {
+  Future<Either<List<LocationModel>, String>> call() async {
     return await locationRepository.getAllLocations();
   }
 }

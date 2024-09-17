@@ -11,23 +11,22 @@ class LocationRepositoryImpl implements LocationRepository {
   LocationRepositoryImpl(this.locationDataSource);
 
   @override
-  Future<Either<bool, CommonFailure>> addLocation(
-      LocationParam locationParam) async {
+  Future<Either<bool, String>> addLocation(LocationParam locationParam) async {
     return await locationDataSource.addLocation(locationParam);
   }
 
   @override
-  Future<Either<bool, CommonFailure>> deleteLocation(String locationId) async {
+  Future<Either<bool, String>> deleteLocation(String locationId) async {
     return await locationDataSource.deleteLocation(locationId);
   }
 
   @override
-  Future<Either<List<LocationModel>, CommonFailure>> getAllLocations() async {
+  Future<Either<List<LocationModel>, String>> getAllLocations() async {
     return await locationDataSource.getAllLocations();
   }
 
   @override
-  Future<Either<LocationModel, CommonFailure>> updateLocation(
+  Future<Either<LocationModel, String>> updateLocation(
       String serviceId, LocationParam locationParam) async {
     return await locationDataSource.updateLocation(serviceId, locationParam);
   }

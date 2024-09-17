@@ -11,28 +11,29 @@ class ClientRepositoryImpl implements ClientRepository {
   ClientRepositoryImpl(this.clientDataSource);
 
   @override
-  Future<Either<bool, CommonFailure>> addClient(ClientParam clientParam) async {
+  Future<Either<bool, String>> addClient(ClientParam clientParam) async {
     return await clientDataSource.addClient(clientParam);
   }
 
   @override
-  Future<Either<bool, CommonFailure>> deleteClient(String serviceId) async {
+  Future<Either<bool, String>> deleteClient(String serviceId) async {
     return await clientDataSource.deleteClient(serviceId);
   }
 
   @override
-  Future<Either<List<ClientModel>, CommonFailure>> getAllClients() async {
+  Future<Either<List<ClientModel>, String>> getAllClients() async {
     return await clientDataSource.getAllClients();
   }
 
   @override
-  Future<Either<ClientModel, CommonFailure>> updateClient(
+  Future<Either<ClientModel, String>> updateClient(
       String serviceId, ClientParam clientParam) async {
     return await clientDataSource.updateClient(serviceId, clientParam);
   }
 
   @override
-  Future<Either<bool, CommonFailure>> disableEnableClient(String clientId, bool isActive) async {
+  Future<Either<bool, String>> disableEnableClient(
+      String clientId, bool isActive) async {
     return await clientDataSource.disableEnableClient(clientId, isActive);
   }
 }

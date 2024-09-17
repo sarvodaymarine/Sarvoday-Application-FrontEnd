@@ -100,7 +100,7 @@ class EmployeeListPage extends StatelessWidget implements AutoRouteWrapper {
                                 await context
                                     .read<EmployeeCubit>()
                                     .disableEmployee(
-                                        employeeList[item].id!,
+                                        employeeList[item].userId!,
                                         employeeList[item]
                                             .userDetail!
                                             .isActive!);

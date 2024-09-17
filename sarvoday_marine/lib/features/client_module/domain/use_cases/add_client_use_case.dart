@@ -7,7 +7,7 @@ class AddClientUseCase {
 
   AddClientUseCase(this.clientRepository);
 
-  Future<Either<bool, CommonFailure>> call(ClientParam clientParam) async {
+  Future<Either<bool, String>> call(ClientParam clientParam) async {
     return await clientRepository.addClient(clientParam);
   }
 }

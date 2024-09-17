@@ -7,7 +7,7 @@ class AddLocationUseCase {
 
   AddLocationUseCase(this.locationRepository);
 
-  Future<Either<bool, CommonFailure>> call(LocationParam locationParam) async {
+  Future<Either<bool, String>> call(LocationParam locationParam) async {
     return await locationRepository.addLocation(locationParam);
   }
 }

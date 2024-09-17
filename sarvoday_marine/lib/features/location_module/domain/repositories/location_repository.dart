@@ -4,12 +4,12 @@ import 'package:sarvoday_marine/features/location_module/data/models/location_mo
 import 'package:sarvoday_marine/features/location_module/domain/use_cases/add_location_use_case.dart';
 
 abstract class LocationRepository {
-  Future<Either<List<LocationModel>, CommonFailure>> getAllLocations();
+  Future<Either<List<LocationModel>, String>> getAllLocations();
 
-  Future<Either<bool, CommonFailure>> addLocation(LocationParam locationParam);
+  Future<Either<bool, String>> addLocation(LocationParam locationParam);
 
-  Future<Either<bool, CommonFailure>> deleteLocation(String serviceId);
+  Future<Either<bool, String>> deleteLocation(String serviceId);
 
-  Future<Either<LocationModel, CommonFailure>> updateLocation(
+  Future<Either<LocationModel, String>> updateLocation(
       String serviceId, LocationParam locationParam);
 }

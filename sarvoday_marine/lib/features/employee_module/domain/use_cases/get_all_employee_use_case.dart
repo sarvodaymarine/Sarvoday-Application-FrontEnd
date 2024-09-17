@@ -8,7 +8,7 @@ class GetAllEmployeesUseCase {
 
   GetAllEmployeesUseCase(this.employeeRepository);
 
-  Future<Either<List<EmployeeModel>, CommonFailure>> call() async {
+  Future<Either<List<EmployeeModel>, String>> call() async {
     return await employeeRepository.getAllEmployees();
   }
 }

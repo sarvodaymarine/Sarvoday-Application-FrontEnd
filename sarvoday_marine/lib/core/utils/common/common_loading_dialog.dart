@@ -25,8 +25,7 @@ class _LoadingDialogState extends State<LoadingDialog>
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
-    )
-      ..repeat(reverse: true);
+    )..repeat(reverse: true);
 
     _animation = CurvedAnimation(
       parent: _controller,
@@ -130,7 +129,7 @@ class WaveClipper extends CustomClipper<Path> {
     var firstControlPoint = Offset(size.width / 4, size.height - 5);
     var firstEndPoint = Offset(size.width / 2, size.height);
     var secondControlPoint =
-    Offset(size.width - (size.width / 4), size.height - 5);
+        Offset(size.width - (size.width / 4), size.height - 5);
     var secondEndPoint = Offset(size.width, size.height - 10);
 
     path.quadraticBezierTo(firstControlPoint.dx, firstControlPoint.dy,

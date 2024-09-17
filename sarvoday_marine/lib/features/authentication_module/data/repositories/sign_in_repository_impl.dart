@@ -10,18 +10,17 @@ class SignInRepositoryImpl implements SignInRepository {
   SignInRepositoryImpl(this.signInDataSource);
 
   @override
-  Future<Either<CommonFailure, bool>> userLogin(
-      String email, String password) async {
+  Future<Either<String, bool>> userLogin(String email, String password) async {
     return await signInDataSource.userLogin(email, password);
   }
 
   @override
-  Future<Either<CommonFailure, UserModel>> getUserInfo() async {
+  Future<Either<String, UserModel>> getUserInfo() async {
     return await signInDataSource.getUserInfo();
   }
 
   @override
-  Future<Either<CommonFailure, bool>> changePassword(String password) async {
+  Future<Either<String, bool>> changePassword(String password) async {
     return await signInDataSource.changePassword(password);
   }
 }

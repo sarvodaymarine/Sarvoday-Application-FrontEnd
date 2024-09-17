@@ -2,6 +2,7 @@ import 'package:sarvoday_marine/features/report_module/data/models/image_config_
 
 class ContainerModel {
   String? containerNo;
+  String? containerId;
   String? maxGrossWeight;
   String? tareWeight;
   String? containerSize;
@@ -24,6 +25,7 @@ class ContainerModel {
 
   ContainerModel({
     this.containerNo,
+    this.containerId,
     this.maxGrossWeight,
     this.tareWeight,
     this.containerSize,
@@ -47,6 +49,7 @@ class ContainerModel {
 
   factory ContainerModel.fromJson(Map<String, dynamic> json) {
     return ContainerModel(
+        containerId: json['_id'],
         containerNo: json['containerNo'],
         maxGrossWeight: json['maxGrossWeight'],
         tareWeight: json['tareWeight'],
@@ -74,6 +77,7 @@ class ContainerModel {
   Map<String, dynamic> toJson() {
     return {
       'containerNo': containerNo,
+      'id': containerId,
       'maxGrossWeight': maxGrossWeight,
       'tareWeight': tareWeight,
       'containerSize': containerSize,
@@ -99,6 +103,7 @@ class ContainerModel {
 
   ContainerModel copyWith({
     String? containerNo,
+    String? containerId,
     String? maxGrossWeight,
     String? tareWeight,
     String? containerSize,
@@ -121,6 +126,7 @@ class ContainerModel {
   }) {
     return ContainerModel(
         containerNo: containerNo ?? this.containerNo,
+        containerId: containerId ?? this.containerId,
         maxGrossWeight: maxGrossWeight ?? this.maxGrossWeight,
         tareWeight: tareWeight ?? this.tareWeight,
         containerSize: containerSize ?? this.containerSize,

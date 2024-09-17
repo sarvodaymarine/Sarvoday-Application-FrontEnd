@@ -4,11 +4,11 @@ import 'package:sarvoday_marine/features/report_module/data/models/report_model.
 import 'package:sarvoday_marine/features/report_module/data/models/service_report.dart';
 
 abstract class ReportDataSource {
-  Future<Either<ReportModel, CommonFailure>> getReport(String id);
+  Future<Either<ReportModel, String>> getReport(String id);
 
-  Future<Either<ServiceContainerModel, CommonFailure>> getServiceReport(
+  Future<Either<ServiceContainerModel, String>> getServiceReport(
       String serviceId);
 
-  Future<Either<CommonFailure, ReportModel>> updateReport(
+  Future<Either<String, ReportModel>> updateReport(
       String reportId, String serviceId, ServiceContainerModel param);
 }

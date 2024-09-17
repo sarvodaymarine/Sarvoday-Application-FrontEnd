@@ -1,22 +1,21 @@
 import 'package:dartz/dartz.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
-import 'package:sarvoday_marine/core/failure/common_failure.dart';
+import 'package:sarvoday_marine/core/api_handler/api_handler_helper.dart';
+import 'package:sarvoday_marine/core/api_handler/token_manager.dart';
 import 'package:sarvoday_marine/core/utils/common/common_methods.dart';
 import 'package:sarvoday_marine/core/utils/constants/string_const.dart';
 import 'package:sarvoday_marine/features/authentication_module/data/data_sources/sign_in_data_source.dart';
-import 'package:dio/dio.dart';
 import 'package:sarvoday_marine/features/authentication_module/data/models/user_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SignInDataSourceImpl implements SignInDataSource {
-  final Dio dio;
+  final DioClient dio;
   final SharedPreferences sharedPreferences;
 
   SignInDataSourceImpl(this.dio, this.sharedPreferences);
 
   @override
-  Future<Either<CommonFailure, bool>> userLogin(
-      String email, String password) async {
+  Future<Either<String, bool>> userLogin(String email, String password) async {
     try {
       Map<String, dynamic> loginCredential = {
         "email": email,
@@ -33,14 +32,13 @@ class SignInDataSourceImpl implements SignInDataSource {
           return Right(user.isFirstLogin ?? false);
         } else {
           dropLocalStorage();
-          return Left(
-              ErrorFailure("Something went to wrong! Please try again later!"));
+          return const Left("Something went to wrong! Please try again later!");
         }
       } else {
-        return Left(ErrorFailure(response.statusMessage.toString()));
+        return Left(response.statusMessage.toString());
       }
     } catch (error) {
-      return Left(ErrorFailure(CommonMethods.commonValidation(error)));
+      return Left(CommonMethods.commonErrorHandler(error));
     }
   }
 
@@ -65,58 +63,51 @@ class SignInDataSourceImpl implements SignInDataSource {
         userUID.isNotEmpty &&
         token != null &&
         token.isNotEmpty) {
-      final response = await dio.get(
-          '${StringConst.backEndBaseURL}users/$userUID/get',
-          options: await CommonMethods.getAuthenticationToken());
+      final response =
+          await dio.get('${StringConst.backEndBaseURL}users/$userUID/get');
       return response;
     }
   }
 
   @override
-  Future<Either<CommonFailure, UserModel>> getUserInfo() async {
+  Future<Either<String, UserModel>> getUserInfo() async {
     try {
-      String? token = sharedPreferences.getString('userToken');
-      String? userUID = sharedPreferences.getString("userUid");
-      if (userUID != null &&
-          userUID.isNotEmpty &&
-          token != null &&
-          token.isNotEmpty) {
-        final response = await dio.get(
-            '${StringConst.backEndBaseURL}users/$userUID/get',
-            options: await CommonMethods.getAuthenticationToken());
+      String? userUID = await TokenManager.getUserId();
+      if (userUID != null && userUID.isNotEmpty) {
+        final response =
+            await dio.get('${StringConst.backEndBaseURL}users/$userUID/get');
         if (response.statusCode == 200) {
           final UserModel user = UserModel.fromJson(response.data);
           return Right(user);
         } else {
-          return Left(ErrorFailure(response.statusMessage.toString()));
+          return Left(CommonMethods.commonErrorHandler(response));
         }
       } else {
-        return Left(AuthFailure());
+        return const Left("User not found");
       }
     } catch (error) {
-      return Left(ErrorFailure(error.toString()));
+      return Left(CommonMethods.commonErrorHandler(error));
     }
   }
 
   @override
-  Future<Either<CommonFailure, bool>> changePassword(String newPassword) async {
+  Future<Either<String, bool>> changePassword(String newPassword) async {
     try {
       String? userId = sharedPreferences.getString("userUid");
       if (userId != null && userId.isNotEmpty) {
         final response = await dio.post(
             '${StringConst.backEndBaseURL}users/$userId/changePassword',
-            options: await CommonMethods.getAuthenticationToken(),
             data: {'password': newPassword});
         if (response.statusCode == 200) {
           return const Right(true);
         } else {
-          return Left(ErrorFailure(response.statusMessage.toString()));
+          return Left(CommonMethods.commonErrorHandler(response));
         }
       } else {
-        return Left(AuthFailure());
+        return const Left('User not found');
       }
     } catch (error) {
-      return Left(ErrorFailure(error.toString()));
+      return Left(CommonMethods.commonErrorHandler(error));
     }
   }
 }

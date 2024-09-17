@@ -8,7 +8,6 @@ import 'package:sarvoday_marine/core/utils/common/common_methods.dart';
 class ImagePickerService {
   final ImagePicker _picker = ImagePicker();
 
-  // Check and request camera and storage permissions
   Future<bool> _requestPermission(BuildContext context) async {
     var cameraStatus = await Permission.camera.status;
     var storageStatus = await Permission.storage.status;
@@ -20,13 +19,11 @@ class ImagePickerService {
     }
 
     if (cameraStatus.isPermanentlyDenied || storageStatus.isPermanentlyDenied) {
-      // Handle permanently denied permissions by showing a dialog to open settings
       _showPermissionDialog(context);
       return false;
     }
 
     if (cameraStatus.isRestricted || storageStatus.isRestricted) {
-      // Handle restricted permissions
       CommonMethods.showToast(
           context, 'Permission is restricted. You cannot access this feature.');
       return false;
@@ -68,22 +65,19 @@ class ImagePickerService {
     );
   }
 
-  // Pick image from the specified source (camera or gallery)
-  Future<String?> _pickImage(BuildContext context, ImageSource source) async {
+  Future<XFile?> _pickImage(BuildContext context, ImageSource source) async {
     final isPermissionGranted = await _requestPermission(context);
 
     if (!isPermissionGranted) {
       return null;
     }
 
-    // Pick the image from the specified source
     final pickedFile = await _picker.pickImage(source: source);
-    return pickedFile?.path; // Return the file path if the image is picked
+    return pickedFile;
   }
 
-  // Display a bottom sheet to choose between camera and gallery and return the selected image path
-  Future<String?> imageBottomSheet(BuildContext context) async {
-    return await showModalBottomSheet<String>(
+  Future<XFile?> imageBottomSheet(BuildContext context) async {
+    return await showModalBottomSheet<XFile?>(
       context: context,
       builder: (context) {
         return Container(
@@ -97,9 +91,8 @@ class ImagePickerService {
                 Icons.camera,
                 'Pick Image from Camera',
                 () async {
-                  final imagePath =
-                      await _pickImage(context, ImageSource.camera);
-                  Navigator.pop(context, imagePath);
+                  final image = await _pickImage(context, ImageSource.camera);
+                  Navigator.pop(context, image);
                 },
               ),
               SizedBox(
@@ -110,9 +103,8 @@ class ImagePickerService {
                 Icons.photo_library,
                 'Pick Image from Gallery',
                 () async {
-                  final imagePath =
-                      await _pickImage(context, ImageSource.gallery);
-                  Navigator.pop(context, imagePath);
+                  final image = await _pickImage(context, ImageSource.gallery);
+                  Navigator.pop(context, image);
                 },
               ),
             ],

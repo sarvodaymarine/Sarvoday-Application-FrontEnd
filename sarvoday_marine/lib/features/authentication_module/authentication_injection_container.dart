@@ -1,5 +1,5 @@
-import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
+import 'package:sarvoday_marine/core/api_handler/api_handler_helper.dart';
 import 'package:sarvoday_marine/features/authentication_module/data/data_sources/sign_in_data_source.dart';
 import 'package:sarvoday_marine/features/authentication_module/data/data_sources/sign_in_data_source_impl.dart';
 import 'package:sarvoday_marine/features/authentication_module/data/repositories/sign_in_repository_impl.dart';
@@ -26,7 +26,7 @@ Future<void> init() async {
   authenticationSl.registerFactory<SignInDataSource>(
       () => SignInDataSourceImpl(authenticationSl(), authenticationSl()));
 
-  authenticationSl.registerFactory(() => Dio());
+  authenticationSl.registerFactory(() => DioClient.getInstance());
   final sharedPreferences = await SharedPreferences.getInstance();
   authenticationSl.registerLazySingleton(() => sharedPreferences);
 }

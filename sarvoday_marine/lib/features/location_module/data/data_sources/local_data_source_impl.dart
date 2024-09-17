@@ -1,19 +1,18 @@
 import 'package:dartz/dartz.dart';
-import 'package:dio/dio.dart';
-import 'package:sarvoday_marine/core/failure/common_failure.dart';
+import 'package:sarvoday_marine/core/api_handler/api_handler_helper.dart';
+import 'package:sarvoday_marine/core/utils/common/common_methods.dart';
 import 'package:sarvoday_marine/core/utils/constants/string_const.dart';
 import 'package:sarvoday_marine/features/location_module/data/data_sources/local_data_source.dart';
 import 'package:sarvoday_marine/features/location_module/data/models/location_model.dart';
 import 'package:sarvoday_marine/features/location_module/domain/use_cases/add_location_use_case.dart';
 
 class LocationDataSourceImpl implements LocationDataSource {
-  final Dio dio;
+  final DioClient dio;
 
   LocationDataSourceImpl(this.dio);
 
   @override
-  Future<Either<bool, CommonFailure>> addLocation(
-      LocationParam locationParam) async {
+  Future<Either<bool, String>> addLocation(LocationParam locationParam) async {
     try {
       Map<String, dynamic> data = {
         'locationName': locationParam.locationName,
@@ -26,30 +25,30 @@ class LocationDataSourceImpl implements LocationDataSource {
       if (response.statusCode == 200) {
         return left(true);
       } else {
-        return right(ErrorFailure(response.statusMessage.toString()));
+        return right(CommonMethods.commonErrorHandler(response));
       }
     } catch (error) {
-      return right(ErrorFailure(error.toString()));
+      return right(CommonMethods.commonErrorHandler(error));
     }
   }
 
   @override
-  Future<Either<bool, CommonFailure>> deleteLocation(String locationId) async {
+  Future<Either<bool, String>> deleteLocation(String locationId) async {
     try {
       final response = await dio.delete(
           '${StringConst.backEndBaseURL}locations/deleteLocation/$locationId');
       if (response.statusCode == 200) {
         return left(true);
       } else {
-        return right(ErrorFailure(response.statusMessage.toString()));
+        return right(response.statusMessage.toString());
       }
     } catch (error) {
-      return right(ErrorFailure(error.toString()));
+      return right(CommonMethods.commonErrorHandler(error));
     }
   }
 
   @override
-  Future<Either<List<LocationModel>, CommonFailure>> getAllLocations() async {
+  Future<Either<List<LocationModel>, String>> getAllLocations() async {
     try {
       final response = await dio
           .get('${StringConst.backEndBaseURL}locations/getAllLocations');
@@ -61,15 +60,15 @@ class LocationDataSourceImpl implements LocationDataSource {
         }
         return left(locationList);
       } else {
-        return right(ErrorFailure("Not found"));
+        return right("Not found");
       }
     } catch (error) {
-      return right(ErrorFailure(error.toString()));
+      return right(CommonMethods.commonErrorHandler(error));
     }
   }
 
   @override
-  Future<Either<LocationModel, CommonFailure>> updateLocation(
+  Future<Either<LocationModel, String>> updateLocation(
       String locationId, LocationParam locationParam) async {
     try {
       Map<String, dynamic> data = {};
@@ -96,13 +95,13 @@ class LocationDataSourceImpl implements LocationDataSource {
           final LocationModel location = LocationModel.fromJson(response.data);
           return left(location);
         } else {
-          return right(ErrorFailure(response.statusMessage.toString()));
+          return right(response.statusMessage.toString());
         }
       } else {
-        return right(ErrorFailure('There is no changes Detected'));
+        return right('There is no changes Detected');
       }
     } catch (error) {
-      return right(ErrorFailure(error.toString()));
+      return right(CommonMethods.commonErrorHandler(error));
     }
   }
 }

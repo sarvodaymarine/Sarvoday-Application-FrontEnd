@@ -7,8 +7,7 @@ class EnableDisableEmployeeUseCase {
 
   EnableDisableEmployeeUseCase(this.employeeRepository);
 
-  Future<Either<bool, CommonFailure>> call(
-      String employeeId, bool isActive) async {
+  Future<Either<bool, String>> call(String employeeId, bool isActive) async {
     return await employeeRepository.disableEnableEmployee(employeeId, isActive);
   }
 }

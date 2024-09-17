@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:sarvoday_marine/core/theme/sm_text_theme.dart';
 import 'package:sarvoday_marine/core/utils/common/common_methods.dart';
+import 'package:sarvoday_marine/core/utils/constants/image_path_const.dart';
 import 'package:sarvoday_marine/core/utils/widgets/image_picker_service.dart';
 
 class ImageGridWidget extends StatefulWidget {
   final List<Map<String, dynamic>> imageList;
+  final String userRole;
 
-  const ImageGridWidget({super.key, required this.imageList});
+  const ImageGridWidget(
+      {super.key, required this.imageList, required this.userRole});
 
   @override
   ImageGridWidgetState createState() => ImageGridWidgetState();
@@ -25,7 +29,8 @@ class ImageGridWidgetState extends State<ImageGridWidget> {
       itemCount: imageList.length,
       itemBuilder: (context, index) {
         final imageUrl = imageList[index]['imageUrl'] ?? '';
-        final imagePath = imageList[index]['imagePath'] ?? '';
+        final error = imageList[index]['error'] ?? '';
+        final imageFile = imageList[index]['imageFile'];
 
         return SizedBox(
           child: Column(
@@ -33,31 +38,30 @@ class ImageGridWidgetState extends State<ImageGridWidget> {
             children: [
               GestureDetector(
                 onTap: () async {
-                  String imageFilePath =
-                      await ImagePickerService().imageBottomSheet(context) ??
-                          "";
-                  if (imageFilePath.isNotEmpty) {
-                    setState(() {
-                      widget.imageList[index]['imagePath'] = imageFilePath;
-                    });
+                  if (widget.userRole != "client") {
+                    XFile? imageFile =
+                        await ImagePickerService().imageBottomSheet(context);
+                    if (imageFile != null) {
+                      setState(() {
+                        widget.imageList[index]['imageFile'] = imageFile;
+                      });
+                    }
                   }
                 },
                 child: Container(
-                  width: double.infinity,
-                  height: SmTextTheme.getResponsiveSize(context, 100),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(8.0),
-                    border: Border.all(color: Colors.grey),
-                  ),
-                  child: imageUrl.isNotEmpty
-                      ? CommonMethods.getNetworkImage(imageUrl)
-                      : (imagePath.isNotEmpty
-                          ? CommonMethods.getImageFromLocalPath(imagePath)
-                          : Icon(Icons.image,
-                              size: SmTextTheme.getResponsiveSize(
-                                  context, 70))), // Default if no image
-                ),
+                    width: double.infinity,
+                    height: SmTextTheme.getResponsiveSize(
+                        context, error != null && error != "" ? 120 : 100),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(8.0),
+                      border: Border.all(color: Colors.grey),
+                    ),
+                    child: (imageFile != null
+                        ? CommonMethods.getImageFromLocalPath(imageFile.path)
+                        : imageUrl.isNotEmpty
+                            ? CommonMethods.getNetworkImage(imageUrl)
+                            : Image.asset(ImagePathConst.imageHolder))),
               ),
               SizedBox(
                 height: SmTextTheme.getResponsiveSize(context, 6),

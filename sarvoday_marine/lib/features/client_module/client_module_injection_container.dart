@@ -20,7 +20,8 @@ Future<void> init() async {
   clientSl.registerLazySingleton(() => AddClientUseCase(clientSl()));
   clientSl.registerLazySingleton(() => DeleteClientUseCase(clientSl()));
   clientSl.registerLazySingleton(() => UpdateClientUseCase(clientSl()));
-  clientSl.registerLazySingleton(() => DisableEnabledClientAuthUseCase(clientSl()));
+  clientSl
+      .registerLazySingleton(() => DisableEnabledClientAuthUseCase(clientSl()));
   clientSl.registerLazySingleton<ClientRepository>(
       () => ClientRepositoryImpl(clientSl()));
 

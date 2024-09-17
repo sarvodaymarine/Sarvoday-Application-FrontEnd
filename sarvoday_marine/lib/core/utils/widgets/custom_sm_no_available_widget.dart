@@ -4,8 +4,7 @@ import 'package:sarvoday_marine/core/theme/sm_text_theme.dart';
 class NoItemsAvailable extends StatelessWidget {
   final String message;
 
-  const NoItemsAvailable({Key? key, this.message = "No items available"})
-      : super(key: key);
+  const NoItemsAvailable({super.key, this.message = "No items available"});
 
   @override
   Widget build(BuildContext context) {

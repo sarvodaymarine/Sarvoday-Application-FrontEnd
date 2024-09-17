@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sarvoday_marine/core/api_handler/token_manager.dart';
+import 'package:sarvoday_marine/core/utils/widgets/image_upload_aws_s3_service.dart';
 import 'package:sarvoday_marine/features/report_module/data/models/container_model.dart';
 import 'package:sarvoday_marine/features/report_module/data/models/image_config_model.dart';
 import 'package:sarvoday_marine/features/report_module/data/models/service_report.dart';
@@ -18,7 +19,7 @@ class ReportCubit extends Cubit<ReportState> {
   final UpdateReportUseCases updateReportUseCases;
   final GetServiceReportUseCases getServiceReportUseCases;
   String user = '';
-  List<Map<String, dynamic>> images = [];
+  Map<String, dynamic> images = {};
 
   getReportDetail(String orderId) async {
     var res = await getReportUseCases.call(orderId);
@@ -34,7 +35,9 @@ class ReportCubit extends Cubit<ReportState> {
     user = await TokenManager.getUserRole() ?? "";
     var res = await getServiceReportUseCases.call(serviceId);
     res.fold((serviceReport) {
-      images = getImageList(serviceReport.containerReports?[0]);
+      serviceReport.containerReports?.forEach((element) {
+        images[element.containerId!] = getImageList(element);
+      });
       emit(StateOnSuccess2(serviceReport));
     }, (error) {
       emit(StateErrorGeneral(error.toString()));
@@ -53,12 +56,12 @@ class ReportCubit extends Cubit<ReportState> {
     });
   }
 
-  List<Map<String, dynamic>> getImageList(ContainerModel? containerDetails) {
+  getImageList(ContainerModel? containerDetails) {
     final List<Map<String, dynamic>> imageList = [];
 
-    final images = containerDetails?.containerImages;
-    if (images != null) {
-      for (ContainerImageModel imageConfig in images) {
+    final containerImages = containerDetails?.containerImages;
+    if (containerImages != null) {
+      for (ContainerImageModel imageConfig in containerImages) {
         String imageUrl = (imageConfig.imageUrlLink != null &&
                 imageConfig.imageUrlLink!.isNotEmpty)
             ? imageConfig.imageUrlLink!
@@ -67,10 +70,30 @@ class ReportCubit extends Cubit<ReportState> {
         imageList.add({
           'imageName': imageConfig.imageName ?? 'Unknown',
           'imageUrl': imageUrl,
-          'imagePath': ""
+          'imagePath': imageConfig.imagePath ?? "",
+          'imageFile': null,
+          "error": "",
+          'imageId': imageConfig.imageId ?? "",
         });
       }
     }
     return imageList;
+  }
+
+  uploadImageService(String reportId, String serviceId, String containerId,
+      List<Map<String, dynamic>> imageList) async {
+    emit(StateNoData());
+    var response = await S3Service2()
+        .uploadMultipleImages(reportId, serviceId, containerId, imageList);
+    response.fold((l) {
+      if (l == "success") {
+        emit(StateImageUploaded('Images uploaded successfully'));
+      } else {
+        emit(StateErrorGeneral(l));
+      }
+    }, (r) {
+      imageList = r;
+      emit(StateImageUploaded(''));
+    });
   }
 }

@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:sarvoday_marine/core/utils/common/common_methods.dart';
 import 'package:sarvoday_marine/features/employee_module/domain/use_cases/add_employee_use_case.dart';
 import 'package:sarvoday_marine/features/employee_module/domain/use_cases/delete_employee_use_case.dart';
 import 'package:sarvoday_marine/features/employee_module/domain/use_cases/enable_disable_use_case.dart';
@@ -32,7 +31,7 @@ class EmployeeCubit extends Cubit<EmployeeState> {
     res.fold((employee) {
       emit(EmpStateOnSuccess(employee));
     }, (error) {
-      emit(EmpStateErrorGeneral(CommonMethods.commonValidation(error)));
+      emit(EmpStateErrorGeneral(error.toString()));
     });
   }
 
@@ -45,7 +44,7 @@ class EmployeeCubit extends Cubit<EmployeeState> {
       emit(EmpStateOnCrudSuccess("Employee Added SuccessFully"));
       getAllEmployee(needFetchData: true);
     }, (error) {
-      emit(EmpStateErrorGeneral(CommonMethods.commonValidation(error)));
+      emit(EmpStateErrorGeneral(error.toString()));
     });
   }
 
@@ -56,7 +55,7 @@ class EmployeeCubit extends Cubit<EmployeeState> {
       emit(EmpStateOnCrudSuccess("Employee deleted SuccessFully!"));
       getAllEmployee(needFetchData: true);
     }, (error) {
-      emit(EmpStateErrorGeneral(CommonMethods.commonValidation(error)));
+      emit(EmpStateErrorGeneral(error.toString()));
     });
   }
 
@@ -67,7 +66,7 @@ class EmployeeCubit extends Cubit<EmployeeState> {
       emit(EmpStateOnCrudSuccess("Employee disabled!"));
       getAllEmployee(needFetchData: true);
     }, (error) {
-      emit(EmpStateErrorGeneral(CommonMethods.commonValidation(error)));
+      emit(EmpStateErrorGeneral(error.toString()));
     });
   }
 
@@ -92,7 +91,7 @@ class EmployeeCubit extends Cubit<EmployeeState> {
           emit(EmpStateOnCrudSuccess('Employee updated Successfully!'));
           getAllEmployee(needFetchData: true);
         }, (error) {
-          emit(EmpStateErrorGeneral(CommonMethods.commonValidation(error)));
+          emit(EmpStateErrorGeneral(error.toString()));
         });
       }
     } else {

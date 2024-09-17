@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:reactive_forms/reactive_forms.dart';
+import 'package:sarvoday_marine/core/api_handler/dio_error_handler.dart';
 import 'package:sarvoday_marine/core/failure/common_failure.dart';
 import 'package:sarvoday_marine/core/theme/sm_color_theme.dart';
 import 'package:sarvoday_marine/core/theme/sm_text_theme.dart';
@@ -146,21 +147,9 @@ class CommonMethods {
     );
   }
 
-  static commonValidation(dynamic error) {
-    if (error is InternetFailure) {
-      return error.failureMsg;
-    } else if (error is ServerFailure || error is SocketException) {
-      return "Server Failure! Please try again in sometime";
-    } else if (error is DioException) {
-      return (error.response?.data['message'] ??
-              error.response?.statusMessage ??
-              error.error ??
-              '')
-          .toString();
-    } else if (error is ErrorFailure) {
-      return error.errorMsg;
-    } else if (error is AuthFailure) {
-      return error.authFailureMsg;
+  static String commonErrorHandler(dynamic error) {
+    if (error is DioException) {
+      return DioErrorHandler.handleDioError(error);
     } else {
       return error.toString();
     }

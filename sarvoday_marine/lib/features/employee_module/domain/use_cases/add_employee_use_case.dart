@@ -7,7 +7,7 @@ class AddEmployeeUseCase {
 
   AddEmployeeUseCase(this.employeeRepository);
 
-  Future<Either<bool, CommonFailure>> call(EmployeeParam employeeParam) async {
+  Future<Either<bool, String>> call(EmployeeParam employeeParam) async {
     return await employeeRepository.addEmployee(employeeParam);
   }
 }

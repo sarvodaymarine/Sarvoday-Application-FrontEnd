@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:sarvoday_marine/core/utils/common/common_methods.dart';
 import 'package:sarvoday_marine/features/client_module/domain/use_cases/add_client_use_case.dart';
 import 'package:sarvoday_marine/features/client_module/domain/use_cases/delete_client_use_case.dart';
 import 'package:sarvoday_marine/features/client_module/domain/use_cases/disable_client_auth_use_case.dart';
@@ -33,7 +32,7 @@ class ClientCubit extends Cubit<ClientState> {
     res.fold((client) {
       emit(CStateOnSuccess(client));
     }, (error) {
-      emit(CStateErrorGeneral(CommonMethods.commonValidation(error)));
+      emit(CStateErrorGeneral(error.toString()));
     });
   }
 
@@ -57,7 +56,7 @@ class ClientCubit extends Cubit<ClientState> {
       emit(CStateOnCrudSuccess("Client Added SuccessFully"));
       getAllClient(needFetchData: true);
     }, (error) {
-      emit(CStateErrorGeneral(CommonMethods.commonValidation(error)));
+      emit(CStateErrorGeneral(error.toString()));
     });
   }
 
@@ -68,7 +67,7 @@ class ClientCubit extends Cubit<ClientState> {
       emit(CStateOnCrudSuccess("Client deleted SuccessFully!"));
       getAllClient(needFetchData: true);
     }, (error) {
-      emit(CStateErrorGeneral(CommonMethods.commonValidation(error)));
+      emit(CStateErrorGeneral(error.toString()));
     });
   }
 
@@ -79,7 +78,7 @@ class ClientCubit extends Cubit<ClientState> {
       emit(CStateOnCrudSuccess("Client disabled!"));
       getAllClient(needFetchData: true);
     }, (error) {
-      emit(CStateErrorGeneral(CommonMethods.commonValidation(error)));
+      emit(CStateErrorGeneral(error.toString()));
     });
   }
 
@@ -111,7 +110,7 @@ class ClientCubit extends Cubit<ClientState> {
           emit(CStateOnCrudSuccess('Client updated Successfully!'));
           getAllClient(needFetchData: true);
         }, (error) {
-          emit(CStateErrorGeneral(CommonMethods.commonValidation(error)));
+          emit(CStateErrorGeneral(error.toString()));
         });
       }
     } else {

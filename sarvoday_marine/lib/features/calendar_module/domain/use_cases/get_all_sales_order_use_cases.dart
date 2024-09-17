@@ -8,7 +8,9 @@ class GetAllSalesOrderUseCases {
 
   GetAllSalesOrderUseCases(this.calendarRepository);
 
-  Future<Either<List<SalesOrderModel>, CommonFailure>> call() async {
-    return await calendarRepository.getAllSalesOrder();
+  Future<Either<List<SalesOrderModel>, String>> call(
+      DateTime startDateOfWeek, DateTime lastDateOfWeek) async {
+    return await calendarRepository.getAllSalesOrder(
+        startDateOfWeek, lastDateOfWeek);
   }
 }

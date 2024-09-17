@@ -8,7 +8,7 @@ class GetReportUseCases {
 
   GetReportUseCases(this.reportRepository);
 
-  Future<Either<ReportModel, CommonFailure>> call(String id) async {
+  Future<Either<ReportModel, String>> call(String id) async {
     return await reportRepository.getReport(id);
   }
 }

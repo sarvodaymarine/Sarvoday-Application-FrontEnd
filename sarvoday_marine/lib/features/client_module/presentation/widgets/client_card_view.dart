@@ -106,8 +106,7 @@ class ClientCardView extends StatelessWidget {
                                 fontSize:
                                     SmTextTheme.getResponsiveSize(context, 14)),
                       )),
-                  SizedBox(
-                      height: SmTextTheme.getResponsiveSize(context, 4.0)),
+                  SizedBox(height: SmTextTheme.getResponsiveSize(context, 4.0)),
                   RichText(
                       overflow: TextOverflow.ellipsis,
                       text: TextSpan(

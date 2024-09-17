@@ -7,7 +7,7 @@ class DeleteEmployeeUseCase {
 
   DeleteEmployeeUseCase(this.employeeRepository);
 
-  Future<Either<bool, CommonFailure>> call(String employeeId) async {
+  Future<Either<bool, String>> call(String employeeId) async {
     return await employeeRepository.deleteEmployee(employeeId);
   }
 }

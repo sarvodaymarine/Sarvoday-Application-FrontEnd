@@ -16,7 +16,7 @@ class SalesOrderState extends Equatable {
   final List<ClientModel>? clients;
   final List<LocationModel>? locations;
 
-  SalesOrderState({
+  const SalesOrderState({
     this.clientSelected = false,
     this.locationSelected = false,
     this.employeesLoading = false,

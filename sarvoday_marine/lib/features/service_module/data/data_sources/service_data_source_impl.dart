@@ -1,18 +1,18 @@
 import 'package:dartz/dartz.dart';
-import 'package:dio/dio.dart';
-import 'package:sarvoday_marine/core/failure/common_failure.dart';
+import 'package:sarvoday_marine/core/api_handler/api_handler_helper.dart';
+import 'package:sarvoday_marine/core/utils/common/common_methods.dart';
 import 'package:sarvoday_marine/core/utils/constants/string_const.dart';
 import 'package:sarvoday_marine/features/service_module/data/data_sources/service_data_source.dart';
 import 'package:sarvoday_marine/features/service_module/data/models/service_model.dart';
 import 'package:sarvoday_marine/features/service_module/domain/use_cases/add_service_use_case.dart';
 
 class ServiceDataSourceImpl implements ServiceDataSource {
-  final Dio dio;
+  final DioClient dio;
 
   ServiceDataSourceImpl(this.dio);
 
   @override
-  Future<Either<bool, CommonFailure>> addService(
+  Future<Either<bool, String>> addService(
       AddServiceParam addServiceParam) async {
     try {
       Map<String, dynamic> data = {
@@ -28,30 +28,30 @@ class ServiceDataSourceImpl implements ServiceDataSource {
       if (response.statusCode == 200) {
         return left(true);
       } else {
-        return right(ErrorFailure(response.statusMessage.toString()));
+        return right(CommonMethods.commonErrorHandler(response));
       }
     } catch (error) {
-      return right(ErrorFailure(error.toString()));
+      return right(CommonMethods.commonErrorHandler(error));
     }
   }
 
   @override
-  Future<Either<bool, CommonFailure>> deleteService(String serviceId) async {
+  Future<Either<bool, String>> deleteService(String serviceId) async {
     try {
       final response = await dio.delete(
           '${StringConst.backEndBaseURL}services/deleteService/$serviceId');
       if (response.statusCode == 200) {
         return left(true);
       } else {
-        return right(ErrorFailure(response.statusMessage.toString()));
+        return right(response.statusMessage.toString());
       }
     } catch (error) {
-      return right(ErrorFailure(error.toString()));
+      return right(CommonMethods.commonErrorHandler(error));
     }
   }
 
   @override
-  Future<Either<List<ServiceModel>, CommonFailure>> getAllServices() async {
+  Future<Either<List<ServiceModel>, String>> getAllServices() async {
     try {
       final response =
           await dio.get('${StringConst.backEndBaseURL}services/getAllService');
@@ -63,27 +63,15 @@ class ServiceDataSourceImpl implements ServiceDataSource {
         }
         return left(services);
       } else {
-        return right(ErrorFailure("Not found"));
+        return right("Not found");
       }
     } catch (error) {
-      return right(ErrorFailure(error.toString()));
+      return right(CommonMethods.commonErrorHandler(error));
     }
   }
 
   @override
-  Future<Either<ServiceModel, CommonFailure>> getServiceById() {
-    // TODO: implement getServiceById
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<Either<ServiceModel, CommonFailure>> getServiceByServiceName() {
-    // TODO: implement getServiceByServiceName
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<Either<ServiceModel, CommonFailure>> updateService(
+  Future<Either<ServiceModel, String>> updateService(
       String serviceId, AddServiceParam addServiceParam) async {
     try {
       Map<String, dynamic> data = {};
@@ -108,9 +96,7 @@ class ServiceDataSourceImpl implements ServiceDataSource {
           addServiceParam.container4Price!.toString().isNotEmpty) {
         data['container4Price'] = addServiceParam.container4Price;
       }
-      if (addServiceParam.images != null) {
-        data["serviceImage"] = addServiceParam.images;
-      }
+      data["serviceImage"] = addServiceParam.images;
       if (data.isNotEmpty) {
         final response = await dio.put(
             '${StringConst.backEndBaseURL}services/updateService/$serviceId',
@@ -119,13 +105,13 @@ class ServiceDataSourceImpl implements ServiceDataSource {
           final ServiceModel services = ServiceModel.fromJson(response.data);
           return left(services);
         } else {
-          return right(ErrorFailure(response.statusMessage.toString()));
+          return right(CommonMethods.commonErrorHandler(response));
         }
       } else {
-        return right(ErrorFailure('There is no changes Detected'));
+        return right('There is no changes Detected');
       }
     } catch (error) {
-      return right(ErrorFailure(error.toString()));
+      return right(CommonMethods.commonErrorHandler(error));
     }
   }
 }

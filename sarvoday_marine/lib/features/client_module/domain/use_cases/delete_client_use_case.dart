@@ -7,7 +7,7 @@ class DeleteClientUseCase {
 
   DeleteClientUseCase(this.clientRepository);
 
-  Future<Either<bool, CommonFailure>> call(String clientId) async {
+  Future<Either<bool, String>> call(String clientId) async {
     return await clientRepository.deleteClient(clientId);
   }
 }

@@ -7,7 +7,7 @@ class DeleteLocationUseCase {
 
   DeleteLocationUseCase(this.locationRepository);
 
-  Future<Either<bool, CommonFailure>> call(String locationId) async {
+  Future<Either<bool, String>> call(String locationId) async {
     return await locationRepository.deleteLocation(locationId);
   }
 }

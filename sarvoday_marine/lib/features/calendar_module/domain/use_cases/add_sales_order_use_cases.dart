@@ -8,8 +8,7 @@ class AddSalesOrderUseCase {
 
   AddSalesOrderUseCase(this.calendarRepository);
 
-  Future<Either<bool, CommonFailure>> call(
-      SalesOrderParam salesOrderParam) async {
+  Future<Either<bool, String>> call(SalesOrderParam salesOrderParam) async {
     return await calendarRepository.addSalesOrder(salesOrderParam);
   }
 }

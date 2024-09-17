@@ -9,8 +9,8 @@ class UpdateReportUseCases {
 
   UpdateReportUseCases(this.reportRepository);
 
-  Future<Either<CommonFailure, ReportModel>> call(String reportId,
-      String serviceId, ServiceContainerModel serviceReport) async {
+  Future<Either<String, ReportModel>> call(String reportId, String serviceId,
+      ServiceContainerModel serviceReport) async {
     return await reportRepository.updateReport(
         reportId, serviceId, serviceReport);
   }

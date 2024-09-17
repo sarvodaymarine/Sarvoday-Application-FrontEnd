@@ -1,7 +1,5 @@
 import 'package:dartz/dartz.dart';
-import 'package:sarvoday_marine/core/failure/common_failure.dart';
 import 'package:sarvoday_marine/features/report_module/data/models/image_config_model.dart';
-import 'package:sarvoday_marine/features/service_module/data/models/service_model.dart';
 import 'package:sarvoday_marine/features/service_module/domain/repositories/service_repository.dart';
 
 class AddServiceUseCase {
@@ -9,8 +7,7 @@ class AddServiceUseCase {
 
   AddServiceUseCase(this.serviceRepository);
 
-  Future<Either<bool, CommonFailure>> call(
-      AddServiceParam addServiceParam) async {
+  Future<Either<bool, String>> call(AddServiceParam addServiceParam) async {
     return await serviceRepository.addService(addServiceParam);
   }
 }

@@ -9,7 +9,7 @@ class UpdateClientUseCase {
 
   UpdateClientUseCase(this.clientRepository);
 
-  Future<Either<ClientModel, CommonFailure>> call(
+  Future<Either<ClientModel, String>> call(
       String clientId, ClientParam clientParam) async {
     return await clientRepository.updateClient(clientId, clientParam);
   }

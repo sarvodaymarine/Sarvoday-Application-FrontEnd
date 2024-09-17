@@ -34,7 +34,6 @@ class ClientListPage extends StatelessWidget implements AutoRouteWrapper {
                   .then((_) async {
                 await context.read<ClientCubit>().getAllClient();
               });
-              ;
             }).addActionButton(),
         floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
         appBar: CommonAppBar(context: context, title: StringConst.smClientTitle)
@@ -83,11 +82,12 @@ class ClientListPage extends StatelessWidget implements AutoRouteWrapper {
                                       isFromEdit: true,
                                       clientModel: clientList[item]))
                                   .then((_) async {
-                                await context
-                                    .read<ClientCubit>()
-                                    .getAllClient();
+                                if (context.mounted) {
+                                  await context
+                                      .read<ClientCubit>()
+                                      .getAllClient();
+                                }
                               });
-                              ;
                             },
                             child: ClientCardView(
                               name:
@@ -98,7 +98,7 @@ class ClientListPage extends StatelessWidget implements AutoRouteWrapper {
                               email: clientList[item].userDetail?.email ?? "",
                               onDisableClick: (context) async {
                                 await context.read<ClientCubit>().disableClient(
-                                    clientList[item].id!,
+                                    clientList[item].userId!,
                                     !clientList[item].userDetail!.isActive!);
                               },
                               onDeleteClick: (context) async {

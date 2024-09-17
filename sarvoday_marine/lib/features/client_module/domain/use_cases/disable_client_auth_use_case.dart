@@ -7,8 +7,7 @@ class DisableEnabledClientAuthUseCase {
 
   DisableEnabledClientAuthUseCase(this.clientRepository);
 
-  Future<Either<bool, CommonFailure>> call(
-      String clientId, bool isActive) async {
+  Future<Either<bool, String>> call(String clientId, bool isActive) async {
     return await clientRepository.disableEnableClient(clientId, isActive);
   }
 }

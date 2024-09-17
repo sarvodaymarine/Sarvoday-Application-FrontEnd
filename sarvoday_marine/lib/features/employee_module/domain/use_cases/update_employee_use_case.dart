@@ -9,7 +9,7 @@ class UpdateEmployeeUseCase {
 
   UpdateEmployeeUseCase(this.employeeRepository);
 
-  Future<Either<EmployeeModel, CommonFailure>> call(
+  Future<Either<EmployeeModel, String>> call(
       String employeeId, EmployeeParam employeeParam) async {
     return await employeeRepository.updateEmployee(employeeId, employeeParam);
   }

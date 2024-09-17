@@ -9,7 +9,7 @@ class UpdateSalesOrderUseCase {
 
   UpdateSalesOrderUseCase(this.calendarRepository);
 
-  Future<Either<SalesOrderModel, CommonFailure>> call(
+  Future<Either<SalesOrderModel, String>> call(
       String id, SalesOrderParam soParam) async {
     return await calendarRepository.updateSalesOrder(id, soParam);
   }

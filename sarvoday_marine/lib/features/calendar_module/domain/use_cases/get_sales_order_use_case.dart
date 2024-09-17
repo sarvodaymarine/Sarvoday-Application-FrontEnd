@@ -8,7 +8,7 @@ class GetSalesOrderUseCases {
 
   GetSalesOrderUseCases(this.calendarRepository);
 
-  Future<Either<SalesOrderModel, CommonFailure>> call(String id) async {
+  Future<Either<SalesOrderModel, String>> call(String id) async {
     return await calendarRepository.getSalesOrder(id);
   }
 }

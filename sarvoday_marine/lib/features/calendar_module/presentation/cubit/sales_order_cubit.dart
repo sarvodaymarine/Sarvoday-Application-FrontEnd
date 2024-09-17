@@ -10,7 +10,7 @@ class SalesOrderCubit extends Cubit<SalesOrderState> {
   final LocationCubit _locationCubit;
 
   SalesOrderCubit(this._employeeCubit, this._clientCubit, this._locationCubit)
-      : super(SalesOrderState()) {
+      : super(const SalesOrderState()) {
     _employeeCubit.stream.listen((employeeState) {
       if (employeeState is EmpStateLoading) {
         emit(state.copyWith(employeesLoading: true));

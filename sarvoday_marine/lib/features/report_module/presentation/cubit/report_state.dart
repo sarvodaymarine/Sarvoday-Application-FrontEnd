@@ -12,6 +12,12 @@ class StateLoading extends ReportState implements Equatable {
   bool? get stringify => null;
 }
 
+class StateImageUploaded<T> extends ReportState {
+  final T response;
+
+  StateImageUploaded(this.response);
+}
+
 class StateNoData extends ReportState {}
 
 class StateErrorGeneral extends ReportState {

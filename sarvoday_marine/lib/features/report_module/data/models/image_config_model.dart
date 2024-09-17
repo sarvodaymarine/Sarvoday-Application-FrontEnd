@@ -59,28 +59,32 @@ class ContainerImageModel {
   String? _imageName;
   String? _imageId;
   String? _imageUrlLink;
+  String? _imagePath;
 
   ContainerImageModel({
     String? imageName,
     String? imageId,
     String? imageUrlLink,
+    String? imagePath,
   }) {
     _imageName = imageName;
     _imageId = imageId;
     _imageUrlLink = imageUrlLink ?? "";
+    _imagePath = imagePath ?? "";
   }
 
   ContainerImageModel.fromJson(Map<String, dynamic> json) {
     _imageName = json['imageName'] ?? "";
     _imageId = json['imageId'];
     _imageUrlLink = json['imageUrlLink'] ?? "";
+    _imagePath = json['imagePath'] ?? "";
   }
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
     map['imageName'] = _imageName;
-    map['imageCount'] = _imageId;
-    map['imageUrlLink'] = _imageUrlLink;
+    map['imageId'] = _imageId;
+    map['imagePath'] = _imagePath;
     return map;
   }
 
@@ -88,11 +92,13 @@ class ContainerImageModel {
     String? imageName,
     String? imageId,
     String? imageUrlLink,
+    String? imagePath,
   }) {
     return ContainerImageModel(
       imageName: imageName ?? _imageName,
       imageId: imageId ?? _imageId,
       imageUrlLink: imageUrlLink ?? _imageUrlLink,
+      imagePath: imagePath ?? _imagePath,
     );
   }
 
@@ -101,4 +107,6 @@ class ContainerImageModel {
   String? get imageId => _imageId;
 
   String? get imageUrlLink => _imageUrlLink;
+
+  String? get imagePath => _imagePath;
 }

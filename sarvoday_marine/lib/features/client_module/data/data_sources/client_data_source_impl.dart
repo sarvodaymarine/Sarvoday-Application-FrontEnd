@@ -1,6 +1,5 @@
 import 'package:dartz/dartz.dart';
-import 'package:dio/dio.dart';
-import 'package:sarvoday_marine/core/failure/common_failure.dart';
+import 'package:sarvoday_marine/core/api_handler/api_handler_helper.dart';
 import 'package:sarvoday_marine/core/utils/common/common_methods.dart';
 import 'package:sarvoday_marine/core/utils/constants/string_const.dart';
 import 'package:sarvoday_marine/features/client_module/data/data_sources/client_data_source.dart';
@@ -8,12 +7,12 @@ import 'package:sarvoday_marine/features/client_module/data/models/client_model.
 import 'package:sarvoday_marine/features/client_module/domain/use_cases/add_client_use_case.dart';
 
 class ClientDataSourceImpl implements ClientDataSource {
-  final Dio dio;
+  final DioClient dio;
 
   ClientDataSourceImpl(this.dio);
 
   @override
-  Future<Either<bool, CommonFailure>> addClient(ClientParam clientParam) async {
+  Future<Either<bool, String>> addClient(ClientParam clientParam) async {
     try {
       Map<String, dynamic> data = {
         'firstName': clientParam.firstName,
@@ -29,30 +28,30 @@ class ClientDataSourceImpl implements ClientDataSource {
       if (response.statusCode == 200) {
         return left(true);
       } else {
-        return right(ErrorFailure(response.statusMessage.toString()));
+        return right(response.statusMessage.toString());
       }
     } catch (error) {
-      return right(ErrorFailure(error.toString()));
+      return right(error.toString());
     }
   }
 
   @override
-  Future<Either<bool, CommonFailure>> deleteClient(String clientId) async {
+  Future<Either<bool, String>> deleteClient(String clientId) async {
     try {
       final response = await dio.delete(
           '${StringConst.backEndBaseURL}clients/deleteClient/$clientId');
       if (response.statusCode == 200) {
         return left(true);
       } else {
-        return right(ErrorFailure(response.statusMessage.toString()));
+        return right(response.statusMessage.toString());
       }
     } catch (error) {
-      return right(ErrorFailure(error.toString()));
+      return right(error.toString());
     }
   }
 
   @override
-  Future<Either<List<ClientModel>, CommonFailure>> getAllClients() async {
+  Future<Either<List<ClientModel>, String>> getAllClients() async {
     try {
       final response = await dio
           .get('${StringConst.backEndBaseURL}clients/getAllClientDetails');
@@ -64,16 +63,15 @@ class ClientDataSourceImpl implements ClientDataSource {
         }
         return left(clients);
       } else {
-        return right(ErrorFailure("Not found"));
+        return right("Not found");
       }
     } catch (error) {
-      return right(
-          (ErrorFailure(CommonMethods.commonValidation(error.toString()))));
+      return right(CommonMethods.commonErrorHandler(error));
     }
   }
 
   @override
-  Future<Either<ClientModel, CommonFailure>> updateClient(
+  Future<Either<ClientModel, String>> updateClient(
       String clientId, ClientParam clientParam) async {
     try {
       Map<String, dynamic> data = {};
@@ -111,38 +109,37 @@ class ClientDataSourceImpl implements ClientDataSource {
           final ClientModel client = ClientModel.fromJson(response.data);
           return left(client);
         } else {
-          return right(ErrorFailure(CommonMethods.commonValidation(
-              response.statusMessage.toString())));
+          return right(
+              CommonMethods.commonErrorHandler(response.statusMessage));
         }
       } else {
-        return right(ErrorFailure('There is no changes Detected'));
+        return right('There is no changes Detected');
       }
     } catch (error) {
-      return right(
-          CommonMethods.commonValidation(ErrorFailure(error.toString())));
+      return right(CommonMethods.commonErrorHandler(error));
     }
   }
 
   @override
-  Future<Either<bool, CommonFailure>> disableEnableClient(
+  Future<Either<bool, String>> disableEnableClient(
       String clientId, bool isActive) async {
     try {
       Map<String, dynamic> data = {'isActive': isActive};
 
       if (data.isNotEmpty) {
         final response = await dio.put(
-            '${StringConst.backEndBaseURL}clients/updateClient/$clientId',
+            '${StringConst.backEndBaseURL}/users/enableDisable/$clientId',
             data: data);
         if (response.statusCode == 200) {
           return left(true);
         } else {
-          return right(ErrorFailure(response.statusMessage.toString()));
+          return right(response.statusMessage.toString());
         }
       } else {
-        return right(ErrorFailure('There is no changes Detected'));
+        return right('There is no changes Detected');
       }
     } catch (error) {
-      return right(ErrorFailure(error.toString()));
+      return right(error.toString());
     }
   }
 }

@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:sarvoday_marine/core/utils/common/common_methods.dart';
 import 'package:sarvoday_marine/features/report_module/data/models/image_config_model.dart';
 import 'package:sarvoday_marine/features/service_module/data/models/service_model.dart';
 import 'package:sarvoday_marine/features/service_module/domain/use_cases/add_service_use_case.dart';
@@ -31,7 +30,7 @@ class ServiceCubit extends Cubit<ServiceState> {
     res.fold((services) {
       emit(StateOnSuccess(services));
     }, (error) {
-      emit(StateErrorGeneral(CommonMethods.commonValidation(error)));
+      emit(StateErrorGeneral(error.toString()));
     });
   }
 
@@ -54,7 +53,7 @@ class ServiceCubit extends Cubit<ServiceState> {
       emit(StateOnCrudSuccess("Service Added SuccessFully"));
       getAllServices(needFetchData: true);
     }, (error) {
-      emit(StateErrorGeneral(CommonMethods.commonValidation(error)));
+      emit(StateErrorGeneral(error.toString()));
     });
   }
 
@@ -65,7 +64,7 @@ class ServiceCubit extends Cubit<ServiceState> {
       emit(StateOnCrudSuccess("Service deleted SuccessFully!"));
       getAllServices(needFetchData: true);
     }, (error) {
-      emit(StateErrorGeneral(CommonMethods.commonValidation(error)));
+      emit(StateErrorGeneral(error.toString()));
     });
   }
 
@@ -95,7 +94,7 @@ class ServiceCubit extends Cubit<ServiceState> {
           emit(StateOnCrudSuccess('Service updated Successfully!'));
           getAllServices(needFetchData: true);
         }, (error) {
-          emit(StateErrorGeneral(CommonMethods.commonValidation(error)));
+          emit(StateErrorGeneral(error.toString()));
         });
       }
     } else {

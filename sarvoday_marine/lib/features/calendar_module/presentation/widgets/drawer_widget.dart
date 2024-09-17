@@ -141,6 +141,7 @@ class _DrawerWidgetState extends State<DrawerWidget> {
         if (context.mounted) {
           context.router.replaceAll([SignInRoute()]);
           CommonMethods.showToast(context, 'Logout Successfully');
+          await TokenManager.clearToken();
         }
         break;
       default:

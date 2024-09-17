@@ -59,7 +59,7 @@ class SignInPage extends StatelessWidget implements AutoRouteWrapper {
             if (state.isFirstTime) {
               context.router.replaceAll([ChangePasswordRoute()]);
             } else {
-              context.router.replaceAll([CalendarRoute()]);
+              context.router.replaceAll([const CalendarRoute()]);
             }
           } else if (state is StateErrorGeneral) {
             hideLoadingDialog(context);

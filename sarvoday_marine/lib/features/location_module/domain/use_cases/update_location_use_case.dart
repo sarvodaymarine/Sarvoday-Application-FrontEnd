@@ -9,7 +9,7 @@ class UpdateLocationUseCase {
 
   UpdateLocationUseCase(this.locationRepository);
 
-  Future<Either<LocationModel, CommonFailure>> call(
+  Future<Either<LocationModel, String>> call(
       String locationId, LocationParam locationParam) async {
     return await locationRepository.updateLocation(locationId, locationParam);
   }

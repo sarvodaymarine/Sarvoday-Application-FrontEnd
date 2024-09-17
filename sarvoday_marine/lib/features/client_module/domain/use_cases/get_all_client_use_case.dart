@@ -8,7 +8,7 @@ class GetAllClientsUseCase {
 
   GetAllClientsUseCase(this.clientRepository);
 
-  Future<Either<List<ClientModel>, CommonFailure>> call() async {
+  Future<Either<List<ClientModel>, String>> call() async {
     return await clientRepository.getAllClients();
   }
 }
