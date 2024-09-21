@@ -45,8 +45,6 @@ dependencies:
 
   #  API calling
   dio: ^5.5.0+1
-  #  Secondary Thread Process
-  flutter_isolate: ^2.0.4
   equatable: ^2.0.5
   #  Functional Programming
   dartz: ^0.10.1
