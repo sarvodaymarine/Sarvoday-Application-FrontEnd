@@ -18,6 +18,7 @@ class CustomSmButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    SmTextTheme.init(context);
     return ElevatedButton(
       onPressed: onTap,
       style: ElevatedButton.styleFrom(

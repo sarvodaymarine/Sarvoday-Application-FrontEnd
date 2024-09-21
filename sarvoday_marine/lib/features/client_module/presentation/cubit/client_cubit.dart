@@ -75,7 +75,8 @@ class ClientCubit extends Cubit<ClientState> {
     emit(CStateNoData());
     var res = await disableClientAuthUseCase.call(clientId, isActive);
     res.fold((client) {
-      emit(CStateOnCrudSuccess("Client disabled!"));
+      emit(CStateOnCrudSuccess(
+          isActive ? "Client is authentication activated!" : "Client disabled!"));
       getAllClient(needFetchData: true);
     }, (error) {
       emit(CStateErrorGeneral(error.toString()));

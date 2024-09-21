@@ -58,18 +58,21 @@ class SoServiceParam {
     this.serviceName,
     this.priceType,
     this.price,
+    this.totalPrice,
   });
 
   String? serviceId;
   String? serviceName;
   String? priceType;
   double? price;
+  double? totalPrice;
 
   factory SoServiceParam.fromJson(Map<String, dynamic> json) {
     return SoServiceParam(
       serviceId: json['serviceId'],
       serviceName: json['serviceName'],
       priceType: json['priceType'],
+      totalPrice: (json['totalPrice'] as num?)?.toDouble(),
       price: (json['price'] as num?)?.toDouble(),
     );
   }
@@ -141,11 +144,13 @@ class TaxParam {
     this.taxName,
     this.description,
     this.cGST,
+    this.taxPrice,
     this.sGST,
   });
 
   String? taxName;
   String? description;
+  double? taxPrice;
   double? cGST;
   double? sGST;
 
@@ -154,6 +159,7 @@ class TaxParam {
       taxName: json['taxName'],
       description: json['description'],
       cGST: (json['cGST'] as num?)?.toDouble(),
+      taxPrice: (json['taxPrice'] as num?)?.toDouble(),
       sGST: (json['sGST'] as num?)?.toDouble(),
     );
   }

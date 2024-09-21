@@ -63,7 +63,9 @@ class EmployeeCubit extends Cubit<EmployeeState> {
     emit(EmpStateNoData());
     var res = await enableDisableEmployeeUseCase.call(employeeId, isActive);
     res.fold((employee) {
-      emit(EmpStateOnCrudSuccess("Employee disabled!"));
+      emit(EmpStateOnCrudSuccess(isActive
+          ? "Employee is authentication activated!"
+          : "Employee disabled!"));
       getAllEmployee(needFetchData: true);
     }, (error) {
       emit(EmpStateErrorGeneral(error.toString()));

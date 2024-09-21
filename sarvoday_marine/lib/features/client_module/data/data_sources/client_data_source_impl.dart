@@ -31,7 +31,7 @@ class ClientDataSourceImpl implements ClientDataSource {
         return right(response.statusMessage.toString());
       }
     } catch (error) {
-      return right(error.toString());
+      return right(CommonMethods.commonErrorHandler(error));
     }
   }
 
@@ -46,7 +46,7 @@ class ClientDataSourceImpl implements ClientDataSource {
         return right(response.statusMessage.toString());
       }
     } catch (error) {
-      return right(error.toString());
+      return right(CommonMethods.commonErrorHandler(error));
     }
   }
 
@@ -128,7 +128,7 @@ class ClientDataSourceImpl implements ClientDataSource {
 
       if (data.isNotEmpty) {
         final response = await dio.put(
-            '${StringConst.backEndBaseURL}/users/enableDisable/$clientId',
+            '${StringConst.backEndBaseURL}users/enableDisable/$clientId',
             data: data);
         if (response.statusCode == 200) {
           return left(true);
@@ -139,7 +139,7 @@ class ClientDataSourceImpl implements ClientDataSource {
         return right('There is no changes Detected');
       }
     } catch (error) {
-      return right(error.toString());
+      return right(CommonMethods.commonErrorHandler(error));
     }
   }
 }

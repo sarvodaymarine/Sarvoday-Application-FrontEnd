@@ -8,26 +8,26 @@
 // coverage:ignore-file
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:auto_route/auto_route.dart' as _i15;
-import 'package:flutter/material.dart' as _i16;
+import 'package:auto_route/auto_route.dart' as _i16;
+import 'package:flutter/material.dart' as _i17;
 import 'package:sarvoday_marine/features/authentication_module/presentation/pages/password_change_page.dart'
     as _i4;
 import 'package:sarvoday_marine/features/authentication_module/presentation/pages/sign_in_page.dart'
     as _i13;
 import 'package:sarvoday_marine/features/calendar_module/data/models/sales_order_model.dart'
-    as _i17;
+    as _i18;
 import 'package:sarvoday_marine/features/calendar_module/presentation/pages/add_update_sales_order_page.dart'
     as _i1;
 import 'package:sarvoday_marine/features/calendar_module/presentation/pages/calendar_page.dart'
     as _i3;
 import 'package:sarvoday_marine/features/client_module/data/models/client_model.dart'
-    as _i19;
+    as _i20;
 import 'package:sarvoday_marine/features/client_module/presentation/pages/client_add_update_page.dart'
     as _i5;
 import 'package:sarvoday_marine/features/client_module/presentation/pages/client_list_page.dart'
     as _i6;
 import 'package:sarvoday_marine/features/employee_module/data/models/employee_model.dart'
-    as _i20;
+    as _i21;
 import 'package:sarvoday_marine/features/employee_module/presentation/pages/employee_details_Add_update_page.dart'
     as _i7;
 import 'package:sarvoday_marine/features/employee_module/presentation/pages/employee_list_page.dart'
@@ -38,8 +38,10 @@ import 'package:sarvoday_marine/features/report_module/presentation/pages/report
     as _i10;
 import 'package:sarvoday_marine/features/report_module/presentation/pages/service_report_page.dart'
     as _i11;
+import 'package:sarvoday_marine/features/report_module/presentation/pages/summury_page.dart'
+    as _i15;
 import 'package:sarvoday_marine/features/service_module/data/models/service_model.dart'
-    as _i18;
+    as _i19;
 import 'package:sarvoday_marine/features/service_module/presentation/pages/add_update_service_page.dart'
     as _i2;
 import 'package:sarvoday_marine/features/service_module/presentation/pages/services_list_page.dart'
@@ -50,19 +52,21 @@ import 'package:sarvoday_marine/features/splash/presentation/pages/splash_screen
 /// generated route for
 /// [_i1.AddUpdateSalesOrderPage]
 class AddUpdateSalesOrderRoute
-    extends _i15.PageRouteInfo<AddUpdateSalesOrderRouteArgs> {
+    extends _i16.PageRouteInfo<AddUpdateSalesOrderRouteArgs> {
   AddUpdateSalesOrderRoute({
-    _i16.Key? key,
+    _i17.Key? key,
     required bool isFromEdit,
     required bool isDisabled,
-    _i17.SalesOrderModel? salesOrderModel,
-    List<_i15.PageRouteInfo>? children,
+    required bool isClientOrSuperAdmin,
+    _i18.SalesOrderModel? salesOrderModel,
+    List<_i16.PageRouteInfo>? children,
   }) : super(
           AddUpdateSalesOrderRoute.name,
           args: AddUpdateSalesOrderRouteArgs(
             key: key,
             isFromEdit: isFromEdit,
             isDisabled: isDisabled,
+            isClientOrSuperAdmin: isClientOrSuperAdmin,
             salesOrderModel: salesOrderModel,
           ),
           initialChildren: children,
@@ -70,15 +74,16 @@ class AddUpdateSalesOrderRoute
 
   static const String name = 'AddUpdateSalesOrderRoute';
 
-  static _i15.PageInfo page = _i15.PageInfo(
+  static _i16.PageInfo page = _i16.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<AddUpdateSalesOrderRouteArgs>();
-      return _i15.WrappedRoute(
+      return _i16.WrappedRoute(
           child: _i1.AddUpdateSalesOrderPage(
         key: args.key,
         isFromEdit: args.isFromEdit,
         isDisabled: args.isDisabled,
+        isClientOrSuperAdmin: args.isClientOrSuperAdmin,
         salesOrderModel: args.salesOrderModel,
       ));
     },
@@ -90,32 +95,35 @@ class AddUpdateSalesOrderRouteArgs {
     this.key,
     required this.isFromEdit,
     required this.isDisabled,
+    required this.isClientOrSuperAdmin,
     this.salesOrderModel,
   });
 
-  final _i16.Key? key;
+  final _i17.Key? key;
 
   final bool isFromEdit;
 
   final bool isDisabled;
 
-  final _i17.SalesOrderModel? salesOrderModel;
+  final bool isClientOrSuperAdmin;
+
+  final _i18.SalesOrderModel? salesOrderModel;
 
   @override
   String toString() {
-    return 'AddUpdateSalesOrderRouteArgs{key: $key, isFromEdit: $isFromEdit, isDisabled: $isDisabled, salesOrderModel: $salesOrderModel}';
+    return 'AddUpdateSalesOrderRouteArgs{key: $key, isFromEdit: $isFromEdit, isDisabled: $isDisabled, isClientOrSuperAdmin: $isClientOrSuperAdmin, salesOrderModel: $salesOrderModel}';
   }
 }
 
 /// generated route for
 /// [_i2.AddUpdateServicePage]
 class AddUpdateServiceRoute
-    extends _i15.PageRouteInfo<AddUpdateServiceRouteArgs> {
+    extends _i16.PageRouteInfo<AddUpdateServiceRouteArgs> {
   AddUpdateServiceRoute({
-    _i16.Key? key,
+    _i17.Key? key,
     bool isEdit = false,
-    _i18.ServiceModel? serviceModel,
-    List<_i15.PageRouteInfo>? children,
+    _i19.ServiceModel? serviceModel,
+    List<_i16.PageRouteInfo>? children,
   }) : super(
           AddUpdateServiceRoute.name,
           args: AddUpdateServiceRouteArgs(
@@ -128,12 +136,12 @@ class AddUpdateServiceRoute
 
   static const String name = 'AddUpdateServiceRoute';
 
-  static _i15.PageInfo page = _i15.PageInfo(
+  static _i16.PageInfo page = _i16.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<AddUpdateServiceRouteArgs>(
           orElse: () => const AddUpdateServiceRouteArgs());
-      return _i15.WrappedRoute(
+      return _i16.WrappedRoute(
           child: _i2.AddUpdateServicePage(
         key: args.key,
         isEdit: args.isEdit,
@@ -150,11 +158,11 @@ class AddUpdateServiceRouteArgs {
     this.serviceModel,
   });
 
-  final _i16.Key? key;
+  final _i17.Key? key;
 
   final bool isEdit;
 
-  final _i18.ServiceModel? serviceModel;
+  final _i19.ServiceModel? serviceModel;
 
   @override
   String toString() {
@@ -164,8 +172,8 @@ class AddUpdateServiceRouteArgs {
 
 /// generated route for
 /// [_i3.CalendarPage]
-class CalendarRoute extends _i15.PageRouteInfo<void> {
-  const CalendarRoute({List<_i15.PageRouteInfo>? children})
+class CalendarRoute extends _i16.PageRouteInfo<void> {
+  const CalendarRoute({List<_i16.PageRouteInfo>? children})
       : super(
           CalendarRoute.name,
           initialChildren: children,
@@ -173,20 +181,20 @@ class CalendarRoute extends _i15.PageRouteInfo<void> {
 
   static const String name = 'CalendarRoute';
 
-  static _i15.PageInfo page = _i15.PageInfo(
+  static _i16.PageInfo page = _i16.PageInfo(
     name,
     builder: (data) {
-      return _i15.WrappedRoute(child: const _i3.CalendarPage());
+      return _i16.WrappedRoute(child: const _i3.CalendarPage());
     },
   );
 }
 
 /// generated route for
 /// [_i4.ChangePasswordPage]
-class ChangePasswordRoute extends _i15.PageRouteInfo<ChangePasswordRouteArgs> {
+class ChangePasswordRoute extends _i16.PageRouteInfo<ChangePasswordRouteArgs> {
   ChangePasswordRoute({
-    _i16.Key? key,
-    List<_i15.PageRouteInfo>? children,
+    _i17.Key? key,
+    List<_i16.PageRouteInfo>? children,
   }) : super(
           ChangePasswordRoute.name,
           args: ChangePasswordRouteArgs(key: key),
@@ -195,12 +203,12 @@ class ChangePasswordRoute extends _i15.PageRouteInfo<ChangePasswordRouteArgs> {
 
   static const String name = 'ChangePasswordRoute';
 
-  static _i15.PageInfo page = _i15.PageInfo(
+  static _i16.PageInfo page = _i16.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<ChangePasswordRouteArgs>(
           orElse: () => const ChangePasswordRouteArgs());
-      return _i15.WrappedRoute(child: _i4.ChangePasswordPage(key: args.key));
+      return _i16.WrappedRoute(child: _i4.ChangePasswordPage(key: args.key));
     },
   );
 }
@@ -208,7 +216,7 @@ class ChangePasswordRoute extends _i15.PageRouteInfo<ChangePasswordRouteArgs> {
 class ChangePasswordRouteArgs {
   const ChangePasswordRouteArgs({this.key});
 
-  final _i16.Key? key;
+  final _i17.Key? key;
 
   @override
   String toString() {
@@ -219,12 +227,12 @@ class ChangePasswordRouteArgs {
 /// generated route for
 /// [_i5.ClientAddUpdatePage]
 class ClientAddUpdateRoute
-    extends _i15.PageRouteInfo<ClientAddUpdateRouteArgs> {
+    extends _i16.PageRouteInfo<ClientAddUpdateRouteArgs> {
   ClientAddUpdateRoute({
-    _i16.Key? key,
-    _i19.ClientModel? clientModel,
+    _i17.Key? key,
+    _i20.ClientModel? clientModel,
     required bool isFromEdit,
-    List<_i15.PageRouteInfo>? children,
+    List<_i16.PageRouteInfo>? children,
   }) : super(
           ClientAddUpdateRoute.name,
           args: ClientAddUpdateRouteArgs(
@@ -237,11 +245,11 @@ class ClientAddUpdateRoute
 
   static const String name = 'ClientAddUpdateRoute';
 
-  static _i15.PageInfo page = _i15.PageInfo(
+  static _i16.PageInfo page = _i16.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<ClientAddUpdateRouteArgs>();
-      return _i15.WrappedRoute(
+      return _i16.WrappedRoute(
           child: _i5.ClientAddUpdatePage(
         key: args.key,
         clientModel: args.clientModel,
@@ -258,9 +266,9 @@ class ClientAddUpdateRouteArgs {
     required this.isFromEdit,
   });
 
-  final _i16.Key? key;
+  final _i17.Key? key;
 
-  final _i19.ClientModel? clientModel;
+  final _i20.ClientModel? clientModel;
 
   final bool isFromEdit;
 
@@ -272,10 +280,10 @@ class ClientAddUpdateRouteArgs {
 
 /// generated route for
 /// [_i6.ClientListPage]
-class ClientListRoute extends _i15.PageRouteInfo<ClientListRouteArgs> {
+class ClientListRoute extends _i16.PageRouteInfo<ClientListRouteArgs> {
   ClientListRoute({
-    _i16.Key? key,
-    List<_i15.PageRouteInfo>? children,
+    _i17.Key? key,
+    List<_i16.PageRouteInfo>? children,
   }) : super(
           ClientListRoute.name,
           args: ClientListRouteArgs(key: key),
@@ -284,12 +292,12 @@ class ClientListRoute extends _i15.PageRouteInfo<ClientListRouteArgs> {
 
   static const String name = 'ClientListRoute';
 
-  static _i15.PageInfo page = _i15.PageInfo(
+  static _i16.PageInfo page = _i16.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<ClientListRouteArgs>(
           orElse: () => const ClientListRouteArgs());
-      return _i15.WrappedRoute(child: _i6.ClientListPage(key: args.key));
+      return _i16.WrappedRoute(child: _i6.ClientListPage(key: args.key));
     },
   );
 }
@@ -297,7 +305,7 @@ class ClientListRoute extends _i15.PageRouteInfo<ClientListRouteArgs> {
 class ClientListRouteArgs {
   const ClientListRouteArgs({this.key});
 
-  final _i16.Key? key;
+  final _i17.Key? key;
 
   @override
   String toString() {
@@ -308,12 +316,12 @@ class ClientListRouteArgs {
 /// generated route for
 /// [_i7.EmployeeDetailsAddUpdatePage]
 class EmployeeDetailsAddUpdateRoute
-    extends _i15.PageRouteInfo<EmployeeDetailsAddUpdateRouteArgs> {
+    extends _i16.PageRouteInfo<EmployeeDetailsAddUpdateRouteArgs> {
   EmployeeDetailsAddUpdateRoute({
-    _i16.Key? key,
-    _i20.EmployeeModel? employeeModel,
+    _i17.Key? key,
+    _i21.EmployeeModel? employeeModel,
     required bool isFromEdit,
-    List<_i15.PageRouteInfo>? children,
+    List<_i16.PageRouteInfo>? children,
   }) : super(
           EmployeeDetailsAddUpdateRoute.name,
           args: EmployeeDetailsAddUpdateRouteArgs(
@@ -326,11 +334,11 @@ class EmployeeDetailsAddUpdateRoute
 
   static const String name = 'EmployeeDetailsAddUpdateRoute';
 
-  static _i15.PageInfo page = _i15.PageInfo(
+  static _i16.PageInfo page = _i16.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<EmployeeDetailsAddUpdateRouteArgs>();
-      return _i15.WrappedRoute(
+      return _i16.WrappedRoute(
           child: _i7.EmployeeDetailsAddUpdatePage(
         key: args.key,
         employeeModel: args.employeeModel,
@@ -347,9 +355,9 @@ class EmployeeDetailsAddUpdateRouteArgs {
     required this.isFromEdit,
   });
 
-  final _i16.Key? key;
+  final _i17.Key? key;
 
-  final _i20.EmployeeModel? employeeModel;
+  final _i21.EmployeeModel? employeeModel;
 
   final bool isFromEdit;
 
@@ -361,10 +369,10 @@ class EmployeeDetailsAddUpdateRouteArgs {
 
 /// generated route for
 /// [_i8.EmployeeListPage]
-class EmployeeListRoute extends _i15.PageRouteInfo<EmployeeListRouteArgs> {
+class EmployeeListRoute extends _i16.PageRouteInfo<EmployeeListRouteArgs> {
   EmployeeListRoute({
-    _i16.Key? key,
-    List<_i15.PageRouteInfo>? children,
+    _i17.Key? key,
+    List<_i16.PageRouteInfo>? children,
   }) : super(
           EmployeeListRoute.name,
           args: EmployeeListRouteArgs(key: key),
@@ -373,12 +381,12 @@ class EmployeeListRoute extends _i15.PageRouteInfo<EmployeeListRouteArgs> {
 
   static const String name = 'EmployeeListRoute';
 
-  static _i15.PageInfo page = _i15.PageInfo(
+  static _i16.PageInfo page = _i16.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<EmployeeListRouteArgs>(
           orElse: () => const EmployeeListRouteArgs());
-      return _i15.WrappedRoute(child: _i8.EmployeeListPage(key: args.key));
+      return _i16.WrappedRoute(child: _i8.EmployeeListPage(key: args.key));
     },
   );
 }
@@ -386,7 +394,7 @@ class EmployeeListRoute extends _i15.PageRouteInfo<EmployeeListRouteArgs> {
 class EmployeeListRouteArgs {
   const EmployeeListRouteArgs({this.key});
 
-  final _i16.Key? key;
+  final _i17.Key? key;
 
   @override
   String toString() {
@@ -396,10 +404,10 @@ class EmployeeListRouteArgs {
 
 /// generated route for
 /// [_i9.LocationListPage]
-class LocationListRoute extends _i15.PageRouteInfo<LocationListRouteArgs> {
+class LocationListRoute extends _i16.PageRouteInfo<LocationListRouteArgs> {
   LocationListRoute({
-    _i16.Key? key,
-    List<_i15.PageRouteInfo>? children,
+    _i17.Key? key,
+    List<_i16.PageRouteInfo>? children,
   }) : super(
           LocationListRoute.name,
           args: LocationListRouteArgs(key: key),
@@ -408,12 +416,12 @@ class LocationListRoute extends _i15.PageRouteInfo<LocationListRouteArgs> {
 
   static const String name = 'LocationListRoute';
 
-  static _i15.PageInfo page = _i15.PageInfo(
+  static _i16.PageInfo page = _i16.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<LocationListRouteArgs>(
           orElse: () => const LocationListRouteArgs());
-      return _i15.WrappedRoute(child: _i9.LocationListPage(key: args.key));
+      return _i16.WrappedRoute(child: _i9.LocationListPage(key: args.key));
     },
   );
 }
@@ -421,7 +429,7 @@ class LocationListRoute extends _i15.PageRouteInfo<LocationListRouteArgs> {
 class LocationListRouteArgs {
   const LocationListRouteArgs({this.key});
 
-  final _i16.Key? key;
+  final _i17.Key? key;
 
   @override
   String toString() {
@@ -431,11 +439,11 @@ class LocationListRouteArgs {
 
 /// generated route for
 /// [_i10.ReportPage]
-class ReportRoute extends _i15.PageRouteInfo<ReportRouteArgs> {
+class ReportRoute extends _i16.PageRouteInfo<ReportRouteArgs> {
   ReportRoute({
-    _i16.Key? key,
+    _i17.Key? key,
     required String orderId,
-    List<_i15.PageRouteInfo>? children,
+    List<_i16.PageRouteInfo>? children,
   }) : super(
           ReportRoute.name,
           args: ReportRouteArgs(
@@ -447,11 +455,11 @@ class ReportRoute extends _i15.PageRouteInfo<ReportRouteArgs> {
 
   static const String name = 'ReportRoute';
 
-  static _i15.PageInfo page = _i15.PageInfo(
+  static _i16.PageInfo page = _i16.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<ReportRouteArgs>();
-      return _i15.WrappedRoute(
+      return _i16.WrappedRoute(
           child: _i10.ReportPage(
         key: args.key,
         orderId: args.orderId,
@@ -466,7 +474,7 @@ class ReportRouteArgs {
     required this.orderId,
   });
 
-  final _i16.Key? key;
+  final _i17.Key? key;
 
   final String orderId;
 
@@ -478,13 +486,13 @@ class ReportRouteArgs {
 
 /// generated route for
 /// [_i11.ServiceDetailPage]
-class ServiceDetailRoute extends _i15.PageRouteInfo<ServiceDetailRouteArgs> {
+class ServiceDetailRoute extends _i16.PageRouteInfo<ServiceDetailRouteArgs> {
   ServiceDetailRoute({
-    _i16.Key? key,
+    _i17.Key? key,
     required String serviceId,
     required String orderId,
     required String reportId,
-    List<_i15.PageRouteInfo>? children,
+    List<_i16.PageRouteInfo>? children,
   }) : super(
           ServiceDetailRoute.name,
           args: ServiceDetailRouteArgs(
@@ -498,11 +506,11 @@ class ServiceDetailRoute extends _i15.PageRouteInfo<ServiceDetailRouteArgs> {
 
   static const String name = 'ServiceDetailRoute';
 
-  static _i15.PageInfo page = _i15.PageInfo(
+  static _i16.PageInfo page = _i16.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<ServiceDetailRouteArgs>();
-      return _i15.WrappedRoute(
+      return _i16.WrappedRoute(
           child: _i11.ServiceDetailPage(
         key: args.key,
         serviceId: args.serviceId,
@@ -521,7 +529,7 @@ class ServiceDetailRouteArgs {
     required this.reportId,
   });
 
-  final _i16.Key? key;
+  final _i17.Key? key;
 
   final String serviceId;
 
@@ -537,10 +545,10 @@ class ServiceDetailRouteArgs {
 
 /// generated route for
 /// [_i12.ServicesListPage]
-class ServicesListRoute extends _i15.PageRouteInfo<ServicesListRouteArgs> {
+class ServicesListRoute extends _i16.PageRouteInfo<ServicesListRouteArgs> {
   ServicesListRoute({
-    _i16.Key? key,
-    List<_i15.PageRouteInfo>? children,
+    _i17.Key? key,
+    List<_i16.PageRouteInfo>? children,
   }) : super(
           ServicesListRoute.name,
           args: ServicesListRouteArgs(key: key),
@@ -549,12 +557,12 @@ class ServicesListRoute extends _i15.PageRouteInfo<ServicesListRouteArgs> {
 
   static const String name = 'ServicesListRoute';
 
-  static _i15.PageInfo page = _i15.PageInfo(
+  static _i16.PageInfo page = _i16.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<ServicesListRouteArgs>(
           orElse: () => const ServicesListRouteArgs());
-      return _i15.WrappedRoute(child: _i12.ServicesListPage(key: args.key));
+      return _i16.WrappedRoute(child: _i12.ServicesListPage(key: args.key));
     },
   );
 }
@@ -562,7 +570,7 @@ class ServicesListRoute extends _i15.PageRouteInfo<ServicesListRouteArgs> {
 class ServicesListRouteArgs {
   const ServicesListRouteArgs({this.key});
 
-  final _i16.Key? key;
+  final _i17.Key? key;
 
   @override
   String toString() {
@@ -572,10 +580,10 @@ class ServicesListRouteArgs {
 
 /// generated route for
 /// [_i13.SignInPage]
-class SignInRoute extends _i15.PageRouteInfo<SignInRouteArgs> {
+class SignInRoute extends _i16.PageRouteInfo<SignInRouteArgs> {
   SignInRoute({
-    _i16.Key? key,
-    List<_i15.PageRouteInfo>? children,
+    _i17.Key? key,
+    List<_i16.PageRouteInfo>? children,
   }) : super(
           SignInRoute.name,
           args: SignInRouteArgs(key: key),
@@ -584,12 +592,12 @@ class SignInRoute extends _i15.PageRouteInfo<SignInRouteArgs> {
 
   static const String name = 'SignInRoute';
 
-  static _i15.PageInfo page = _i15.PageInfo(
+  static _i16.PageInfo page = _i16.PageInfo(
     name,
     builder: (data) {
       final args =
           data.argsAs<SignInRouteArgs>(orElse: () => const SignInRouteArgs());
-      return _i15.WrappedRoute(child: _i13.SignInPage(key: args.key));
+      return _i16.WrappedRoute(child: _i13.SignInPage(key: args.key));
     },
   );
 }
@@ -597,7 +605,7 @@ class SignInRoute extends _i15.PageRouteInfo<SignInRouteArgs> {
 class SignInRouteArgs {
   const SignInRouteArgs({this.key});
 
-  final _i16.Key? key;
+  final _i17.Key? key;
 
   @override
   String toString() {
@@ -607,8 +615,8 @@ class SignInRouteArgs {
 
 /// generated route for
 /// [_i14.SplashScreen]
-class SplashRoute extends _i15.PageRouteInfo<void> {
-  const SplashRoute({List<_i15.PageRouteInfo>? children})
+class SplashRoute extends _i16.PageRouteInfo<void> {
+  const SplashRoute({List<_i16.PageRouteInfo>? children})
       : super(
           SplashRoute.name,
           initialChildren: children,
@@ -616,10 +624,56 @@ class SplashRoute extends _i15.PageRouteInfo<void> {
 
   static const String name = 'SplashRoute';
 
-  static _i15.PageInfo page = _i15.PageInfo(
+  static _i16.PageInfo page = _i16.PageInfo(
     name,
     builder: (data) {
-      return _i15.WrappedRoute(child: const _i14.SplashScreen());
+      return _i16.WrappedRoute(child: const _i14.SplashScreen());
     },
   );
+}
+
+/// generated route for
+/// [_i15.SummaryPage]
+class SummaryRoute extends _i16.PageRouteInfo<SummaryRouteArgs> {
+  SummaryRoute({
+    _i17.Key? key,
+    required _i18.SalesOrderModel? salesOrderModel,
+    List<_i16.PageRouteInfo>? children,
+  }) : super(
+          SummaryRoute.name,
+          args: SummaryRouteArgs(
+            key: key,
+            salesOrderModel: salesOrderModel,
+          ),
+          initialChildren: children,
+        );
+
+  static const String name = 'SummaryRoute';
+
+  static _i16.PageInfo page = _i16.PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<SummaryRouteArgs>();
+      return _i15.SummaryPage(
+        key: args.key,
+        salesOrderModel: args.salesOrderModel,
+      );
+    },
+  );
+}
+
+class SummaryRouteArgs {
+  const SummaryRouteArgs({
+    this.key,
+    required this.salesOrderModel,
+  });
+
+  final _i17.Key? key;
+
+  final _i18.SalesOrderModel? salesOrderModel;
+
+  @override
+  String toString() {
+    return 'SummaryRouteArgs{key: $key, salesOrderModel: $salesOrderModel}';
+  }
 }

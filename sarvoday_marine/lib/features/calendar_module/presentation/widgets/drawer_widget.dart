@@ -29,7 +29,7 @@ class _DrawerWidgetState extends State<DrawerWidget> {
 
   @override
   void initState() {
-    if (widget.userRole == "client" || widget.userRole == "employee") {
+    if (widget.userRole != "superAdmin") {
       drawerItems.removeRange(0, 4);
     }
     super.initState();
@@ -37,6 +37,7 @@ class _DrawerWidgetState extends State<DrawerWidget> {
 
   @override
   Widget build(BuildContext context) {
+    SmTextTheme.init(context);
     return BlocProvider(
       create: (_) => DrawerCubit(),
       child: BlocBuilder<DrawerCubit, bool>(
