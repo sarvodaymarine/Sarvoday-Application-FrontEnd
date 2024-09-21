@@ -1,8 +1,7 @@
 import 'dart:convert';
 
 import 'package:dartz/dartz.dart';
-import 'package:dio/dio.dart';
-import 'package:sarvoday_marine/core/failure/common_failure.dart';
+import 'package:sarvoday_marine/core/api_handler/api_handler_helper.dart';
 import 'package:sarvoday_marine/core/utils/common/common_methods.dart';
 import 'package:sarvoday_marine/core/utils/constants/string_const.dart';
 import 'package:sarvoday_marine/features/calendar_module/data/data_sources/calendar_data_source.dart';
@@ -10,37 +9,34 @@ import 'package:sarvoday_marine/features/calendar_module/data/models/sales_order
 import 'package:sarvoday_marine/features/calendar_module/data/models/so_param_model.dart';
 
 class CalendarDataSourceImpl implements CalendarDataSource {
-  final Dio dio;
+  final DioClient dio;
 
   CalendarDataSourceImpl(this.dio);
 
   @override
-  Future<Either<bool, CommonFailure>> addSalesOrder(
+  Future<Either<bool, String>> addSalesOrder(
       SalesOrderParam salesOrderParam) async {
     try {
       final response = await dio.post(
           '${StringConst.backEndBaseURL}orders/addSalesOrder',
-          data: jsonEncode(salesOrderParam.toJson()),
-          options: await CommonMethods.getAuthenticationToken());
+          data: jsonEncode(salesOrderParam.toJson()));
       if (response.statusCode == 200) {
         return const Left(true);
       } else {
-        return Right(ErrorFailure(
-            CommonMethods.commonValidation(response.statusMessage.toString())));
+        return Right(CommonMethods.commonErrorHandler(response));
       }
     } catch (error) {
-      return Right(
-          ErrorFailure(CommonMethods.commonValidation(error.toString())));
+      return Right(CommonMethods.commonErrorHandler(error));
     }
   }
 
   @override
-  Future<Either<List<SalesOrderModel>, CommonFailure>>
-      getAllSalesOrder() async {
+  Future<Either<List<SalesOrderModel>, String>> getAllSalesOrder(
+      DateTime startDateOfWeek, DateTime lastDateOfWeek) async {
     try {
       final response = await dio.get(
-          '${StringConst.backEndBaseURL}orders/getAllSalesOrders',
-          options: await CommonMethods.getAuthenticationToken());
+          '${StringConst
+              .backEndBaseURL}orders/getAllSalesOrders/$startDateOfWeek/$lastDateOfWeek');
       if (response.statusCode == 200) {
         final List<SalesOrderModel> salesOrder = [];
         final jsonList = response.data;
@@ -49,48 +45,42 @@ class CalendarDataSourceImpl implements CalendarDataSource {
         }
         return left(salesOrder);
       } else {
-        return right(ErrorFailure("Not found"));
+        return right("Not found");
       }
     } catch (error) {
-      return right(
-          ErrorFailure(CommonMethods.commonValidation(error.toString())));
+      return right(CommonMethods.commonErrorHandler(error));
     }
   }
 
   @override
-  Future<Either<SalesOrderModel, CommonFailure>> getSalesOrder(
-      String id) async {
+  Future<Either<SalesOrderModel, String>> getSalesOrder(String id) async {
     try {
       final response =
-          await dio.get('${StringConst.backEndBaseURL}orders/getOrder/$id');
+      await dio.get('${StringConst.backEndBaseURL}orders/getOrder/$id');
       if (response.statusCode == 200) {
         return left(SalesOrderModel.fromJson(response.data));
       } else {
-        return right(ErrorFailure("Not found"));
+        return right("Not found");
       }
     } catch (error) {
-      return right(
-          ErrorFailure(CommonMethods.commonValidation(error.toString())));
+      return right(CommonMethods.commonErrorHandler(error));
     }
   }
 
   @override
-  Future<Either<SalesOrderModel, CommonFailure>> updateSalesOrder(
-      String orderId, SalesOrderParam salesOrderParam) async {
+  Future<Either<SalesOrderModel, String>> updateSalesOrder(String orderId,
+      SalesOrderParam salesOrderParam) async {
     try {
       final response = await dio.put(
           '${StringConst.backEndBaseURL}orders/updateSalesOrder/$orderId',
-          data: jsonEncode(salesOrderParam.toJson()),
-          options: await CommonMethods.getAuthenticationToken());
+          data: jsonEncode(salesOrderParam.toJson()));
       if (response.statusCode == 200) {
         return Left(SalesOrderModel.fromJson(response.data));
       } else {
-        return Right(ErrorFailure(
-            CommonMethods.commonValidation(response.statusMessage.toString())));
+        return Right(CommonMethods.commonErrorHandler(response));
       }
     } catch (error) {
-      return Right(
-          ErrorFailure(CommonMethods.commonValidation(error.toString())));
+      return Right(CommonMethods.commonErrorHandler(error));
     }
   }
 }

@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:sarvoday_marine/core/failure/common_failure.dart';
 import 'package:sarvoday_marine/features/report_module/data/models/report_model.dart';
 import 'package:sarvoday_marine/features/report_module/data/models/service_report.dart';
 
@@ -9,6 +8,6 @@ abstract class ReportDataSource {
   Future<Either<ServiceContainerModel, String>> getServiceReport(
       String serviceId);
 
-  Future<Either<String, ReportModel>> updateReport(
-      String reportId, String serviceId, ServiceContainerModel param);
+  Future<Either<String, ReportModel>> updateReport(String reportId,
+      String serviceId, ServiceContainerModel param, bool isReviewed);
 }

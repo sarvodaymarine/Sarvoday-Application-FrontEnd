@@ -41,19 +41,6 @@ class ClientAddUpdatePage extends StatefulWidget implements AutoRouteWrapper {
 
 class _ClientAddUpdatePageState extends State<ClientAddUpdatePage> {
   late FormGroup form;
-
-  /*= FormGroup({
-    'firstName': FormControl<String>(validators: [Validators.required]),
-    'lastName': FormControl<String>(validators: [Validators.required]),
-    'email': FormControl<String>(
-        validators: [Validators.required, Validators.email]),
-    'countryCode':
-        FormControl<String>(validators: [Validators.required], value: '+91'),
-    'mobile': FormControl<String>(validators: [Validators.required]),
-    'clientAddress': FormControl<String>(validators: [Validators.required]),
-    'services': FormArray<double>([]),
-  });*/
-
   List<Widget> serviceWidgetList = [];
 
   @override
@@ -81,7 +68,7 @@ class _ClientAddUpdatePageState extends State<ClientAddUpdatePage> {
         Validators.minLength(10),
         Validators.maxLength(10)
       ], value: widget.clientModel?.userDetail?.mobile ?? ""),
-      'services': FormArray([]),
+      'services': FormArray([], validators: [Validators.minLength(1)]),
     });
     if (widget.isFromEdit) {
       _initializeFormWithExistingData(widget.clientModel?.services ?? []);
@@ -203,7 +190,11 @@ class _ClientAddUpdatePageState extends State<ClientAddUpdatePage> {
                                   ValidationMessage.required: (error) =>
                                       "Mobile number is Required",
                                   ValidationMessage.mustMatch: (error) =>
-                                      "Please enter valid phone Number"
+                                      "Please enter valid phone Number",
+                                  ValidationMessage.minLength: (error) =>
+                                      "min length 10 is required",
+                                  ValidationMessage.maxLength: (error) =>
+                                      "max length 10 is valid"
                                 },
                               ),
                             ),
@@ -222,35 +213,12 @@ class _ClientAddUpdatePageState extends State<ClientAddUpdatePage> {
                         SizedBox(
                             height:
                                 SmTextTheme.getResponsiveSize(context, 20.0)),
-                        // Row(
-                        //   mainAxisAlignment: MainAxisAlignment.end,
-                        //   mainAxisSize: MainAxisSize.max,
-                        //   children: <Widget>[
-                        //     RichText(
-                        //       text: TextSpan(
-                        //           text: "Add Service",
-                        //           style: SmTextTheme.confirmButtonTextStyle(
-                        //                   context)
-                        //               .copyWith(
-                        //                   fontSize:
-                        //                       SmTextTheme.getResponsiveSize(
-                        //                           context, 14.0))),
-                        //     ),
-                        //     SizedBox(
-                        //         width: SmTextTheme.getResponsiveSize(
-                        //             context, 16.0)),
-                        //     IconButton(
-                        //       icon: const Icon(Icons.add),
-                        //       onPressed: () => serviceDialog(context),
-                        //     ),
-                        //   ],
-                        // ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             RichText(
                               text: TextSpan(
-                                  text: "Add Service",
+                                  text: "Service",
                                   style: SmTextTheme.confirmButtonTextStyle(
                                           context)
                                       .copyWith(
@@ -261,7 +229,7 @@ class _ClientAddUpdatePageState extends State<ClientAddUpdatePage> {
                           ],
                         ),
                         SizedBox(
-                            width:
+                            height:
                                 SmTextTheme.getResponsiveSize(context, 20.0)),
                         serviceSearchWidget(context),
                         SizedBox(
@@ -282,6 +250,12 @@ class _ClientAddUpdatePageState extends State<ClientAddUpdatePage> {
                           child: CustomSmButton(
                             text: widget.isFromEdit ? "Update" : "Add",
                             onTap: () {
+                              List<Object?> services =
+                                  form.control('services').value;
+                              if (services.isEmpty) {
+                                CommonMethods.showToast(context,
+                                    "Please add service for the client");
+                              }
                               if (form.valid) {
                                 String mobile = form.control('mobile').value;
                                 String countryCode =
@@ -291,8 +265,6 @@ class _ClientAddUpdatePageState extends State<ClientAddUpdatePage> {
                                     form.control('firstName').value;
                                 String lastName =
                                     form.control('lastName').value;
-                                List<Object?> services =
-                                    form.control('services').value;
                                 String clientAddress =
                                     form.control('clientAddress').value;
                                 if (widget.isFromEdit &&
@@ -369,6 +341,7 @@ class _ClientAddUpdatePageState extends State<ClientAddUpdatePage> {
   }
 
   Widget _buildServiceFields() {
+    final selectedServices = form.controls['services'] as FormArray;
     return ReactiveFormArray(
         formArrayName: 'services',
         builder: (context, formArray, child) {
@@ -386,13 +359,38 @@ class _ClientAddUpdatePageState extends State<ClientAddUpdatePage> {
                   children: [
                     SizedBox(
                         height: SmTextTheme.getResponsiveSize(context, 20)),
-                    RichText(
-                        text: TextSpan(
-                            text: serviceName,
-                            style: SmTextTheme.confirmButtonTextStyle(context)
-                                .copyWith(
-                                    fontSize: SmTextTheme.getResponsiveSize(
-                                        context, 12)))),
+                    Row(
+                      children: [
+                        Expanded(
+                          flex: 7,
+                          child: RichText(
+                              text: TextSpan(
+                                  text: serviceName,
+                                  style: SmTextTheme.confirmButtonTextStyle(
+                                          context)
+                                      .copyWith(
+                                          fontSize:
+                                              SmTextTheme.getResponsiveSize(
+                                                  context, 12)))),
+                        ),
+                        Expanded(
+                            flex: 1,
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: SmTextTheme.getResponsiveSize(
+                                      context, 4)),
+                              child: IconButton(
+                                color: SmCommonColors.errorColor,
+                                icon: const Icon(Icons.clear_outlined),
+                                onPressed: () {
+                                  setState(() {
+                                    selectedServices.remove(serviceGroup);
+                                  });
+                                },
+                              ),
+                            )),
+                      ],
+                    ),
                     SizedBox(
                         height: SmTextTheme.getResponsiveSize(context, 16)),
                     ReactiveTextField<double>(
@@ -554,7 +552,7 @@ class _ClientAddUpdatePageState extends State<ClientAddUpdatePage> {
       onSelected: (value) {
         setState(() {
           (form.control('services') as FormArray).add(FormGroup({
-            'id': FormControl<String>(value: value.id),
+            'serviceId': FormControl<String>(value: value.id),
             'serviceName': FormControl<String>(value: value.serviceName),
             'container1Price':
                 FormControl<double>(value: value.container1Price),
@@ -571,96 +569,7 @@ class _ClientAddUpdatePageState extends State<ClientAddUpdatePage> {
         return services;
       },
     );
-    // CommonMethods.showCommonDialogWithChild(
-    //     context,
-    //     "Select Service",
-    //
-    //     positiveButtonString: 'Cancel');
   }
-
-/*Widget serviceUI(BuildContext context) {
-    return services != null && services!.isNotEmpty
-        ? SizedBox(
-            height: SmTextTheme.getResponsiveSize(context, 300),
-            width: SmTextTheme.getResponsiveSize(context, 320),
-            child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: services!.length,
-                itemBuilder: (_, index) {
-                  return InkWell(
-                    onTap: () {
-                      (form.controls['services'] as FormArray<double>).add(
-                          FormControl<double>(
-                              value: services![index].container1Price));
-                      serviceWidgetList.add(Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          RichText(
-                            text: TextSpan(
-                                text: services![index].serviceName,
-                                style:
-                                    SmTextTheme.confirmButtonTextStyle(context)
-                                        .copyWith(
-                                            fontSize:
-                                                SmTextTheme.getResponsiveSize(
-                                                    context, 14))),
-                          ),
-                          SizedBox(
-                              height:
-                                  SmTextTheme.getResponsiveSize(context, 20.0)),
-                          ReactiveTextField<double>(
-                            formControlName: "services[${services![index].id}]",
-                            decoration: InputDecoration(
-                                border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(16.0)),
-                                labelText: "Price",
-                                labelStyle: TextStyle(
-                                    fontSize: SmTextTheme.getResponsiveSize(
-                                        context, 16.0),
-                                    fontWeight: FontWeight.w400,
-                                    color: SmAppTheme.isDarkMode(context)
-                                        ? SmColorDarkTheme.secondaryTextColor
-                                        : SmColorLightTheme
-                                            .secondaryTextColor)),
-                            validationMessages: {
-                              ValidationMessage.required: (error) =>
-                                  "Price is Required",
-                            },
-                          ),
-                          SizedBox(
-                              height:
-                                  SmTextTheme.getResponsiveSize(context, 20.0)),
-                        ],
-                      ));
-                      context
-                          .read<ClientCubit>()
-                          .addServiceUiChange(services!, services![index]);
-                      Navigator.of(context).pop();
-                    } */ /*_showAddServiceDialog(context, services![index])*/ /*,
-                    child: ListTile(
-                      hoverColor: SmAppTheme.isDarkMode(context)
-                          ? SmColorDarkTheme.primaryLightColor
-                          : SmColorLightTheme.primaryLightColor,
-                      style: ListTileStyle.list,
-                      title: RichText(
-                          text: TextSpan(
-                        text: services![index].serviceName,
-                        style: SmTextTheme.confirmButtonTextStyle(context)
-                            .copyWith(
-                                fontSize:
-                                    SmTextTheme.getResponsiveSize(context, 12)),
-                      )),
-                    ),
-                  );
-                }),
-          )
-        : RichText(
-            text: TextSpan(
-            text: "No data Found",
-            style: SmTextTheme.unselectedLabelStyle(context)
-                .copyWith(fontSize: SmTextTheme.getResponsiveSize(context, 12)),
-          ));
-  }*/
 }
 
 convertServicesToFormGroups(List<ServiceModel>? services) {
@@ -669,7 +578,7 @@ convertServicesToFormGroups(List<ServiceModel>? services) {
   }
   return services.map((service) {
     return FormGroup({
-      'id': FormControl<String>(value: service.id),
+      'serviceId': FormControl<String>(value: service.id),
       'serviceName': FormControl<String>(value: service.serviceName),
       'container1Price': FormControl<double>(value: service.container1Price),
       'container2Price': FormControl<double>(value: service.container2Price),

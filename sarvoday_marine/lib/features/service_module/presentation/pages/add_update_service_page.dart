@@ -41,7 +41,21 @@ class AddUpdateServicePage extends StatefulWidget implements AutoRouteWrapper {
 
 class AddUpdateServicePageState extends State<AddUpdateServicePage> {
   late FormGroup form;
-  List<String> imageList = ["Image1", "Image2", "Image3", "Image4", "Image5"];
+  List<String> imageList = [
+    "Sampling",
+    "Truck Rear View",
+    "Container Door View",
+    "Empty Container View",
+    "Outer Container View",
+    "Batch View",
+    "Cargo View",
+    "Weightment",
+    "Stuffing View",
+    "Custom Seal",
+    "Line Seal",
+    "Storage Tank View",
+    "Sealed Container"
+  ];
   final TextEditingController controller = TextEditingController();
 
   @override
@@ -51,25 +65,25 @@ class AddUpdateServicePageState extends State<AddUpdateServicePage> {
     form = FormGroup({
       "serviceName": FormControl<String>(
         validators: [Validators.required],
-        value: widget.serviceModel?.serviceName ?? "",
+        value: widget.serviceModel?.serviceName,
       ),
       "container1Price": FormControl<double>(
         validators: [Validators.required],
-        value: widget.serviceModel?.container1Price ?? 0,
+        value: widget.serviceModel?.container1Price,
       ),
       "container2Price": FormControl<double>(
         validators: [Validators.required],
-        value: widget.serviceModel?.container2Price ?? 0,
+        value: widget.serviceModel?.container2Price,
       ),
       "container3Price": FormControl<double>(
         validators: [Validators.required],
-        value: widget.serviceModel?.container3Price ?? 0,
+        value: widget.serviceModel?.container3Price,
       ),
       "container4Price": FormControl<double>(
         validators: [Validators.required],
-        value: widget.serviceModel?.container4Price ?? 0,
+        value: widget.serviceModel?.container4Price,
       ),
-      "serviceImage": FormArray([]),
+      "serviceImage": FormArray([], validators: [Validators.minLength(1)]),
     });
 
     if (widget.isEdit) {
@@ -118,22 +132,26 @@ class AddUpdateServicePageState extends State<AddUpdateServicePage> {
                             height:
                                 SmTextTheme.getResponsiveSize(context, 20.0)),
                         _buildTextField<double>(
-                            "container1Price", "1 container price"),
+                            "container1Price", "1 container price",
+                            keyboardType: TextInputType.number),
                         SizedBox(
                             height:
                                 SmTextTheme.getResponsiveSize(context, 20.0)),
                         _buildTextField<double>(
-                            "container2Price", "2 container price"),
+                            "container2Price", "2 container price",
+                            keyboardType: TextInputType.number),
                         SizedBox(
                             height:
                                 SmTextTheme.getResponsiveSize(context, 20.0)),
                         _buildTextField<double>(
-                            "container3Price", "3 container price"),
+                            "container3Price", "3 container price",
+                            keyboardType: TextInputType.number),
                         SizedBox(
                             height:
                                 SmTextTheme.getResponsiveSize(context, 20.0)),
                         _buildTextField<double>(
-                            "container4Price", "4 container price"),
+                            "container4Price", "4 container price",
+                            keyboardType: TextInputType.number),
                         SizedBox(
                             height:
                                 SmTextTheme.getResponsiveSize(context, 20.0)),
@@ -289,9 +307,11 @@ class AddUpdateServicePageState extends State<AddUpdateServicePage> {
         });
   }
 
-  Widget _buildTextField<T>(String formControlName, String labelText) {
+  Widget _buildTextField<T>(String formControlName, String labelText,
+      {TextInputType? keyboardType}) {
     return ReactiveTextField<T>(
       formControlName: formControlName,
+      keyboardType: keyboardType,
       decoration: InputDecoration(
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16.0),
@@ -317,13 +337,17 @@ class AddUpdateServicePageState extends State<AddUpdateServicePage> {
       child: CustomSmButton(
         text: widget.isEdit ? "Update" : "Add",
         onTap: () async {
+          final List<ImageConfig>? images =
+              (form.control("serviceImage").value as List?)
+                  ?.map<ImageConfig>((element) => ImageConfig(
+                      imageName: element['imageName'],
+                      imageCount: element['imageCount']))
+                  .toList();
+          if (images == null || images.isEmpty) {
+            CommonMethods.showToast(context, "Please add service images");
+            return;
+          }
           if (form.valid) {
-            final List<ImageConfig>? images =
-                (form.control("serviceImage").value as List?)
-                    ?.map<ImageConfig>((element) => ImageConfig(
-                        imageName: element['imageName'],
-                        imageCount: element['imageCount']))
-                    .toList();
             if (widget.isEdit) {
               await context.read<ServiceCubit>().updatedService(
                   widget.serviceModel!.id!,
@@ -332,7 +356,7 @@ class AddUpdateServicePageState extends State<AddUpdateServicePage> {
                   form.control('container2Price').value,
                   form.control('container3Price').value,
                   form.control('container4Price').value,
-                  images ?? []);
+                  images);
             } else {
               await context.read<ServiceCubit>().addService(
                   form.control("serviceName").value,
@@ -340,9 +364,9 @@ class AddUpdateServicePageState extends State<AddUpdateServicePage> {
                   form.control('container2Price').value,
                   form.control('container3Price').value,
                   form.control('container4Price').value,
-                  images ?? []);
+                  images);
             }
-            if (mounted) {
+            if (context.mounted) {
               Navigator.of(context).pop();
             }
           } else {

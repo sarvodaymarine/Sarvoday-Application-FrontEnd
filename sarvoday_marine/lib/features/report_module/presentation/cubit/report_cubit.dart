@@ -45,10 +45,10 @@ class ReportCubit extends Cubit<ReportState> {
   }
 
   updateServiceReport(String serviceId, String reportId,
-      ServiceContainerModel serviceReport) async {
+      ServiceContainerModel serviceReport, bool isReviewed) async {
     emit(StateNoData());
-    var res =
-        await updateReportUseCases.call(reportId, serviceId, serviceReport);
+    var res = await updateReportUseCases.call(
+        reportId, serviceId, serviceReport, isReviewed);
     res.fold((location) {
       emit(StateOnCrudSuccess("Report updated SuccessFully"));
     }, (error) {

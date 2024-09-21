@@ -38,10 +38,12 @@ class AddUpdateSalesOrderPage extends StatefulWidget
       {super.key,
       required this.isFromEdit,
       required this.isDisabled,
+      required this.isClientOrSuperAdmin,
       this.salesOrderModel});
 
   final bool isFromEdit;
   final SalesOrderModel? salesOrderModel;
+  final bool isClientOrSuperAdmin;
   final bool isDisabled;
 
   @override
@@ -108,9 +110,7 @@ class _AddUpdateSalesOrderPageState extends State<AddUpdateSalesOrderPage> {
       'comments': FormControl<String>(value: widget.salesOrderModel?.comments),
       'tax': FormArray([], validators: [Validators.minLength(1)]),
     });
-    if (widget.isDisabled || (widget.isFromEdit && !isEditEnabled)) {
-      form.markAsDisabled();
-    }
+
     if (widget.isFromEdit) {
       controller.text = widget.salesOrderModel?.clientName ?? "";
       context.read<SalesOrderCubit>().setFieldReadOnly(true, 'client');
@@ -123,6 +123,11 @@ class _AddUpdateSalesOrderPageState extends State<AddUpdateSalesOrderPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.isDisabled || (widget.isFromEdit && !isEditEnabled)) {
+      form.markAsDisabled();
+    } else {
+      form.markAsEnabled();
+    }
     SmTextTheme.init(context);
     return PopScope(
       canPop: false,
@@ -140,24 +145,37 @@ class _AddUpdateSalesOrderPageState extends State<AddUpdateSalesOrderPage> {
           context: context,
           title: widget.isDisabled || (widget.isFromEdit && !isEditEnabled)
               ? "Sales Order"
-              : widget.isFromEdit
+              : widget.isFromEdit && isEditEnabled
                   ? "Edit Sales Order"
                   : "Create Sales Order",
           actionList: [
-            widget.isDisabled || !widget.isFromEdit
-                ? const SizedBox.shrink()
-                : Visibility(
-                    visible: !widget.isDisabled &&
-                        (widget.isFromEdit && !isEditEnabled),
-                    child: IconButton(
-                        color: SmCommonColors.secondaryColor,
-                        icon: const Icon(Icons.edit),
-                        onPressed: () {
-                          setState(() {
-                            isEditEnabled = true;
-                          });
-                        }),
-                  )
+            Visibility(
+              visible: widget.isClientOrSuperAdmin && widget.isFromEdit,
+              child: Padding(
+                padding:
+                    EdgeInsets.all(SmTextTheme.getResponsiveSize(context, 10)),
+                child: IconButton(
+                    color: SmCommonColors.secondaryColor,
+                    icon: const Icon(Icons.receipt_long,
+                        color: SmCommonColors.secondaryColor),
+                    onPressed: () async {
+                      context.router.push(SummaryRoute(
+                          salesOrderModel: widget.salesOrderModel!));
+                    }),
+              ),
+            ),
+            Visibility(
+              visible:
+                  !widget.isDisabled && (widget.isFromEdit && !isEditEnabled),
+              child: IconButton(
+                  color: SmCommonColors.secondaryColor,
+                  icon: const Icon(Icons.edit),
+                  onPressed: () {
+                    setState(() {
+                      isEditEnabled = true;
+                    });
+                  }),
+            )
           ],
         ).appBar(),
         body: BlocConsumer<CalendarCubit, CalendarState>(
@@ -168,9 +186,9 @@ class _AddUpdateSalesOrderPageState extends State<AddUpdateSalesOrderPage> {
               hideLoadingDialog(context);
               CommonMethods.showToast(context, state.response);
               Navigator.of(context).pop(true);
-            } else if (state is CMStateErrorGeneral) {
+            } else if (state is CMStateError) {
               hideLoadingDialog(context);
-              CommonMethods.showCommonDialog(context, "Error", state.errorMsg);
+              CommonMethods.showCommonDialog(context, "Error", state.message);
             }
           },
           builder: (context, calendarState) {
@@ -184,28 +202,34 @@ class _AddUpdateSalesOrderPageState extends State<AddUpdateSalesOrderPage> {
                 } else if (state.employeesError != null ||
                     state.clientsError != null ||
                     state.locationsError != null) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        if (state.employeesError != null)
-                          Text(
-                              'Failed to load employees: ${state.employeesError}'),
-                        if (state.clientsError != null)
-                          Text('Failed to load clients: ${state.clientsError}'),
-                        if (state.locationsError != null)
-                          Text(
-                              'Failed to load locations: ${state.locationsError}'),
-                        ElevatedButton(
-                          onPressed: () =>
-                              context.read<SalesOrderCubit>().fetchData(),
-                          child: RichText(
-                              text: TextSpan(
-                                  text: 'Retry',
-                                  style: SmTextTheme.confirmButtonTextStyle(
-                                      context))),
-                        ),
-                      ],
+                  return Padding(
+                    padding: EdgeInsets.symmetric(
+                        horizontal: SmTextTheme.getResponsiveSize(context, 14)),
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          state.employeesError != null
+                              ? Text(
+                                  'Failed to load employees: ${state.employeesError}')
+                              : state.clientsError != null
+                                  ? Text(
+                                      'Failed to load clients: ${state.clientsError}')
+                                  : state.locationsError != null
+                                      ? Text(
+                                          'Failed to load locations: ${state.locationsError}')
+                                      : const SizedBox.shrink(),
+                          ElevatedButton(
+                            onPressed: () =>
+                                context.read<SalesOrderCubit>().fetchData(),
+                            child: RichText(
+                                text: TextSpan(
+                                    text: 'Retry',
+                                    style: SmTextTheme.confirmButtonTextStyle(
+                                        context))),
+                          ),
+                        ],
+                      ),
                     ),
                   );
                 }
@@ -228,14 +252,14 @@ class _AddUpdateSalesOrderPageState extends State<AddUpdateSalesOrderPage> {
                             },
                             child: AbsorbPointer(
                               absorbing: state.clientSelected,
-                              // Disable input if read-only
                               child: TypeAheadField<ClientModel>(
                                 controller: controller,
                                 builder: (context, controller, focusNode) =>
                                     TextField(
                                   controller: controller,
-                                  enabled: !(widget.isDisabled ||
-                                      (widget.isFromEdit && !isEditEnabled)),
+                                  enabled: !widget.isDisabled &&
+                                      (!widget.isFromEdit ||
+                                          (widget.isFromEdit && isEditEnabled)),
                                   focusNode: focusNode,
                                   style: SmTextTheme.confirmButtonTextStyle(
                                           context)
@@ -244,12 +268,17 @@ class _AddUpdateSalesOrderPageState extends State<AddUpdateSalesOrderPage> {
                                               SmTextTheme.getResponsiveSize(
                                                   context, 12)),
                                   decoration: InputDecoration(
-                                    errorText: form.control('client').valid ||
-                                            widget.isDisabled ||
+                                    errorText: widget.isDisabled ||
                                             (widget.isFromEdit &&
                                                 !isEditEnabled)
                                         ? null
-                                        : 'Please add client',
+                                        : form.control('client').isNotNull &&
+                                                form
+                                                    .control('client')
+                                                    .value
+                                                    .isNotEmpty
+                                            ? null
+                                            : 'Please add client',
                                     prefix: const Icon(Icons.search),
                                     border: OutlineInputBorder(
                                         borderRadius:
@@ -290,7 +319,7 @@ class _AddUpdateSalesOrderPageState extends State<AddUpdateSalesOrderPage> {
                                   ),
                                 ),
                                 onSelected: (value) {
-                                  form.patchValue({'client': value.id});
+                                  form.patchValue({'client': value.userId});
                                   controller.text =
                                       '${value.firstName} ${value.lastName}';
                                   context
@@ -298,6 +327,21 @@ class _AddUpdateSalesOrderPageState extends State<AddUpdateSalesOrderPage> {
                                       .setFieldReadOnly(true, 'client');
                                 },
                                 suggestionsCallback: (String search) {
+                                  if (search.isNotEmpty) {
+                                    return state.clients
+                                        ?.where((client) =>
+                                            (client.firstName != null &&
+                                                client.firstName!
+                                                    .toLowerCase()
+                                                    .contains(search
+                                                        .toLowerCase())) ||
+                                            (client.lastName != null &&
+                                                client.lastName!
+                                                    .toLowerCase()
+                                                    .contains(
+                                                        search.toLowerCase())))
+                                        .toList();
+                                  }
                                   return state.clients;
                                 },
                               ),
@@ -312,18 +356,24 @@ class _AddUpdateSalesOrderPageState extends State<AddUpdateSalesOrderPage> {
                                 TextField(
                               controller: controller,
                               focusNode: focusNode,
-                              enabled: !(widget.isDisabled ||
-                                  (widget.isFromEdit && !isEditEnabled)),
+                              enabled: !widget.isDisabled &&
+                                  (!widget.isFromEdit ||
+                                      (widget.isFromEdit && isEditEnabled)),
                               style: SmTextTheme.confirmButtonTextStyle(context)
                                   .copyWith(
                                       fontSize: SmTextTheme.getResponsiveSize(
                                           context, 12)),
                               decoration: InputDecoration(
-                                errorText: form.control('services').valid ||
-                                        widget.isDisabled ||
+                                errorText: widget.isDisabled ||
                                         (widget.isFromEdit && !isEditEnabled)
                                     ? null
-                                    : 'Please add services',
+                                    : form.control('services').isNotNull &&
+                                            form
+                                                .control('services')
+                                                .value
+                                                .isNotEmpty
+                                        ? null
+                                        : 'Please add services',
                                 prefix: const Icon(Icons.search),
                                 border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(16.0)),
@@ -370,12 +420,28 @@ class _AddUpdateSalesOrderPageState extends State<AddUpdateSalesOrderPage> {
                               });
                             },
                             suggestionsCallback: (String search) {
+                              if (search.isNotEmpty) {
+                                return state.clients
+                                    ?.firstWhere((client) =>
+                                        client.userId ==
+                                        form.control('client').value)
+                                    .services
+                                    ?.where((service) =>
+                                        service.serviceName != null &&
+                                        service.serviceName!
+                                            .toLowerCase()
+                                            .contains(search.toLowerCase()))
+                                    .toList();
+                              }
                               return state.clients
                                   ?.firstWhere((client) =>
-                                      client.id == form.control('client').value)
+                                      client.userId == form.control('client').value)
                                   .services;
                             },
                           ),
+                          SizedBox(
+                              height:
+                                  SmTextTheme.getResponsiveSize(context, 20.0)),
                           _buildServiceFields(),
                           SizedBox(
                               height:
@@ -433,13 +499,14 @@ class _AddUpdateSalesOrderPageState extends State<AddUpdateSalesOrderPage> {
                             },
                             child: AbsorbPointer(
                               absorbing: state.locationSelected,
-                              // Disable input if read-only
                               child: TypeAheadField<LocationModel>(
                                 controller: controller3,
                                 builder: (context, controller, focusNode) =>
                                     TextField(
-                                  enabled: !(widget.isDisabled ||
-                                      (widget.isFromEdit && !isEditEnabled)),
+                                  enabled: !widget.isDisabled &&
+                                      (widget.isFromEdit
+                                          ? isEditEnabled
+                                          : true),
                                   controller: controller,
                                   focusNode: focusNode,
                                   style: SmTextTheme.confirmButtonTextStyle(
@@ -449,12 +516,17 @@ class _AddUpdateSalesOrderPageState extends State<AddUpdateSalesOrderPage> {
                                               SmTextTheme.getResponsiveSize(
                                                   context, 12)),
                                   decoration: InputDecoration(
-                                    errorText: form.control('location').valid ||
-                                            widget.isDisabled ||
+                                    errorText: widget.isDisabled ||
                                             (widget.isFromEdit &&
                                                 !isEditEnabled)
                                         ? null
-                                        : 'location is Required',
+                                        : form.control('location').isNotNull &&
+                                                form
+                                                    .control('location')
+                                                    .value
+                                                    .isNotEmpty
+                                            ? null
+                                            : 'location is Required',
                                     prefix: const Icon(Icons.search),
                                     border: OutlineInputBorder(
                                         borderRadius:
@@ -502,6 +574,21 @@ class _AddUpdateSalesOrderPageState extends State<AddUpdateSalesOrderPage> {
                                       .setFieldReadOnly(true, 'location');
                                 },
                                 suggestionsCallback: (String search) {
+                                  if (search.isNotEmpty) {
+                                    return state.locations
+                                        ?.where((location) =>
+                                            (location.address != null &&
+                                                location.address!
+                                                    .toLowerCase()
+                                                    .contains(search
+                                                        .toLowerCase())) ||
+                                            (location.locationName != null &&
+                                                location.locationName!
+                                                    .toLowerCase()
+                                                    .contains(
+                                                        search.toLowerCase())))
+                                        .toList();
+                                  }
                                   return state.locations;
                                 },
                               ),
@@ -514,8 +601,8 @@ class _AddUpdateSalesOrderPageState extends State<AddUpdateSalesOrderPage> {
                             controller: controller4,
                             builder: (context, controller, focusNode) =>
                                 TextField(
-                              enabled: !(widget.isDisabled ||
-                                  (widget.isFromEdit && !isEditEnabled)),
+                              enabled: !widget.isDisabled ||
+                                  (widget.isFromEdit && isEditEnabled),
                               controller: controller,
                               focusNode: focusNode,
                               style: SmTextTheme.confirmButtonTextStyle(context)
@@ -568,7 +655,7 @@ class _AddUpdateSalesOrderPageState extends State<AddUpdateSalesOrderPage> {
                                 selectedServices
                                     .add(FormControl<SoEmployeeParam>(
                                   value: SoEmployeeParam(
-                                      employeeId: value.id,
+                                      employeeId: value.userId,
                                       employeeName:
                                           '${value.firstName} ${value.lastName}',
                                       isAssigned: false),
@@ -576,7 +663,31 @@ class _AddUpdateSalesOrderPageState extends State<AddUpdateSalesOrderPage> {
                               });
                             },
                             suggestionsCallback: (String search) {
-                              return state.employees;
+                              if (search.isNotEmpty) {
+                                return state.employees
+                                    ?.where((employee) =>
+                                        (employee.userRole != null &&
+                                            (employee.userRole != 'admin' &&
+                                                employee.userRole !=
+                                                    'superAdmin')) &&
+                                        ((employee.firstName != null &&
+                                                employee.firstName!
+                                                    .toLowerCase()
+                                                    .contains(search
+                                                        .toLowerCase())) ||
+                                            (employee.lastName != null &&
+                                                employee.lastName!
+                                                    .toLowerCase()
+                                                    .contains(
+                                                        search.toLowerCase()))))
+                                    .toList();
+                              }
+                              return state.employees
+                                  ?.where((employee) => (employee.userRole !=
+                                          null &&
+                                      (employee.userRole != '"admin' &&
+                                          employee.userRole != 'superAdmin')))
+                                  .toList();
                             },
                           ),
                           SizedBox(
@@ -676,11 +787,13 @@ class _AddUpdateSalesOrderPageState extends State<AddUpdateSalesOrderPage> {
                           SizedBox(
                             width: double.infinity,
                             child: CustomSmButton(
-                              text: widget.isDisabled ||
-                                      (widget.isFromEdit && !isEditEnabled)
-                                  ? "Survey"
-                                  : widget.isFromEdit
-                                      ? "Update"
+                              text: widget.isFromEdit &&
+                                      isEditEnabled &&
+                                      !widget.isDisabled
+                                  ? "Update"
+                                  : widget.isDisabled ||
+                                          (widget.isFromEdit && !isEditEnabled)
+                                      ? "Survey"
                                       : "Add",
                               onTap: () {
                                 if (widget.isDisabled ||
@@ -689,6 +802,20 @@ class _AddUpdateSalesOrderPageState extends State<AddUpdateSalesOrderPage> {
                                       orderId:
                                           widget.salesOrderModel!.orderId!));
                                 } else if (form.valid) {
+                                  final List<SoEmployeeParam> employees = form
+                                      .control("employees")
+                                      .value
+                                      ?.where((element) => element != null)
+                                      .cast<SoEmployeeParam>()
+                                      .toList();
+                                  final result = employees.where(
+                                      (SoEmployeeParam element) =>
+                                          element.isAssigned ?? false);
+                                  if (result.isEmpty) {
+                                    CommonMethods.showToast(
+                                        context, "Please assign an employee.");
+                                    return;
+                                  }
                                   final List<SoServiceParam>? services = (form
                                           .control("services")
                                           .value as List?)
@@ -699,15 +826,9 @@ class _AddUpdateSalesOrderPageState extends State<AddUpdateSalesOrderPage> {
                                               priceType: element['priceType'],
                                               serviceId: element['id']))
                                       .toList();
-                                  final List<SoEmployeeParam> employees = form
-                                      .control("employees")
-                                      .value
-                                      ?.where((element) => element != null)
-                                      .cast<SoEmployeeParam>()
-                                      .toList();
                                   final ClientModel? client = state.clients
                                       ?.firstWhere((client) =>
-                                          client.id ==
+                                          client.userId ==
                                           form.control('client').value);
                                   final String products =
                                       form.control('products').value;
@@ -745,7 +866,7 @@ class _AddUpdateSalesOrderPageState extends State<AddUpdateSalesOrderPage> {
                                         location?.locationName ?? "",
                                         location?.address ?? "",
                                         comment ?? "",
-                                        client?.id ?? "",
+                                        client?.userId ?? "",
                                         orderDate!,
                                         products,
                                         noOfContainer ?? 0,
@@ -760,7 +881,7 @@ class _AddUpdateSalesOrderPageState extends State<AddUpdateSalesOrderPage> {
                                         location?.locationName ?? "",
                                         location?.address ?? "",
                                         comment ?? "",
-                                        client?.id ?? "",
+                                        client?.userId ?? "",
                                         orderDate!,
                                         products,
                                         noOfContainer ?? 0,
@@ -802,52 +923,58 @@ class _AddUpdateSalesOrderPageState extends State<AddUpdateSalesOrderPage> {
   }
 
   Widget addIconForTaxAndExpenses(bool isForTax) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        GestureDetector(
-          onTap: () {
-            setState(() {
-              if (isForTax) {
-                (form.control('tax') as FormArray).add(FormGroup({
-                  'taxName': FormControl<String>(
-                      /*validators: [Validators.required]*/),
-                  'description': FormControl<String>(
-                      /*validators: [Validators.required]*/),
-                  'sGST':
-                      FormControl<double>(validators: [Validators.required]),
-                  'cGST':
-                      FormControl<double>(validators: [Validators.required]),
-                }));
-              } else {
-                (form.control('otherExpenses') as FormArray).add(FormGroup({
-                  'expenseName':
-                      FormControl<String>(validators: [Validators.required]),
-                  'expensePrice':
-                      FormControl<double>(validators: [Validators.required]),
-                }));
+    return Visibility(
+      visible: !widget.isDisabled,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          GestureDetector(
+            onTap: () {
+              if (!widget.isDisabled &&
+                  (widget.isFromEdit ? isEditEnabled : true)) {
+                setState(() {
+                  if (isForTax) {
+                    (form.control('tax') as FormArray).add(FormGroup({
+                      'taxName': FormControl<String>(
+                          /*validators: [Validators.required]*/),
+                      'description': FormControl<String>(
+                          /*validators: [Validators.required]*/),
+                      'sGST': FormControl<double>(
+                          validators: [Validators.required]),
+                      'cGST': FormControl<double>(
+                          validators: [Validators.required]),
+                    }));
+                  } else {
+                    (form.control('otherExpenses') as FormArray).add(FormGroup({
+                      'expenseName': FormControl<String>(
+                          validators: [Validators.required]),
+                      'expensePrice': FormControl<double>(
+                          validators: [Validators.required]),
+                    }));
+                  }
+                });
               }
-            });
-          },
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                RichText(
-                    text: TextSpan(
-                  text: isForTax ? "Add Tax" : "Add Expenses",
-                  style: SmTextTheme.confirmButtonTextStyle(context).copyWith(
-                      fontSize: SmTextTheme.getResponsiveSize(context, 14.0)),
-                )),
-                SizedBox(width: SmTextTheme.getResponsiveSize(context, 12)),
-                const Icon(Icons.add),
-              ],
+            },
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  RichText(
+                      text: TextSpan(
+                    text: isForTax ? "Tax" : "Expenses",
+                    style: SmTextTheme.confirmButtonTextStyle(context).copyWith(
+                        fontSize: SmTextTheme.getResponsiveSize(context, 14.0)),
+                  )),
+                  SizedBox(width: SmTextTheme.getResponsiveSize(context, 12)),
+                  const Icon(Icons.add),
+                ],
+              ),
             ),
           ),
-        ),
-        SizedBox(height: SmTextTheme.getResponsiveSize(context, 10.0)),
-      ],
+          SizedBox(height: SmTextTheme.getResponsiveSize(context, 10.0)),
+        ],
+      ),
     );
   }
 
@@ -859,6 +986,8 @@ class _AddUpdateSalesOrderPageState extends State<AddUpdateSalesOrderPage> {
           final formArrayControls = formArray as FormArray;
           if (widget.isDisabled || (widget.isFromEdit && !isEditEnabled)) {
             formArray.markAsDisabled();
+          } else {
+            formArray.markAsEnabled();
           }
           return ListView.builder(
               physics: const NeverScrollableScrollPhysics(),
@@ -893,8 +1022,7 @@ class _AddUpdateSalesOrderPageState extends State<AddUpdateSalesOrderPage> {
                           Expanded(
                             flex: 1,
                             child: Visibility(
-                              visible: !widget.isDisabled ||
-                                  (widget.isFromEdit && !isEditEnabled),
+                              visible: !widget.isDisabled,
                               child: Padding(
                                 padding: EdgeInsets.symmetric(
                                     horizontal: SmTextTheme.getResponsiveSize(
@@ -903,9 +1031,11 @@ class _AddUpdateSalesOrderPageState extends State<AddUpdateSalesOrderPage> {
                                     color: SmCommonColors.errorColor,
                                     icon: const Icon(Icons.clear_outlined),
                                     onPressed: () {
-                                      if (!widget.isDisabled &&
-                                          (widget.isFromEdit &&
-                                              isEditEnabled)) {
+                                      if ((!widget.isDisabled &&
+                                              widget.isFromEdit &&
+                                              isEditEnabled) ||
+                                          (!widget.isDisabled &&
+                                              !widget.isFromEdit)) {
                                         setState(() {
                                           selectedServices.remove(serviceGroup);
                                         });
@@ -1018,6 +1148,8 @@ class _AddUpdateSalesOrderPageState extends State<AddUpdateSalesOrderPage> {
           final formArrayControls = formArray as FormArray;
           if (widget.isDisabled || (widget.isFromEdit && !isEditEnabled)) {
             formArray.markAsDisabled();
+          } else {
+            formArray.markAsEnabled();
           }
           return ListView.builder(
               physics: const NeverScrollableScrollPhysics(),
@@ -1035,8 +1167,7 @@ class _AddUpdateSalesOrderPageState extends State<AddUpdateSalesOrderPage> {
                         Align(
                           alignment: Alignment.topRight,
                           child: Visibility(
-                            visible: !widget.isDisabled ||
-                                (widget.isFromEdit && !isEditEnabled),
+                            visible: !widget.isDisabled,
                             child: Padding(
                               padding: EdgeInsets.symmetric(
                                   horizontal: SmTextTheme.getResponsiveSize(
@@ -1046,7 +1177,9 @@ class _AddUpdateSalesOrderPageState extends State<AddUpdateSalesOrderPage> {
                                   icon: const Icon(Icons.clear_outlined),
                                   onPressed: () {
                                     if (!widget.isDisabled &&
-                                        (widget.isFromEdit && isEditEnabled)) {
+                                        (widget.isFromEdit
+                                            ? isEditEnabled
+                                            : true)) {
                                       setState(() {
                                         taxList.remove(taxGroup);
                                       });
@@ -1125,6 +1258,8 @@ class _AddUpdateSalesOrderPageState extends State<AddUpdateSalesOrderPage> {
           final formArrayControls = formArray as FormArray;
           if (widget.isDisabled || (widget.isFromEdit && !isEditEnabled)) {
             formArray.markAsDisabled();
+          } else {
+            formArray.markAsEnabled();
           }
           return ListView.builder(
               physics: const NeverScrollableScrollPhysics(),
@@ -1143,8 +1278,7 @@ class _AddUpdateSalesOrderPageState extends State<AddUpdateSalesOrderPage> {
                         Align(
                           alignment: Alignment.topRight,
                           child: Visibility(
-                            visible: !widget.isDisabled ||
-                                (widget.isFromEdit && !isEditEnabled),
+                            visible: !widget.isDisabled,
                             child: Padding(
                               padding: EdgeInsets.symmetric(
                                   horizontal: SmTextTheme.getResponsiveSize(
@@ -1154,7 +1288,9 @@ class _AddUpdateSalesOrderPageState extends State<AddUpdateSalesOrderPage> {
                                   icon: const Icon(Icons.clear_outlined),
                                   onPressed: () {
                                     if (!widget.isDisabled &&
-                                        (widget.isFromEdit && isEditEnabled)) {
+                                        (widget.isFromEdit
+                                            ? isEditEnabled
+                                            : true)) {
                                       setState(() {
                                         expenseList.remove(expenseGroup);
                                       });
@@ -1258,8 +1394,7 @@ class _AddUpdateSalesOrderPageState extends State<AddUpdateSalesOrderPage> {
               Expanded(
                 flex: 2,
                 child: Visibility(
-                  visible: !widget.isDisabled ||
-                      (widget.isFromEdit && !isEditEnabled),
+                  visible: !widget.isDisabled,
                   child: SizedBox(
                     height: SmTextTheme.getResponsiveSize(context, 28),
                     child: CustomSmButton(
@@ -1268,7 +1403,8 @@ class _AddUpdateSalesOrderPageState extends State<AddUpdateSalesOrderPage> {
                             isAssigned ? SmCommonColors.secondaryColor : null,
                         text: isAssigned ? "Assigned" : "Assign",
                         onTap: () {
-                          if (!widget.isDisabled) {
+                          if (!widget.isDisabled &&
+                              (widget.isFromEdit ? isEditEnabled : true)) {
                             setState(() {
                               employeeControl.value = SoEmployeeParam(
                                   employeeId: employeeId,
@@ -1283,8 +1419,7 @@ class _AddUpdateSalesOrderPageState extends State<AddUpdateSalesOrderPage> {
               Expanded(
                 flex: 1,
                 child: Visibility(
-                  visible: !widget.isDisabled ||
-                      (widget.isFromEdit && !isEditEnabled),
+                  visible: !widget.isDisabled,
                   child: Padding(
                     padding: EdgeInsets.symmetric(
                         horizontal: SmTextTheme.getResponsiveSize(context, 4)),
@@ -1293,7 +1428,7 @@ class _AddUpdateSalesOrderPageState extends State<AddUpdateSalesOrderPage> {
                         icon: const Icon(Icons.clear_outlined),
                         onPressed: () {
                           if (!widget.isDisabled &&
-                              (widget.isFromEdit && isEditEnabled)) {
+                              (widget.isFromEdit ? isEditEnabled : true)) {
                             setState(() {
                               selectedEmployee.remove(employeeControl);
                             });

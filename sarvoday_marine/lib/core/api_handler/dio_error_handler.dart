@@ -12,10 +12,12 @@ class DioErrorHandler {
         return "The server is taking too long to respond. Please try again later.";
       case DioExceptionType.sendTimeout:
         return "Unable to send data. Please check your connection and try again.";
+      case DioExceptionType.unknown:
+        return "Server is Down! Please try again in sometime";
       case DioExceptionType.badResponse:
-        if (dioError.response != null) {
-          return _handleStatusCode(
-              dioError.response!.statusCode, dioError.message);
+        if (dioError.response != null && dioError.response!.data != null) {
+          return _handleStatusCode(dioError.response!.data!["status"],
+              dioError.response!.data!['message']);
         } else {
           return "Something went wrong. Please try again later.";
         }
@@ -23,7 +25,7 @@ class DioErrorHandler {
         return "The server's security certificate is not valid. Please contact support.";
       case DioExceptionType.connectionError:
         if (dioError.error is SocketException) {
-          return "Server Failure! Please try again in sometime";
+          return "Unable to connect to the server. Please try again later.";
         } else {
           return "An unexpected error occurred. Please try again later.";
         }
@@ -42,7 +44,7 @@ class DioErrorHandler {
       case 403:
         return message ?? "You do not have permission to access this resource.";
       case 404:
-        return message ?? "The requested resource could not be found.";
+        return "The requested resource could not be found.";
       case 500:
         return "The server encountered an error. Please try again later.";
       case 502:

@@ -17,6 +17,8 @@ class SalesOrderModel {
   List<ExpenseParam>? _otherExpenses;
   String? _updatedAt;
   String? _createdAt;
+  double? _totalTax;
+  double? _totalInvoice;
 
   SalesOrderModel({
     String? id,
@@ -26,6 +28,8 @@ class SalesOrderModel {
     String? orderDate,
     int? noOfContainer,
     String? products,
+    double? totalTax,
+    double? totalInvoice,
     String? orderId,
     String? status,
     List<SoServiceParam>? services,
@@ -43,6 +47,8 @@ class SalesOrderModel {
     _orderDate = orderDate;
     _noOfContainer = noOfContainer;
     _products = products;
+    _totalTax = totalTax;
+    _totalInvoice = totalInvoice;
     _orderId = orderId;
     _status = status;
     _services = services;
@@ -62,6 +68,12 @@ class SalesOrderModel {
     _orderDate = json['orderDate'];
     _noOfContainer = json['noOfContainer'];
     _products = json['products'];
+    _totalTax = json['totalTax'] is int
+        ? json['totalTax'].toDouble()
+        : json['totalTax'];
+    _totalInvoice = json['totalInvoice'] is int
+        ? json['totalInvoice'].toDouble()
+        : json['totalInvoice'];
     _orderId = json['orderId'];
     _status = json['status'];
     _comments = json['comments'];
@@ -89,6 +101,8 @@ class SalesOrderModel {
     String? orderDate,
     int? noOfContainer,
     String? products,
+    double? totalTax,
+    double? totalInvoice,
     String? orderId,
     String? status,
     List<SoServiceParam>? services,
@@ -107,6 +121,8 @@ class SalesOrderModel {
       orderDate: orderDate ?? _orderDate,
       noOfContainer: noOfContainer ?? _noOfContainer,
       products: products ?? _products,
+      totalTax: totalTax ?? _totalTax,
+      totalInvoice: totalInvoice ?? _totalInvoice,
       orderId: orderId ?? _orderId,
       status: status ?? _status,
       services: services ?? _services,
@@ -132,6 +148,10 @@ class SalesOrderModel {
   int? get noOfContainer => _noOfContainer;
 
   String? get products => _products;
+
+  double? get totalTax => _totalTax;
+
+  double? get totalInvoice => _totalInvoice;
 
   String? get status => _status;
 

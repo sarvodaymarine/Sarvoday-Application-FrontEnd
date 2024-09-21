@@ -29,7 +29,6 @@ class ImageGridWidgetState extends State<ImageGridWidget> {
       itemCount: imageList.length,
       itemBuilder: (context, index) {
         final imageUrl = imageList[index]['imageUrl'] ?? '';
-        final error = imageList[index]['error'] ?? '';
         final imageFile = imageList[index]['imageFile'];
 
         return SizedBox(
@@ -50,8 +49,7 @@ class ImageGridWidgetState extends State<ImageGridWidget> {
                 },
                 child: Container(
                     width: double.infinity,
-                    height: SmTextTheme.getResponsiveSize(
-                        context, error != null && error != "" ? 120 : 100),
+                    height: SmTextTheme.getResponsiveSize(context, 100),
                     decoration: BoxDecoration(
                       color: Colors.grey[300],
                       borderRadius: BorderRadius.circular(8.0),

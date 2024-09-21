@@ -29,11 +29,11 @@ class ReportDataSourceImpl implements ReportDataSource {
   }
 
   @override
-  Future<Either<String, ReportModel>> updateReport(
-      String reportId, String serviceId, ServiceContainerModel param) async {
+  Future<Either<String, ReportModel>> updateReport(String reportId,
+      String serviceId, ServiceContainerModel param, bool isReviewed) async {
     try {
       final response = await dio.put(
-          '${StringConst.backEndBaseURL}reports/updateReport/$reportId/serviceReport/$serviceId',
+          '${StringConst.backEndBaseURL}reports/updateReport/$reportId/serviceReport/$serviceId/$isReviewed',
           data: jsonEncode(param.toJson()));
       if (response.statusCode == 200) {
         return Right(ReportModel.fromJson(response.data));

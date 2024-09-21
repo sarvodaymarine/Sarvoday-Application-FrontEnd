@@ -2,8 +2,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:sarvoday_marine/core/api_handler/token_manager.dart';
-import 'package:sarvoday_marine/core/navigation/app_route.dart';
-import 'package:sarvoday_marine/core/navigation/app_route.gr.dart';
+import 'package:sarvoday_marine/core/navigation/navigation_service.dart';
 import 'package:sarvoday_marine/core/utils/common/common_methods.dart';
 
 class DioClient {
@@ -13,9 +12,9 @@ class DioClient {
   DioClient._internal() {
     dio = Dio(
       BaseOptions(
-        connectTimeout: const Duration(seconds: 10),
-        sendTimeout: const Duration(seconds: 10),
-        receiveTimeout: const Duration(seconds: 10),
+        connectTimeout: const Duration(seconds: 30),
+        sendTimeout: const Duration(seconds: 30),
+        receiveTimeout: const Duration(seconds: 30),
       ),
     );
 
@@ -68,8 +67,7 @@ class DioClient {
 
   void _redirectToLogin() {
     TokenManager.clearToken();
-    final appRouter = AppRouter();
-    appRouter.replaceAll([SignInRoute()]);
+    NavigationService().navigateToLogin();
   }
 
   Future<Response> get(String url,

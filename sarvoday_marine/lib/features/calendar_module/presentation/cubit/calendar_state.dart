@@ -1,45 +1,27 @@
 part of 'calendar_cubit.dart';
 
-@immutable
-sealed class CalendarState extends Equatable {
+abstract class CalendarState extends Equatable {
   const CalendarState();
-}
-
-final class CMCalendarInitial extends CalendarState {
-  @override
-  List<Object> get props => [];
-}
-
-class CMAuthenticated extends CalendarState {
-  @override
-  List<Object?> get props => [];
-}
-
-class CMUnauthenticated extends CalendarState {
-  @override
-  List<Object?> get props => [];
-}
-
-class CMStateLoading extends CalendarState implements Equatable {
-  @override
-  List<Object> get props => [];
-
-  @override
-  bool? get stringify => null;
-}
-
-class CMStateNoData extends CalendarState {
-  @override
-  List<Object?> get props => [];
-}
-
-class CMStateErrorGeneral extends CalendarState {
-  final String errorMsg;
-
-  const CMStateErrorGeneral(this.errorMsg);
 
   @override
   List<Object?> get props => [];
+}
+
+class CalendarInitial extends CalendarState {}
+
+class CMStateLoading extends CalendarState {}
+
+class CMStateNoData extends CalendarState {}
+
+class CMStateLoadingMore extends CalendarState {}
+
+class CMStateError extends CalendarState {
+  final String message;
+
+  const CMStateError(this.message);
+
+  @override
+  List<Object?> get props => [message];
 }
 
 class CMStateOnCrudSuccess<T> extends CalendarState {
@@ -60,20 +42,29 @@ class CMStateOnCrudSuccess2<T> extends CalendarState {
   List<Object?> get props => [response];
 }
 
-class CMStateOnSuccess<T> extends CalendarState {
-  final T response;
+class CMStateOnSuccess extends CalendarState {
+  final Map<DateTime, List<SalesOrderModel>> response;
+  final DateTime selectedDay;
+  final DateTime focusedDay;
+  final CalendarFormat calendarFormat;
 
-  const CMStateOnSuccess(this.response);
+  const CMStateOnSuccess(
+    this.response,
+    this.selectedDay,
+    this.focusedDay,
+    this.calendarFormat,
+  );
 
   @override
-  List<Object?> get props => [response];
+  List<Object?> get props =>
+      [response, selectedDay, focusedDay, calendarFormat];
 }
 
-class CMValidationError extends CalendarState {
-  final String errorMessage;
+class CMStateUserTypeLoaded extends CalendarState {
+  final String userType;
 
-  const CMValidationError(this.errorMessage);
+  const CMStateUserTypeLoaded(this.userType);
 
   @override
-  List<Object?> get props => [errorMessage];
+  List<Object?> get props => [userType];
 }

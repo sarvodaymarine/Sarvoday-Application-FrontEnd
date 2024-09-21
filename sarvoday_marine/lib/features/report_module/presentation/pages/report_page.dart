@@ -139,16 +139,6 @@ class _ReportPageState extends State<ReportPage> {
                           );
                         },
                       ),
-                      /*  SizedBox(
-                  height: SmTextTheme.getResponsiveSize(context, 12),
-                ),
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: SmTextTheme.getResponsiveSize(context, 12)),
-                  child: SizedBox(
-                      width: double.infinity,
-                      child: CustomSmButton(text: "Submit", onTap: () {})),
-                ),*/
                     ],
                   )
                 : const NoItemsAvailable(),

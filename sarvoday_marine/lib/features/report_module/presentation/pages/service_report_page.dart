@@ -9,6 +9,7 @@ import 'package:sarvoday_marine/core/utils/common/common_methods.dart';
 import 'package:sarvoday_marine/core/utils/widgets/common_app_bar.dart';
 import 'package:sarvoday_marine/core/utils/widgets/custom_sm_button.dart';
 import 'package:sarvoday_marine/core/utils/widgets/custom_text_form_field.dart';
+import 'package:sarvoday_marine/core/utils/widgets/download_pdf.dart';
 import 'package:sarvoday_marine/features/report_module/data/models/container_model.dart';
 import 'package:sarvoday_marine/features/report_module/data/models/image_config_model.dart';
 import 'package:sarvoday_marine/features/report_module/data/models/service_report.dart';
@@ -123,14 +124,20 @@ class _ServiceDetailPageState extends State<ServiceDetailPage> {
                     visible: userRole != "client",
                     child: Padding(
                       padding: EdgeInsets.symmetric(
+                          vertical: SmTextTheme.getResponsiveSize(context, 12),
                           horizontal:
                               SmTextTheme.getResponsiveSize(context, 12)),
                       child: SizedBox(
                           width: double.infinity,
                           child: CustomSmButton(
-                              text: formGroupList.every((form) => form.valid)
-                                  ? "Submit"
-                                  : "save",
+                              text: ((userRole == "admin" ||
+                                          userRole == "superAdmin") &&
+                                      serviceReportDetail?.reportStatus ==
+                                          "Completed")
+                                  ? "Reviewed"
+                                  : formGroupList.every((form) => form.valid)
+                                      ? "Submit"
+                                      : "save",
                               onTap: () async {
                                 final containerModels =
                                     await _createContainerModels(formGroupList);
@@ -139,17 +146,25 @@ class _ServiceDetailPageState extends State<ServiceDetailPage> {
                                     ServiceContainerModel(
                                   serviceName: serviceReportDetail?.serviceName,
                                   containerReports: containerModels,
-                                  reportStatus:
-                                      serviceReportDetail?.reportStatus,
+                                  reportStatus: ((userRole == "admin" ||
+                                              userRole == "superAdmin") &&
+                                          serviceReportDetail?.reportStatus ==
+                                              "Completed")
+                                      ? "Reviewed"
+                                      : serviceReportDetail?.reportStatus,
                                 );
                                 if (context.mounted) {
                                   context
                                       .read<ReportCubit>()
                                       .updateServiceReport(
-                                        widget.serviceId,
-                                        widget.reportId,
-                                        serviceReportResponse,
-                                      );
+                                          widget.serviceId,
+                                          widget.reportId,
+                                          serviceReportResponse,
+                                          ((userRole == "admin" ||
+                                                  userRole == "superAdmin") &&
+                                              serviceReportDetail
+                                                      ?.reportStatus ==
+                                                  "Completed"));
                                 }
                               })),
                     ),
@@ -341,7 +356,28 @@ class ContainerCard extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
       child: ExpansionTile(
-        title: Text(containerReport?.containerNo ?? "Container ${index + 1}"),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Flexible(
+              child: RichText(
+                  maxLines: 2,
+                  text: TextSpan(
+                      style: SmTextTheme.labelDescriptionStyle(context),
+                      text: containerReport?.containerNo ??
+                          "Container ${index + 1}")),
+            ),
+            if (containerReport != null &&
+                containerReport?.containerReportUrl != null &&
+                containerReport!.containerReportUrl!.isNotEmpty)
+              Padding(
+                  padding: EdgeInsets.symmetric(
+                      horizontal: SmTextTheme.getResponsiveSize(context, 14)),
+                  child: DownloadPDFButton(
+                    signedUrl: containerReport?.containerReportUrl ?? "",
+                  )),
+          ],
+        ),
         children: [
           ReactiveFormComponent(
             containerDetails: containerReport,

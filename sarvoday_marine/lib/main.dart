@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:sarvoday_marine/core/navigation/app_route.dart';
+import 'package:sarvoday_marine/core/navigation/navigation_service.dart';
 import 'package:sarvoday_marine/core/theme/sm_app_theme.dart';
 import 'package:sarvoday_marine/core/utils/constants/string_const.dart';
 import 'package:sarvoday_marine/features/service_module/service_module_injection_container.dart'
@@ -40,6 +42,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+    NavigationService().setRouter(_router);
     return MaterialApp.router(
       title: StringConst.appTitle,
       debugShowCheckedModeBanner: false,

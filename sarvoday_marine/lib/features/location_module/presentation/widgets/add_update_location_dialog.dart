@@ -9,9 +9,9 @@ import 'package:sarvoday_marine/features/location_module/presentation/cubit/loca
 class AddUpdateLocationDialog {
   static showLocationDialog(BuildContext context2, bool isEditDialog,
       {String locationName = "",
-      String address = "",
-      String locationCode = '',
-      String locationId = ""}) {
+        String address = "",
+        String locationCode = '',
+        String locationId = ""}) {
     final FormGroup form = FormGroup({
       "locationName": FormControl<String>(validators: [
         Validators.required,
@@ -23,6 +23,7 @@ class AddUpdateLocationDialog {
         Validators.required,
       ], value: locationCode),
     });
+    final locationCubit = context2.read<LocationCubit>();
     return showDialog(
       context: context2,
       builder: (BuildContext context) {
@@ -59,7 +60,7 @@ class AddUpdateLocationDialog {
                           labelText: "Location Name",
                           labelStyle: TextStyle(
                               fontSize:
-                                  SmTextTheme.getResponsiveSize(context, 16.0),
+                              SmTextTheme.getResponsiveSize(context, 16.0),
                               fontWeight: FontWeight.w400,
                               color: SmAppTheme.isDarkMode(context)
                                   ? SmColorDarkTheme.secondaryTextColor
@@ -67,7 +68,7 @@ class AddUpdateLocationDialog {
                         ),
                         validationMessages: {
                           ValidationMessage.required: (error) =>
-                              "Location Name is Required",
+                          "Location Name is Required",
                         },
                       ),
                       SizedBox(
@@ -87,7 +88,7 @@ class AddUpdateLocationDialog {
                                     : SmColorLightTheme.secondaryTextColor)),
                         validationMessages: {
                           ValidationMessage.required: (error) =>
-                              "Location code is Required",
+                          "Location code is Required",
                         },
                       ),
                       SizedBox(
@@ -109,7 +110,7 @@ class AddUpdateLocationDialog {
                                     : SmColorLightTheme.secondaryTextColor)),
                         validationMessages: {
                           ValidationMessage.required: (error) =>
-                              "Address is Required",
+                          "Address is Required",
                         },
                       ),
                       SizedBox(
@@ -127,8 +128,8 @@ class AddUpdateLocationDialog {
                       text: 'Cancel',
                       style: SmTextTheme.cancelButtonTextStyle(context)
                           .copyWith(
-                              fontSize:
-                                  SmTextTheme.getResponsiveSize(context, 14)))),
+                          fontSize:
+                          SmTextTheme.getResponsiveSize(context, 14)))),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -139,21 +140,33 @@ class AddUpdateLocationDialog {
                       text: 'Submit',
                       style: SmTextTheme.confirmButtonTextStyle(context)
                           .copyWith(
-                              fontSize:
-                                  SmTextTheme.getResponsiveSize(context, 14)))),
+                          fontSize:
+                          SmTextTheme.getResponsiveSize(context, 14)))),
               onPressed: () async {
                 if (form.valid) {
                   if (isEditDialog) {
-                    context2.read<LocationCubit>().updatedLocation(
+                    await locationCubit.updatedLocation(
                         locationId,
-                        form.control("locationName").value,
-                        form.control('address').value,
-                        form.control("locationCode").value);
+                        form
+                            .control("locationName")
+                            .value,
+                        form
+                            .control('address')
+                            .value,
+                        form
+                            .control("locationCode")
+                            .value);
                   } else {
-                    await context2.read<LocationCubit>().addLocation(
-                        form.control("locationName").value,
-                        form.control('address').value,
-                        form.control('locationCode').value);
+                    await locationCubit.addLocation(
+                        form
+                            .control("locationName")
+                            .value,
+                        form
+                            .control('address')
+                            .value,
+                        form
+                            .control('locationCode')
+                            .value);
                   }
                 } else {
                   form.markAllAsTouched();

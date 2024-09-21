@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sarvoday_marine/core/utils/common/common_methods.dart';
 import 'package:sarvoday_marine/features/calendar_module/data/models/sales_order_model.dart';
@@ -9,53 +8,23 @@ import 'package:sarvoday_marine/features/calendar_module/domain/use_cases/get_al
 import 'package:sarvoday_marine/features/calendar_module/domain/use_cases/get_sales_order_use_case.dart';
 import 'package:sarvoday_marine/features/calendar_module/domain/use_cases/update_sales_order_use_cases.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:table_calendar/table_calendar.dart';
 
 part 'calendar_state.dart';
 
 class CalendarCubit extends Cubit<CalendarState> {
   CalendarCubit(this.addSalesOrderUseCase, this.getAllSalesOrderUseCases,
       this.getSalesOrderUseCases, this.updateSalesOrderUseCase)
-      : super(CMCalendarInitial());
+      : super(CalendarInitial());
   final AddSalesOrderUseCase addSalesOrderUseCase;
   final GetAllSalesOrderUseCases getAllSalesOrderUseCases;
   final UpdateSalesOrderUseCase updateSalesOrderUseCase;
   final GetSalesOrderUseCases getSalesOrderUseCases;
+  DateTime _selectedDay = DateTime.now();
+  DateTime _focusedDay = DateTime.now();
+  CalendarFormat _calendarFormat = CalendarFormat.week;
+  Map<DateTime, List<SalesOrderModel>> _events = {};
   String? userType = '';
-
-  getAllSalesOrders(
-      {bool needFetchData = false, bool isFromCalendar = false}) async {
-    if (needFetchData) {
-      emit(CMStateLoading());
-    }
-    Map<DateTime, List<SalesOrderModel>> calendarSalesOrder = {};
-    var res = await getAllSalesOrderUseCases.call();
-    res.fold((orders) {
-      if (isFromCalendar) {
-        for (var event in orders) {
-          DateTime date = CommonMethods.normalizeDateTime(
-              DateTime.parse(event.orderDate!).toLocal());
-          if (calendarSalesOrder.containsKey(date)) {
-            calendarSalesOrder[date]!.add(event);
-          } else {
-            calendarSalesOrder[date] = [event];
-          }
-        }
-      }
-      emit(CMStateOnSuccess(isFromCalendar ? calendarSalesOrder : orders));
-    }, (error) {
-      emit(CMStateErrorGeneral(error.toString()));
-    });
-  }
-
-  getSalesOrders(String id) async {
-    emit(CMStateLoading());
-    var res = await getSalesOrderUseCases.call(id);
-    res.fold((orders) {
-      emit(CMStateOnSuccess(orders));
-    }, (error) {
-      emit(CMStateErrorGeneral(error.toString()));
-    });
-  }
 
   calendarUiChanged(DateTime selectedDay, DateTime focusDay) {
     emit(CMStateOnCrudSuccess2(
@@ -92,8 +61,48 @@ class CalendarCubit extends Cubit<CalendarState> {
     res.fold((location) {
       emit(const CMStateOnCrudSuccess("Sales Order created SuccessFully"));
     }, (error) {
-      emit(CMStateErrorGeneral(error.toString()));
+      emit(CMStateError(error.toString()));
     });
+  }
+
+  Future<void> getSalesOrdersForWeek(
+      DateTime focusedDay, DateTime startDateOfWeek, DateTime lastDateOfWeek,
+      {bool needFetchData = false}) async {
+    emit(CMStateLoading());
+    _events = {};
+    _focusedDay = focusedDay;
+    final res =
+        await getAllSalesOrderUseCases.call(startDateOfWeek, lastDateOfWeek);
+    res.fold((orders) {
+      for (var event in orders) {
+        DateTime date = CommonMethods.normalizeDateTime(
+            DateTime.parse(event.orderDate!).toLocal());
+        if (_events.containsKey(date)) {
+          _events[date]!.add(event);
+        } else {
+          _events[date] = [event];
+        }
+      }
+      emit(CMStateOnSuccess(
+          _events, _selectedDay, _focusedDay, _calendarFormat));
+    }, (error) {
+      emit(CMStateError(error.toString()));
+    });
+  }
+
+  void setSelectedDay(DateTime selectedDay) {
+    _selectedDay = selectedDay;
+    emit(CMStateOnSuccess(_events, _selectedDay, _focusedDay, _calendarFormat));
+  }
+
+  void setFocusedDay(DateTime focusedDay) {
+    _focusedDay = focusedDay;
+    emit(CMStateOnSuccess(_events, _selectedDay, _focusedDay, _calendarFormat));
+  }
+
+  void setCalendarFormat(CalendarFormat calendarFormat) {
+    _calendarFormat = calendarFormat;
+    emit(CMStateOnSuccess(_events, _selectedDay, _focusedDay, _calendarFormat));
   }
 
   updateSalesOrders(
@@ -129,7 +138,7 @@ class CalendarCubit extends Cubit<CalendarState> {
     res.fold((location) {
       emit(const CMStateOnCrudSuccess("Sales Order updated SuccessFully"));
     }, (error) {
-      emit(CMStateErrorGeneral(error.toString()));
+      emit(CMStateError(error.toString()));
     });
   }
 

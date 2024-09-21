@@ -4,13 +4,13 @@ import 'package:sarvoday_marine/features/calendar_module/data/models/sales_order
 import 'package:sarvoday_marine/features/calendar_module/data/models/so_param_model.dart';
 
 abstract class CalendarRepository {
-  Future<Either<List<SalesOrderModel>, CommonFailure>> getAllSalesOrder();
+  Future<Either<List<SalesOrderModel>, String>> getAllSalesOrder(
+      DateTime startDateOfWeek, DateTime lastDateOfWeek);
 
-  Future<Either<bool, CommonFailure>> addSalesOrder(
-      SalesOrderParam salesOrderParam);
+  Future<Either<bool, String>> addSalesOrder(SalesOrderParam salesOrderParam);
 
-  Future<Either<SalesOrderModel, CommonFailure>> getSalesOrder(String id);
+  Future<Either<SalesOrderModel, String>> getSalesOrder(String id);
 
-  Future<Either<SalesOrderModel, CommonFailure>> updateSalesOrder(
+  Future<Either<SalesOrderModel, String>> updateSalesOrder(
       String orderId, SalesOrderParam salesOrderParam);
 }

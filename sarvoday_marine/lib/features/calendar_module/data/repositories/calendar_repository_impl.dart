@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:sarvoday_marine/core/failure/common_failure.dart';
 import 'package:sarvoday_marine/features/calendar_module/data/data_sources/calendar_data_source.dart';
 import 'package:sarvoday_marine/features/calendar_module/data/models/sales_order_model.dart';
 import 'package:sarvoday_marine/features/calendar_module/data/models/so_param_model.dart';
@@ -11,25 +10,25 @@ class CalendarRepositoryImpl implements CalendarRepository {
   CalendarRepositoryImpl(this.calendarDataSource);
 
   @override
-  Future<Either<bool, CommonFailure>> addSalesOrder(
+  Future<Either<bool, String>> addSalesOrder(
       SalesOrderParam salesOrderParam) async {
     return await calendarDataSource.addSalesOrder(salesOrderParam);
   }
 
   @override
-  Future<Either<List<SalesOrderModel>, CommonFailure>>
-      getAllSalesOrder() async {
-    return await calendarDataSource.getAllSalesOrder();
+  Future<Either<List<SalesOrderModel>, String>> getAllSalesOrder(
+      DateTime startDateOfWeek, DateTime lastDateOfWeek) async {
+    return await calendarDataSource.getAllSalesOrder(
+        startDateOfWeek, lastDateOfWeek);
   }
 
   @override
-  Future<Either<SalesOrderModel, CommonFailure>> getSalesOrder(
-      String id) async {
+  Future<Either<SalesOrderModel, String>> getSalesOrder(String id) async {
     return await calendarDataSource.getSalesOrder(id);
   }
 
   @override
-  Future<Either<SalesOrderModel, CommonFailure>> updateSalesOrder(
+  Future<Either<SalesOrderModel, String>> updateSalesOrder(
       String orderId, SalesOrderParam salesOrderParam) async {
     return await calendarDataSource.updateSalesOrder(orderId, salesOrderParam);
   }
