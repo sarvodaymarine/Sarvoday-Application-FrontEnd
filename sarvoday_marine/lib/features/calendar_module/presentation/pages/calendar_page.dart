@@ -182,31 +182,34 @@ class _CalendarPageState extends State<CalendarPage> {
         events[CommonMethods.normalizeDateTime(_selectedDay ?? _focusedDay)] ??
             [];
 
-    return ListView.builder(
-      shrinkWrap: true,
-      controller: _scrollController,
-      itemCount: orders.length,
-      itemBuilder: (context, index) {
-        return Padding(
-          padding: EdgeInsets.all(SmTextTheme.getResponsiveSize(context, 12)),
-          child: GestureDetector(
-            onTap: () async {
-              final result = await context.router.push(
-                AddUpdateSalesOrderRoute(
-                    isFromEdit: true,
-                    isClientOrSuperAdmin: isClientOrSuperAdmin,
-                    salesOrderModel: orders[index],
-                    isDisabled: isClientOREmployee),
+    return orders.isEmpty
+        ? const NoItemsAvailable()
+        : ListView.builder(
+            shrinkWrap: true,
+            controller: _scrollController,
+            itemCount: orders.length,
+            itemBuilder: (context, index) {
+              return Padding(
+                padding:
+                    EdgeInsets.all(SmTextTheme.getResponsiveSize(context, 12)),
+                child: GestureDetector(
+                  onTap: () async {
+                    final result = await context.router.push(
+                      AddUpdateSalesOrderRoute(
+                          isFromEdit: true,
+                          isClientOrSuperAdmin: isClientOrSuperAdmin,
+                          salesOrderModel: orders[index],
+                          isDisabled: isClientOREmployee),
+                    );
+                    if (result != null) {
+                      await _fetchDataForWeek();
+                    }
+                  },
+                  child: _buildOrderCard(orders[index]),
+                ),
               );
-              if (result != null) {
-                await _fetchDataForWeek();
-              }
             },
-            child: _buildOrderCard(orders[index]),
-          ),
-        );
-      },
-    );
+          );
   }
 
   Widget _buildOrderCard(SalesOrderModel order) {

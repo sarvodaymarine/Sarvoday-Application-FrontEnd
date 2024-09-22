@@ -34,8 +34,8 @@ class CalendarDataSourceImpl implements CalendarDataSource {
   Future<Either<List<SalesOrderModel>, String>> getAllSalesOrder(
       DateTime startDateOfWeek, DateTime lastDateOfWeek) async {
     try {
-      final startDate = startDateOfWeek.toUtc().toIso8601String();
-      final endDate = lastDateOfWeek.toUtc().toIso8601String();
+      final startDate = DateTime(startDateOfWeek.year, startDateOfWeek.month, startDateOfWeek.day, 0, 0, 0, 0, 0).toUtc();
+      final endDate = DateTime(lastDateOfWeek.year, lastDateOfWeek.month, lastDateOfWeek.day, 23, 59, 59, 999, 999).toUtc();
       final response = await dio.get(
           '${StringConst.backEndBaseURL}orders/getAllSalesOrders/$startDate/$endDate');
       if (response.statusCode == 200) {
