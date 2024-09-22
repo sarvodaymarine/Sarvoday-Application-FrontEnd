@@ -1,7 +1,9 @@
 import 'dart:convert';
 
 import 'package:dartz/dartz.dart';
+import 'package:dio/dio.dart';
 import 'package:sarvoday_marine/core/api_handler/api_handler_helper.dart';
+import 'package:sarvoday_marine/core/navigation/navigation_service.dart';
 import 'package:sarvoday_marine/core/utils/common/common_methods.dart';
 import 'package:sarvoday_marine/core/utils/constants/string_const.dart';
 import 'package:sarvoday_marine/features/report_module/data/data_sources/report_data_source.dart';
@@ -29,14 +31,18 @@ class ReportDataSourceImpl implements ReportDataSource {
   }
 
   @override
-  Future<Either<String, ReportModel>> updateReport(String reportId,
+  Future<Either<String, ServiceContainerModel>> updateReport(String reportId,
       String serviceId, ServiceContainerModel param, bool isReviewed) async {
     try {
       final response = await dio.put(
           '${StringConst.backEndBaseURL}reports/updateReport/$reportId/serviceReport/$serviceId/$isReviewed',
+          options: Options(receiveTimeout: const Duration(seconds: 300)),
           data: jsonEncode(param.toJson()));
-      if (response.statusCode == 200) {
-        return Right(ReportModel.fromJson(response.data));
+      if (response.statusCode == 401) {
+        NavigationService().navigateToLogin();
+        return Left(CommonMethods.commonErrorHandler(response));
+      } else if (response.statusCode == 200) {
+        return Right(ServiceContainerModel.fromJson(response.data));
       } else {
         return Left(CommonMethods.commonErrorHandler(response));
       }

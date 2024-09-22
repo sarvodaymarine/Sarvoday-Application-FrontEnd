@@ -435,7 +435,8 @@ class _AddUpdateSalesOrderPageState extends State<AddUpdateSalesOrderPage> {
                               }
                               return state.clients
                                   ?.firstWhere((client) =>
-                                      client.userId == form.control('client').value)
+                                      client.userId ==
+                                      form.control('client').value)
                                   .services;
                             },
                           ),

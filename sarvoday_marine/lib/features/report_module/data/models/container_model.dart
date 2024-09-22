@@ -21,6 +21,7 @@ class ContainerModel {
   String? baggageCondition;
   String? conclusion;
   String? containerReportUrl;
+  String? containerReportPath;
   List<ContainerImageModel>? containerImages;
 
   ContainerModel({
@@ -44,6 +45,7 @@ class ContainerModel {
     this.baggageCondition,
     this.conclusion,
     this.containerReportUrl,
+    this.containerReportPath,
     this.containerImages,
   });
 
@@ -69,6 +71,7 @@ class ContainerModel {
         baggageCondition: json['baggageCondition'],
         conclusion: json['conclusion'],
         containerReportUrl: json['containerReportUrl'],
+        containerReportPath: json['containerReportPath'],
         containerImages: (json['containerImages'] as List<dynamic>?)
             ?.map((item) => ContainerImageModel.fromJson(item))
             .toList());
@@ -96,6 +99,7 @@ class ContainerModel {
       'baggageCondition': baggageCondition,
       'conclusion': conclusion,
       'containerReportUrl': containerReportUrl,
+      'containerReportPath': containerReportPath,
       'containerImages':
           containerImages?.map((image) => image.toJson()).toList(),
     };
@@ -122,6 +126,7 @@ class ContainerModel {
     String? baggageCondition,
     String? conclusion,
     String? containerReportUrl,
+    String? containerReportPath,
     List<ContainerImageModel>? containerImages,
   }) {
     return ContainerModel(
@@ -145,6 +150,7 @@ class ContainerModel {
         baggageCondition: baggageCondition ?? this.baggageCondition,
         conclusion: conclusion ?? this.conclusion,
         containerReportUrl: containerReportUrl ?? this.containerReportUrl,
+        containerReportPath: containerReportPath ?? this.containerReportPath,
         containerImages: containerImages ?? this.containerImages);
   }
 }

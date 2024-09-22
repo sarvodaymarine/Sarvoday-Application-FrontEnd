@@ -8,6 +8,6 @@ abstract class ReportDataSource {
   Future<Either<ServiceContainerModel, String>> getServiceReport(
       String serviceId);
 
-  Future<Either<String, ReportModel>> updateReport(String reportId,
+  Future<Either<String, ServiceContainerModel>> updateReport(String reportId,
       String serviceId, ServiceContainerModel param, bool isReviewed);
 }

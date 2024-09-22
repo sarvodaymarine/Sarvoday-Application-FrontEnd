@@ -68,7 +68,7 @@ class _ServiceDetailPageState extends State<ServiceDetailPage> {
           }
         } else if (state is StateOnCrudSuccess) {
           hideLoadingDialog(context);
-          CommonMethods.showToast(context, "Report updated successfully");
+          CommonMethods.showToast(context, "Report Updated successfully");
         } else if (state is StateErrorGeneral) {
           hideLoadingDialog(context);
           CommonMethods.showToast(context, state.errorMsg);
@@ -76,8 +76,10 @@ class _ServiceDetailPageState extends State<ServiceDetailPage> {
       },
       builder: (context, state) {
         if (state is StateLoading) {
-          return const Center(
-            child: CircularProgressIndicator(),
+          return const Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(),
+            ),
           );
         } else if (state is StateOnSuccess2) {
           userRole = context.read<ReportCubit>().user;
@@ -86,6 +88,8 @@ class _ServiceDetailPageState extends State<ServiceDetailPage> {
           loadFormData();
         } else if (state is StateImageUploaded) {
           imageList = context.read<ReportCubit>().images;
+        } else if (state is StateOnCrudSuccess) {
+          serviceReportDetail = state.response;
         }
         return Scaffold(
             appBar: CommonAppBar(
@@ -104,6 +108,8 @@ class _ServiceDetailPageState extends State<ServiceDetailPage> {
                       final containerReport =
                           serviceReportDetail?.containerReports?[index];
                       return ContainerCard(
+                        serviceStatus:
+                            serviceReportDetail?.reportStatus ?? "Pending",
                         reportId: widget.reportId,
                         containerReport: containerReport,
                         serviceName: serviceReportDetail?.serviceName ?? "",
@@ -121,7 +127,11 @@ class _ServiceDetailPageState extends State<ServiceDetailPage> {
                     height: SmTextTheme.getResponsiveSize(context, 12),
                   ),
                   Visibility(
-                    visible: userRole != "client",
+                    visible: userRole != "client" ||
+                        !(userRole == "employee" &&
+                            (serviceReportDetail?.reportStatus == "Completed" ||
+                                serviceReportDetail?.reportStatus ==
+                                    "Reviewed")),
                     child: Padding(
                       padding: EdgeInsets.symmetric(
                           vertical: SmTextTheme.getResponsiveSize(context, 12),
@@ -130,10 +140,14 @@ class _ServiceDetailPageState extends State<ServiceDetailPage> {
                       child: SizedBox(
                           width: double.infinity,
                           child: CustomSmButton(
-                              text: ((userRole == "admin" ||
-                                          userRole == "superAdmin") &&
-                                      serviceReportDetail?.reportStatus ==
-                                          "Completed")
+                              text: ((serviceReportDetail?.isEdited ?? false) &&
+                                          (userRole == "admin" ||
+                                              userRole == "superAdmin") &&
+                                          serviceReportDetail?.reportStatus ==
+                                              "Completed") ||
+                                      (userRole == "superAdmin" &&
+                                          serviceReportDetail?.reportStatus ==
+                                              "Completed")
                                   ? "Reviewed"
                                   : formGroupList.every((form) => form.valid)
                                       ? "Submit"
@@ -146,12 +160,19 @@ class _ServiceDetailPageState extends State<ServiceDetailPage> {
                                     ServiceContainerModel(
                                   serviceName: serviceReportDetail?.serviceName,
                                   containerReports: containerModels,
-                                  reportStatus: ((userRole == "admin" ||
-                                              userRole == "superAdmin") &&
-                                          serviceReportDetail?.reportStatus ==
-                                              "Completed")
-                                      ? "Reviewed"
-                                      : serviceReportDetail?.reportStatus,
+                                  reportStatus:
+                                      ((serviceReportDetail?.isEdited ??
+                                                      false) &&
+                                                  ((userRole == "admin") &&
+                                                      serviceReportDetail
+                                                              ?.reportStatus ==
+                                                          "Completed")) ||
+                                              (userRole == "superAdmin" &&
+                                                  serviceReportDetail
+                                                          ?.reportStatus ==
+                                                      "Completed")
+                                          ? "Reviewed"
+                                          : serviceReportDetail?.reportStatus,
                                 );
                                 if (context.mounted) {
                                   context
@@ -251,7 +272,10 @@ class _ServiceDetailPageState extends State<ServiceDetailPage> {
         }));
       }
     }
-    if (userRole == "client") {
+    if (userRole == "client" ||
+        (userRole == "employee" &&
+            (serviceReportDetail?.reportStatus == "Completed" ||
+                serviceReportDetail?.reportStatus == "Reviewed"))) {
       disableAllFormGroups(formGroupList);
     }
   }
@@ -334,6 +358,7 @@ class ContainerCard extends StatelessWidget {
       required this.serviceName,
       required this.orderId,
       required this.index,
+      required this.serviceStatus,
       required this.userRole,
       required this.imageList,
       required this.serviceId,
@@ -346,6 +371,7 @@ class ContainerCard extends StatelessWidget {
   final String serviceName;
   final String orderId;
   final int index;
+  final String serviceStatus;
   final String serviceId;
   final String userRole;
   final List<Map<String, dynamic>> imageList;
@@ -369,12 +395,16 @@ class ContainerCard extends StatelessWidget {
             ),
             if (containerReport != null &&
                 containerReport?.containerReportUrl != null &&
-                containerReport!.containerReportUrl!.isNotEmpty)
+                containerReport!.containerReportUrl!.isNotEmpty &&
+                (userRole == "client" || userRole == "superAdmin"))
               Padding(
                   padding: EdgeInsets.symmetric(
                       horizontal: SmTextTheme.getResponsiveSize(context, 14)),
                   child: DownloadPDFButton(
                     signedUrl: containerReport?.containerReportUrl ?? "",
+                    fileName: (containerReport?.containerReportPath ?? "")
+                        .split('/')
+                        .last,
                   )),
           ],
         ),
@@ -382,6 +412,7 @@ class ContainerCard extends StatelessWidget {
           ReactiveFormComponent(
             containerDetails: containerReport,
             serviceId: serviceId,
+            serviceStatus: serviceStatus,
             serviceName: serviceName,
             orderId: orderId,
             imageList: imageList,
@@ -407,6 +438,7 @@ class ReactiveFormComponent extends StatefulWidget {
       required this.orderId,
       required this.userRole,
       required this.imageList,
+      required this.serviceStatus,
       required this.formGroupList,
       required this.form,
       required this.containerList});
@@ -415,6 +447,7 @@ class ReactiveFormComponent extends StatefulWidget {
   final String reportId;
   final String serviceId;
   final String serviceName;
+  final String serviceStatus;
   final String orderId;
   final String userRole;
   final List<Map<String, dynamic>> imageList;
@@ -560,7 +593,10 @@ class _ReactiveFormComponentState extends State<ReactiveFormComponent> {
                       "Baggage4"
                     ])),
             Visibility(
-              visible: widget.userRole != "client",
+              visible: widget.userRole != "client" ||
+                  !(widget.userRole == "employee" &&
+                      (widget.serviceStatus == "Completed" ||
+                          widget.serviceStatus == "Reviewed")),
               child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(

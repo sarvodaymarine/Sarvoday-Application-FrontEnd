@@ -34,9 +34,10 @@ class CalendarDataSourceImpl implements CalendarDataSource {
   Future<Either<List<SalesOrderModel>, String>> getAllSalesOrder(
       DateTime startDateOfWeek, DateTime lastDateOfWeek) async {
     try {
+      final startDate = startDateOfWeek.toUtc().toIso8601String();
+      final endDate = lastDateOfWeek.toUtc().toIso8601String();
       final response = await dio.get(
-          '${StringConst
-              .backEndBaseURL}orders/getAllSalesOrders/$startDateOfWeek/$lastDateOfWeek');
+          '${StringConst.backEndBaseURL}orders/getAllSalesOrders/$startDate/$endDate');
       if (response.statusCode == 200) {
         final List<SalesOrderModel> salesOrder = [];
         final jsonList = response.data;
@@ -56,7 +57,7 @@ class CalendarDataSourceImpl implements CalendarDataSource {
   Future<Either<SalesOrderModel, String>> getSalesOrder(String id) async {
     try {
       final response =
-      await dio.get('${StringConst.backEndBaseURL}orders/getOrder/$id');
+          await dio.get('${StringConst.backEndBaseURL}orders/getOrder/$id');
       if (response.statusCode == 200) {
         return left(SalesOrderModel.fromJson(response.data));
       } else {
@@ -68,8 +69,8 @@ class CalendarDataSourceImpl implements CalendarDataSource {
   }
 
   @override
-  Future<Either<SalesOrderModel, String>> updateSalesOrder(String orderId,
-      SalesOrderParam salesOrderParam) async {
+  Future<Either<SalesOrderModel, String>> updateSalesOrder(
+      String orderId, SalesOrderParam salesOrderParam) async {
     try {
       final response = await dio.put(
           '${StringConst.backEndBaseURL}orders/updateSalesOrder/$orderId',
