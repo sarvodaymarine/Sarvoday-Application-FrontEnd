@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:sarvoday_marine/features/report_module/data/models/report_model.dart';
 import 'package:sarvoday_marine/features/report_module/data/models/service_report.dart';
 import 'package:sarvoday_marine/features/report_module/domain/repositories/report_repository.dart';
 
@@ -8,8 +7,11 @@ class UpdateReportUseCases {
 
   UpdateReportUseCases(this.reportRepository);
 
-  Future<Either<String, ReportModel>> call(String reportId, String serviceId,
-      ServiceContainerModel serviceReport, bool isReviewed) async {
+  Future<Either<String, ServiceContainerModel>> call(
+      String reportId,
+      String serviceId,
+      ServiceContainerModel serviceReport,
+      bool isReviewed) async {
     return await reportRepository.updateReport(
         reportId, serviceId, serviceReport, isReviewed);
   }

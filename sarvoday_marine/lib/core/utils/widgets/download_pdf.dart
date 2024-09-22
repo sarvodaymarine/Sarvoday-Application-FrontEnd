@@ -1,16 +1,20 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:open_file/open_file.dart';
-import 'package:sarvoday_marine/core/api_handler/api_handler_helper.dart';
 import 'package:sarvoday_marine/core/theme/sm_color_theme.dart';
 import 'package:sarvoday_marine/core/theme/sm_text_theme.dart';
 
 class DownloadPDFButton extends StatefulWidget {
   final String signedUrl;
+  final String fileName;
 
-  const DownloadPDFButton({required this.signedUrl, super.key});
+  const DownloadPDFButton(
+      {required this.signedUrl, required this.fileName, super.key});
 
   @override
   DownloadPDFButtonState createState() => DownloadPDFButtonState();
@@ -18,26 +22,30 @@ class DownloadPDFButton extends StatefulWidget {
 
 class DownloadPDFButtonState extends State<DownloadPDFButton> {
   bool _isDownloading = false;
-  String _downloadStatus = '';
 
   Future<String> _downloadPDF() async {
     setState(() {
       _isDownloading = true;
-      _downloadStatus = 'Downloading...';
     });
-    final dio = DioClient.getInstance();
-    final response = await dio.get(widget.signedUrl);
+    final dio = Dio();
+    final response = await dio.get(widget.signedUrl,
+        options: Options(responseType: ResponseType.plain));
 
     if (response.statusCode == 200) {
       final appDirectory = await getApplicationDocumentsDirectory();
-      final file = File(
-          '${appDirectory.path}/downloads/${widget.signedUrl.split('/').last}');
+      final file = File('${appDirectory.path}/${widget.fileName}');
+      var responseData = response.data;
 
-      await file.writeAsBytes(response.data["bodyBytes"]);
+      if (responseData is String) {
+        Uint8List bodyBytes = Uint8List.fromList(responseData.codeUnits);
+
+        await file.writeAsBytes(bodyBytes);
+      } else if (responseData is Uint8List) {
+        await file.writeAsBytes(responseData);
+      }
 
       setState(() {
         _isDownloading = false;
-        _downloadStatus = 'Download completed!';
       });
 
       final result = await OpenFile.open(file.path);
@@ -50,7 +58,6 @@ class DownloadPDFButtonState extends State<DownloadPDFButton> {
     } else {
       setState(() {
         _isDownloading = false;
-        _downloadStatus = 'Download failed.';
       });
       return 'Download failed.';
     }
@@ -59,20 +66,21 @@ class DownloadPDFButtonState extends State<DownloadPDFButton> {
   @override
   Widget build(BuildContext context) {
     SmTextTheme.init(context);
-    return ElevatedButton(
-      onPressed: _isDownloading ? null : _downloadPDF,
+    return GestureDetector(
+      onTap: _isDownloading ? null : _downloadPDF,
       child: _isDownloading
           ? Row(
               children: [
-                const CircularProgressIndicator(),
-                const SizedBox(width: 10),
-                Text(_downloadStatus),
+                SizedBox(
+                    width: SmTextTheme.getResponsiveSize(context, 18),
+                    height: SmTextTheme.getResponsiveSize(context, 18),
+                    child: const CircularProgressIndicator()),
               ],
             )
           : Icon(
               Icons.download_sharp,
               color: SmCommonColors.secondaryColor,
-              size: SmTextTheme.getResponsiveSize(context, 14),
+              size: SmTextTheme.getResponsiveSize(context, 18),
             ),
     );
   }

@@ -15,7 +15,7 @@ class ReportRepositoryImpl implements ReportRepository {
   }
 
   @override
-  Future<Either<String, ReportModel>> updateReport(String reportId,
+  Future<Either<String, ServiceContainerModel>> updateReport(String reportId,
       String serviceId, ServiceContainerModel param, bool isReviewed) async {
     return await reportDataSource.updateReport(
         reportId, serviceId, param, isReviewed);

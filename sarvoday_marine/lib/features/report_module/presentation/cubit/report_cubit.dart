@@ -49,10 +49,13 @@ class ReportCubit extends Cubit<ReportState> {
     emit(StateNoData());
     var res = await updateReportUseCases.call(
         reportId, serviceId, serviceReport, isReviewed);
-    res.fold((location) {
-      emit(StateOnCrudSuccess("Report updated SuccessFully"));
-    }, (error) {
+    res.fold((error) {
       emit(StateErrorGeneral(error.toString()));
+    }, (service) {
+      service.containerReports?.forEach((element) {
+        images[element.containerId!] = getImageList(element);
+      });
+      emit(StateOnCrudSuccess(service));
     });
   }
 
