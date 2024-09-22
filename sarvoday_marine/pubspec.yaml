@@ -30,18 +30,16 @@ dependencies:
   flutter_svg: ^2.0.10+1
   shimmer: ^3.0.0
   fluttertoast: ^8.2.8
-  shared_preferences: ^2.3.2
   flutter_image_compress: ^2.3.0
+  shared_preferences: ^2.3.2
   path_provider: ^2.1.4
   path: ^1.9.0
   flutter_slidable: ^3.1.1
   hex: ^0.2.0
   crypto: ^3.0.5
-  aws_s3_upload: ^1.5.0
 
   file_picker: ^8.0.6
   image_picker: ^1.1.2
-  aws_signature_v4: ^0.6.3
 
   #  API calling
   dio: ^5.5.0+1

@@ -29,12 +29,12 @@ class ImagePickerService {
       return false;
     }
 
-    // if (!cameraStatus.isGranted || !storageStatus.isGranted) {
-    //   // Handle temporarily denied permissions
-    //   CommonMethods.showToast(
-    //       context, 'Permission denied. Please grant access.');
-    //   return false;
-    // }
+    if (!cameraStatus.isGranted || !storageStatus.isGranted) {
+      // Handle temporarily denied permissions
+      CommonMethods.showToast(
+          context, 'Permission denied. Please grant access.');
+      return false;
+    }
 
     // Permissions are granted
     return true;

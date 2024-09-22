@@ -14,14 +14,6 @@ packages:
     description: dart
     source: sdk
     version: "0.3.2"
-  amazon_cognito_identity_dart_2:
-    dependency: transitive
-    description:
-      name: amazon_cognito_identity_dart_2
-      sha256: ad550b054e19c1879f729f9f1b612f91f21f2c595623942a283564f9218ca6c8
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.5"
   analyzer:
     dependency: transitive
     description:
@@ -70,30 +62,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "9.0.0"
-  aws_common:
-    dependency: transitive
-    description:
-      name: aws_common
-      sha256: "310ff360f59eb8ca33841bfd01c8132be82910c0801f10cbd4d655a4809ff5e6"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.7.3"
-  aws_s3_upload:
-    dependency: "direct main"
-    description:
-      name: aws_s3_upload
-      sha256: "20683fa0de19c75d1f4c4f48d3a7ac7fa8e0cdfd370003c59b4234fb4aa4257b"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.5.0"
-  aws_signature_v4:
-    dependency: "direct main"
-    description:
-      name: aws_signature_v4
-      sha256: bdab328397aefde51cae62b6fcc2d2ba568dd9dcc9e77a2e28a4c498b823c57c
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.6.3"
   bloc:
     dependency: transitive
     description:
@@ -634,14 +602,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.2"
-  http2:
-    dependency: transitive
-    description:
-      name: http2
-      sha256: "9ced024a160b77aba8fb8674e38f70875e321d319e6f303ec18e87bd5a4b0c1d"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.3.0"
   http_multi_server:
     dependency: transitive
     description:
@@ -930,14 +890,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.0.2"
-  os_detect:
-    dependency: transitive
-    description:
-      name: os_detect
-      sha256: faf3bcf39515e64da8ff76b2f2805b20a6ff47ae515393e535f8579ff91d6b7f
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.1"
   package_config:
     dependency: transitive
     description:
@@ -1154,14 +1106,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "17.0.1"
-  recase:
-    dependency: transitive
-    description:
-      name: recase
-      sha256: e4eb4ec2dcdee52dcf99cb4ceabaffc631d7424ee55e56f280bc039737f89213
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.1.0"
   rxdart:
     dependency: "direct main"
     description:
@@ -1359,14 +1303,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.2.2"
-  uuid:
-    dependency: transitive
-    description:
-      name: uuid
-      sha256: "648e103079f7c64a36dc7d39369cabb358d377078a051d6ae2ad3aa539519313"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.0.7"
   vector_graphics:
     dependency: transitive
     description:
