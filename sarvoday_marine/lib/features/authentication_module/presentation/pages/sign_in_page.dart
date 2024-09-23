@@ -15,18 +15,31 @@ import 'package:sarvoday_marine/features/authentication_module/authentication_in
 import 'package:sarvoday_marine/features/authentication_module/presentation/cubit/sign_in_cubit.dart';
 
 @RoutePage()
-class SignInPage extends StatelessWidget implements AutoRouteWrapper {
-  SignInPage({super.key});
-
-  final FocusNode _emailFocus = FocusNode();
-  final FocusNode _passwordFocus = FocusNode();
+class SignInPage extends StatefulWidget implements AutoRouteWrapper {
+  const SignInPage({super.key});
 
   @override
-  Widget wrappedRoute(context) {
+  State<SignInPage> createState() => _SignInPageState();
+
+  @override
+  Widget wrappedRoute(BuildContext context) {
     return BlocProvider(
       create: (context) => authenticationSl<SignInCubit>(),
       child: this,
     );
+  }
+}
+
+class _SignInPageState extends State<SignInPage> {
+  final FocusNode _emailFocus = FocusNode();
+  final FocusNode _passwordFocus = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      FocusScope.of(context).requestFocus(_emailFocus);
+    });
   }
 
   final FormGroup signInForm = FormGroup({
@@ -43,6 +56,7 @@ class SignInPage extends StatelessWidget implements AutoRouteWrapper {
       ],
     ),
   });
+
   bool passwordObSecure = true;
 
   @override

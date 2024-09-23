@@ -390,8 +390,10 @@ class ContainerCard extends StatelessWidget {
                   maxLines: 2,
                   text: TextSpan(
                       style: SmTextTheme.labelDescriptionStyle(context),
-                      text: containerReport?.containerNo ??
-                          "Container ${index + 1}")),
+                      text: containerReport?.containerNo == null ||
+                              (containerReport?.containerNo ?? "").isEmpty
+                          ? "Container ${index + 1}"
+                          : containerReport?.containerNo ?? "")),
             ),
             if (containerReport != null &&
                 containerReport?.containerReportUrl != null &&

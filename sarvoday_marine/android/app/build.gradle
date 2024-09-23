@@ -9,11 +9,7 @@ def keystorePropertiesFile = rootProject.file('key.properties')
 
 if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
-    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
-    println "Keystore file: ${keystoreProperties['storeFile']}"
-    println "Key alias: ${keystoreProperties['keyAlias']}"
 } else {
-    println("root: ${rootProject.name}")
     println "key.properties file not found"
 }
 
@@ -49,6 +45,7 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        multiDexEnabled true
     }
 
     buildTypes {
@@ -59,6 +56,10 @@ android {
             signingConfig = signingConfigs.release
         }
     }
+}
+
+dependencies {
+    implementation("com.google.android.material:material:1.13.0-alpha06");
 }
 
 flutter {

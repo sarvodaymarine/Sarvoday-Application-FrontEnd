@@ -4,9 +4,9 @@ import 'package:country_picker/country_picker.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:reactive_forms/reactive_forms.dart';
 import 'package:sarvoday_marine/core/api_handler/dio_error_handler.dart';
-import 'package:sarvoday_marine/core/failure/common_failure.dart';
 import 'package:sarvoday_marine/core/theme/sm_color_theme.dart';
 import 'package:sarvoday_marine/core/theme/sm_text_theme.dart';
 import 'package:sarvoday_marine/core/utils/constants/image_path_const.dart';
@@ -22,6 +22,30 @@ class CommonMethods {
       backgroundColor: SmCommonColors.secondaryColor,
       textColor: SmColorLightTheme.textColor,
       fontSize: SmTextTheme.getResponsiveSize(context, 14.0),
+    );
+  }
+
+  static showPermissionDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Permissions Required'),
+        content: const Text(
+            'Permissions are permanently denied. Please enable them in settings.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              openAppSettings();
+              Navigator.pop(context);
+            },
+            child: const Text('Open Settings'),
+          ),
+        ],
+      ),
     );
   }
 

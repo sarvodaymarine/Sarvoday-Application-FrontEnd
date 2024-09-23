@@ -19,50 +19,29 @@ class ImagePickerService {
     }
 
     if (cameraStatus.isPermanentlyDenied || storageStatus.isPermanentlyDenied) {
-      _showPermissionDialog(context);
+      if (context.mounted) {
+        CommonMethods.showPermissionDialog(context);
+      }
       return false;
     }
 
     if (cameraStatus.isRestricted || storageStatus.isRestricted) {
-      CommonMethods.showToast(
-          context, 'Permission is restricted. You cannot access this feature.');
+      if (context.mounted) {
+        CommonMethods.showToast(context,
+            'Permission is restricted. You cannot access this feature.');
+      }
       return false;
     }
 
-    if (!cameraStatus.isGranted || !storageStatus.isGranted) {
-      // Handle temporarily denied permissions
-      CommonMethods.showToast(
-          context, 'Permission denied. Please grant access.');
-      return false;
-    }
+    // if (!cameraStatus.isGranted || !storageStatus.isGranted) {
+    //   // Handle temporarily denied permissions
+    //   CommonMethods.showToast(
+    //       context, 'Permission denied. Please grant access.');
+    //   return false;
+    // }
 
     // Permissions are granted
     return true;
-  }
-
-  // Show dialog to open app settings
-  void _showPermissionDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Permissions Required'),
-        content: const Text(
-            'Permissions are permanently denied. Please enable them in settings.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              openAppSettings();
-              Navigator.pop(context);
-            },
-            child: const Text('Open Settings'),
-          ),
-        ],
-      ),
-    );
   }
 
   Future<XFile?> _pickImage(BuildContext context, ImageSource source) async {
@@ -92,7 +71,9 @@ class ImagePickerService {
                 'Pick Image from Camera',
                 () async {
                   final image = await _pickImage(context, ImageSource.camera);
-                  Navigator.pop(context, image);
+                  if (context.mounted) {
+                    Navigator.pop(context, image);
+                  }
                 },
               ),
               SizedBox(
@@ -104,7 +85,9 @@ class ImagePickerService {
                 'Pick Image from Gallery',
                 () async {
                   final image = await _pickImage(context, ImageSource.gallery);
-                  Navigator.pop(context, image);
+                  if (context.mounted) {
+                    Navigator.pop(context, image);
+                  }
                 },
               ),
             ],

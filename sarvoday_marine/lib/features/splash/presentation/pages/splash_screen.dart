@@ -96,7 +96,7 @@ class SplashScreenState extends State<SplashScreen>
 
   void _navigateToSignIn() {
     if (mounted) {
-      AutoRouter.of(context).replace(SignInRoute());
+      AutoRouter.of(context).replaceAll([SignInRoute()]);
     }
   }
 

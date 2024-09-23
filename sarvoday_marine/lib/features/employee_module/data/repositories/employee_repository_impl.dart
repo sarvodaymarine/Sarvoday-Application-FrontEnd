@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:sarvoday_marine/core/failure/common_failure.dart';
 import 'package:sarvoday_marine/features/employee_module/data/data_sources/employee_data_source.dart';
 import 'package:sarvoday_marine/features/employee_module/data/models/employee_model.dart';
 import 'package:sarvoday_marine/features/employee_module/domain/repositories/employee_repository.dart';
