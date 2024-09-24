@@ -20,6 +20,12 @@ class StateImageUploaded<T> extends ReportState {
 
 class StateNoData extends ReportState {}
 
+class RefreshDropDownChange extends ReportState {
+  final String response;
+
+  RefreshDropDownChange(this.response);
+}
+
 class StateErrorGeneral extends ReportState {
   final String errorMsg;
 

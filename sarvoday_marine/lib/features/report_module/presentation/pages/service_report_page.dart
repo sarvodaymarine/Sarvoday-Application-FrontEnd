@@ -47,6 +47,9 @@ class _ServiceDetailPageState extends State<ServiceDetailPage> {
   List<FormGroup> formGroupList = [];
   ServiceContainerModel? serviceReportDetail;
   List<ContainerModel> containerList = [];
+  bool isFormInitialLoaded = false;
+  String dropDownValue = "";
+  bool isFromUpdate = false;
 
   @override
   void initState() {
@@ -90,6 +93,9 @@ class _ServiceDetailPageState extends State<ServiceDetailPage> {
           imageList = context.read<ReportCubit>().images;
         } else if (state is StateOnCrudSuccess) {
           serviceReportDetail = state.response;
+          isFromUpdate = true;
+        } else if (state is RefreshDropDownChange) {
+          dropDownValue = state.response;
         }
         return Scaffold(
             appBar: CommonAppBar(
@@ -200,76 +206,159 @@ class _ServiceDetailPageState extends State<ServiceDetailPage> {
   loadFormData() {
     if (serviceReportDetail != null &&
         serviceReportDetail?.containerReports != null) {
-      for (var containerDetails in serviceReportDetail!.containerReports!) {
-        formGroupList.add(FormGroup({
-          'id': FormControl<String>(
-            value: containerDetails.containerId ?? "",
-          ),
-          'containerNo': FormControl<String>(
-              value: containerDetails.containerNo ?? "",
-              validators: [Validators.required]),
-          'maxGrossWeight': FormControl<String>(
-              value: containerDetails.maxGrossWeight ?? "",
-              validators: [Validators.required]),
-          'tareWeight': FormControl<String>(
-              value: containerDetails.tareWeight ?? "",
-              validators: [Validators.required]),
-          'containerSize': FormControl<String>(
-              value: containerDetails.containerSize ?? "",
-              validators: [Validators.required]),
-          'batchNo': FormControl<String>(
-              value: containerDetails.batchNo ?? "",
-              validators: [Validators.required]),
-          'lineSealNo': FormControl<String>(
-              value: containerDetails.lineSealNo ?? "",
-              validators: [Validators.required]),
-          'customSealNo': FormControl<String>(
-              value: containerDetails.customSealNo ?? "",
-              validators: [Validators.required]),
-          'typeOfBaggage': FormControl<String>(
-              value: containerDetails.typeOfBaggage ?? "",
-              validators: [Validators.required]),
-          'quantity': FormControl<int>(
-              value: containerDetails.quantity,
-              validators: [Validators.required]),
-          'noOfPkg': FormControl<int>(
-              value: containerDetails.noOfPkg,
-              validators: [Validators.required]),
-          'netWeight': FormControl<String>(
-              value: containerDetails.netWeight ?? "",
-              validators: [Validators.required]),
-          'comment': FormControl<String>(
-              value: containerDetails.comment ?? "",
-              validators: (userRole == "admin" || userRole == "superAdmin")
-                  ? [Validators.required]
-                  : []),
-          'baggageName': FormControl<String>(
-              value: containerDetails.baggageName ?? "",
-              validators: [Validators.required]),
-          'background': FormControl<String>(
-              value: containerDetails.background ?? "",
-              validators: (userRole == "admin" || userRole == "superAdmin")
-                  ? [Validators.required]
-                  : []),
-          'survey': FormControl<String>(
-              value: containerDetails.survey ?? "",
-              validators: (userRole == "admin" || userRole == "superAdmin")
-                  ? [Validators.required]
-                  : []),
-          'packing': FormControl<String>(
-              value: containerDetails.packing ?? "",
-              validators: (userRole == "admin" || userRole == "superAdmin")
-                  ? [Validators.required]
-                  : []),
-          'baggageCondition': FormControl<String>(
-              value: containerDetails.baggageCondition ?? "",
-              validators: [Validators.required]),
-          'conclusion': FormControl<String>(
-              value: containerDetails.conclusion ?? "",
-              validators: (userRole == "admin" || userRole == "superAdmin")
-                  ? [Validators.required]
-                  : []),
-        }));
+      if (!isFormInitialLoaded) {
+        isFormInitialLoaded = true;
+        formGroupList = [];
+        for (var containerDetails in serviceReportDetail!.containerReports!) {
+          formGroupList.add(FormGroup({
+            'id': FormControl<String>(
+              value: containerDetails.containerId ?? "",
+            ),
+            'containerNo': FormControl<String>(
+                value: containerDetails.containerNo ?? "",
+                validators: [Validators.required]),
+            'maxGrossWeight': FormControl<String>(
+                value: containerDetails.maxGrossWeight ?? "",
+                validators: [Validators.required]),
+            'tareWeight': FormControl<String>(
+                value: containerDetails.tareWeight ?? "",
+                validators: [Validators.required]),
+            'containerSize': FormControl<String>(
+                value: containerDetails.containerSize ?? "",
+                validators: [Validators.required]),
+            'batchNo': FormControl<String>(
+                value: containerDetails.batchNo ?? "",
+                validators: [Validators.required]),
+            'lineSealNo': FormControl<String>(
+                value: containerDetails.lineSealNo ?? "",
+                validators: [Validators.required]),
+            'customSealNo': FormControl<String>(
+                value: containerDetails.customSealNo ?? "",
+                validators: [Validators.required]),
+            'typeOfBaggage': FormControl<String>(
+                value: containerDetails.typeOfBaggage ?? "",
+                validators: [Validators.required]),
+            'quantity': FormControl<int>(
+                value: containerDetails.quantity,
+                validators: [Validators.required]),
+            'noOfPkg': FormControl<int>(
+                value: containerDetails.noOfPkg,
+                validators: [Validators.required]),
+            'netWeight': FormControl<String>(
+                value: containerDetails.netWeight ?? "",
+                validators: [Validators.required]),
+            'comment': FormControl<String>(
+                value: containerDetails.comment ?? "",
+                validators: (userRole == "admin" || userRole == "superAdmin")
+                    ? [Validators.required]
+                    : []),
+            'baggageName': FormControl<String>(
+                value: containerDetails.baggageName ?? "",
+                validators: [Validators.required]),
+            'background': FormControl<String>(
+                value: containerDetails.background ?? "",
+                validators: (userRole == "admin" || userRole == "superAdmin")
+                    ? [Validators.required]
+                    : []),
+            'survey': FormControl<String>(
+                value: containerDetails.survey ?? "",
+                validators: (userRole == "admin" || userRole == "superAdmin")
+                    ? [Validators.required]
+                    : []),
+            'packing': FormControl<String>(
+                value: containerDetails.packing ?? "",
+                validators: (userRole == "admin" || userRole == "superAdmin")
+                    ? [Validators.required]
+                    : []),
+            'baggageCondition': FormControl<String>(
+                value: containerDetails.baggageCondition ?? "",
+                validators: [Validators.required]),
+            'conclusion': FormControl<String>(
+                value: containerDetails.conclusion ?? "",
+                validators: (userRole == "admin" || userRole == "superAdmin")
+                    ? [Validators.required]
+                    : []),
+          }));
+        }
+      } else if (dropDownValue.isNotEmpty && isFromUpdate) {
+        dropDownValue = "";
+        isFromUpdate = false;
+        for (int i = 0; i < formGroupList.length; i++) {
+          FormGroup formGroup = formGroupList[i];
+          ContainerModel containerDetails =
+              serviceReportDetail!.containerReports![i];
+          formGroup.patchValue({
+            'id': FormControl<String>(
+              value: containerDetails.containerId ?? "",
+            ),
+            'containerNo': FormControl<String>(
+                value: containerDetails.containerNo ?? "",
+                validators: [Validators.required]),
+            'maxGrossWeight': FormControl<String>(
+                value: containerDetails.maxGrossWeight ?? "",
+                validators: [Validators.required]),
+            'tareWeight': FormControl<String>(
+                value: containerDetails.tareWeight ?? "",
+                validators: [Validators.required]),
+            'containerSize': FormControl<String>(
+                value: containerDetails.containerSize ?? "",
+                validators: [Validators.required]),
+            'batchNo': FormControl<String>(
+                value: containerDetails.batchNo ?? "",
+                validators: [Validators.required]),
+            'lineSealNo': FormControl<String>(
+                value: containerDetails.lineSealNo ?? "",
+                validators: [Validators.required]),
+            'customSealNo': FormControl<String>(
+                value: containerDetails.customSealNo ?? "",
+                validators: [Validators.required]),
+            'typeOfBaggage': FormControl<String>(
+                value: dropDownValue.isNotEmpty
+                    ? dropDownValue
+                    : containerDetails.typeOfBaggage ?? "",
+                validators: [Validators.required]),
+            'quantity': FormControl<int>(
+                value: containerDetails.quantity,
+                validators: [Validators.required]),
+            'noOfPkg': FormControl<int>(
+                value: containerDetails.noOfPkg,
+                validators: [Validators.required]),
+            'netWeight': FormControl<String>(
+                value: containerDetails.netWeight ?? "",
+                validators: [Validators.required]),
+            'comment': FormControl<String>(
+                value: containerDetails.comment ?? "",
+                validators: (userRole == "admin" || userRole == "superAdmin")
+                    ? [Validators.required]
+                    : []),
+            'baggageName': FormControl<String>(
+                value: containerDetails.baggageName ?? "",
+                validators: [Validators.required]),
+            'background': FormControl<String>(
+                value: containerDetails.background ?? "",
+                validators: (userRole == "admin" || userRole == "superAdmin")
+                    ? [Validators.required]
+                    : []),
+            'survey': FormControl<String>(
+                value: containerDetails.survey ?? "",
+                validators: (userRole == "admin" || userRole == "superAdmin")
+                    ? [Validators.required]
+                    : []),
+            'packing': FormControl<String>(
+                value: containerDetails.packing ?? "",
+                validators: (userRole == "admin" || userRole == "superAdmin")
+                    ? [Validators.required]
+                    : []),
+            'baggageCondition': FormControl<String>(
+                value: containerDetails.baggageCondition ?? "",
+                validators: [Validators.required]),
+            'conclusion': FormControl<String>(
+                value: containerDetails.conclusion ?? "",
+                validators: (userRole == "admin" || userRole == "superAdmin")
+                    ? [Validators.required]
+                    : []),
+          });
+        }
       }
     }
     if (userRole == "client" ||
@@ -462,7 +551,6 @@ class ReactiveFormComponent extends StatefulWidget {
 }
 
 class _ReactiveFormComponentState extends State<ReactiveFormComponent> {
-  String currentTypeOfBaggage = "";
   final List<String> baggageOptions = [
     'Baggage1',
     'Baggage2',
@@ -634,9 +722,7 @@ class _ReactiveFormComponentState extends State<ReactiveFormComponent> {
           formControlName: formControlName,
           onChanged: (value) {
             if (value.isNotNullOrEmpty) {
-              setState(() {
-                currentTypeOfBaggage = value.value ?? "";
-              });
+              context.read<ReportCubit>().refreshUI(value.value ?? "");
             }
           },
           decoration: InputDecoration(

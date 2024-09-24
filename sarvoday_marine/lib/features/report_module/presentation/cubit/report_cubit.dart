@@ -83,6 +83,10 @@ class ReportCubit extends Cubit<ReportState> {
     return imageList;
   }
 
+  refreshUI(String dropDownValue) {
+    emit(RefreshDropDownChange(dropDownValue));
+  }
+
   uploadImageService(String reportId, String serviceId, String containerId,
       List<Map<String, dynamic>> imageList) async {
     emit(StateNoData());
