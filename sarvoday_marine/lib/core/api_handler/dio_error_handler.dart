@@ -15,9 +15,9 @@ class DioErrorHandler {
       case DioExceptionType.unknown:
         return "Server is Down! Please try again in sometime";
       case DioExceptionType.badResponse:
-        if (dioError.response != null && dioError.response!.data != null) {
-          return _handleStatusCode(dioError.response!.data!["status"],
-              dioError.response!.data!['message']);
+        if (dioError.response != null && dioError.response!.statusCode != null) {
+          return _handleStatusCode(dioError.response!.statusCode,
+              dioError.response!.statusMessage);
         } else {
           return "Something went wrong. Please try again later.";
         }

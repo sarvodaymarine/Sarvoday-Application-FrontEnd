@@ -12,9 +12,9 @@ class DioClient {
   DioClient._internal() {
     dio = Dio(
       BaseOptions(
-        connectTimeout: const Duration(seconds: 100),
-        sendTimeout: const Duration(seconds: 100),
-        receiveTimeout: const Duration(seconds: 100),
+        connectTimeout: const Duration(seconds: 300),
+        sendTimeout: const Duration(seconds: 300),
+        receiveTimeout: const Duration(seconds: 300),
       ),
     );
 

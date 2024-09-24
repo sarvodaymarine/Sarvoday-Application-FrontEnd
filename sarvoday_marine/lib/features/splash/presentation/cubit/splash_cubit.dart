@@ -28,8 +28,8 @@ class SplashCubit extends Cubit<SplashState> {
     } catch (dioError) {
       if (dioError is DioException &&
           dioError.response != null &&
-          dioError.response!.data != null &&
-          dioError.response!.data['status'] == 401) {
+          dioError.response!.statusCode != null &&
+          dioError.response!.statusCode == 401) {
         emit(UnAuthenticated());
       } else {
         emit(AuthError(CommonMethods.commonErrorHandler(dioError)));
