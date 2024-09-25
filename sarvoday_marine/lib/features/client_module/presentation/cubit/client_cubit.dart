@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sarvoday_marine/features/authentication_module/domain/use_cases/reset_password_use_case.dart';
 import 'package:sarvoday_marine/features/client_module/domain/use_cases/add_client_use_case.dart';
 import 'package:sarvoday_marine/features/client_module/domain/use_cases/delete_client_use_case.dart';
 import 'package:sarvoday_marine/features/client_module/domain/use_cases/disable_client_auth_use_case.dart';
@@ -14,6 +15,7 @@ class ClientCubit extends Cubit<ClientState> {
       this.getAllClientsUseCase,
       this.addClientUseCase,
       this.deleteClientUseCase,
+      this.resetPasswordUseCase,
       this.updateClientUseCase,
       this.disableClientAuthUseCase)
       : super(ClientInitial());
@@ -22,6 +24,7 @@ class ClientCubit extends Cubit<ClientState> {
   final AddClientUseCase addClientUseCase;
   final DeleteClientUseCase deleteClientUseCase;
   final UpdateClientUseCase updateClientUseCase;
+  final ResetPasswordUseCase resetPasswordUseCase;
   final DisableEnabledClientAuthUseCase disableClientAuthUseCase;
 
   getAllClient({bool needFetchData = false}) async {
@@ -71,12 +74,25 @@ class ClientCubit extends Cubit<ClientState> {
     });
   }
 
+  resetClientPassword(String userId) async {
+    emit(CStateNoData());
+    var res = await resetPasswordUseCase.call(userId);
+    res.fold((client) {
+      emit(CStateOnCrudSuccess(
+          "Reset password successfully sent to the client!"));
+      getAllClient(needFetchData: true);
+    }, (error) {
+      emit(CStateErrorGeneral(error.toString()));
+    });
+  }
+
   disableClient(String clientId, bool isActive) async {
     emit(CStateNoData());
     var res = await disableClientAuthUseCase.call(clientId, isActive);
     res.fold((client) {
-      emit(CStateOnCrudSuccess(
-          isActive ? "Client is authentication activated!" : "Client disabled!"));
+      emit(CStateOnCrudSuccess(isActive
+          ? "Client is authentication activated!"
+          : "Client disabled!"));
       getAllClient(needFetchData: true);
     }, (error) {
       emit(CStateErrorGeneral(error.toString()));

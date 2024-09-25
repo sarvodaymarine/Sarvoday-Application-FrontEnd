@@ -13,6 +13,7 @@ class ClientCardView extends StatelessWidget {
       required this.email,
       required this.mobile,
       required this.onDeleteClick,
+      required this.onResetClick,
       required this.isActive,
       required this.onDisableClick,
       required this.date});
@@ -22,31 +23,41 @@ class ClientCardView extends StatelessWidget {
   final String mobile;
   final bool isActive;
   final void Function(BuildContext)? onDisableClick;
+  final void Function(BuildContext)? onResetClick;
   final void Function(BuildContext)? onDeleteClick;
   final String date;
 
   @override
   Widget build(BuildContext context) {
+    SmTextTheme.init(context);
+    final padding = EdgeInsets.symmetric(
+      horizontal: SmTextTheme.getResponsiveSize(context, 8.0),
+      vertical: SmTextTheme.getResponsiveSize(context, 12.0),
+    );
+
+    final borderRadius = BorderRadius.circular(
+      SmTextTheme.getResponsiveSize(context, 12.0),
+    );
+
+    final primaryColor = SmAppTheme.isDarkMode(context)
+        ? SmColorDarkTheme.primaryColor
+        : SmColorLightTheme.primaryColor;
+
+    final backgroundColor = SmAppTheme.isDarkMode(context)
+        ? SmColorDarkTheme.backgroundColor
+        : SmColorLightTheme.backgroundColor;
     return Slidable(
         endActionPane: ActionPane(
-          extentRatio: 0.6,
+          extentRatio: 0.8,
           motion: const DrawerMotion(),
           children: [
             SlidableAction(
-              padding: EdgeInsets.symmetric(
-                  horizontal: SmTextTheme.getResponsiveSize(context, 4.0),
-                  vertical: SmTextTheme.getResponsiveSize(context, 12.0)),
-              borderRadius: BorderRadius.circular(
-                  SmTextTheme.getResponsiveSize(context, 12.0)),
+              padding: padding,
+              borderRadius: borderRadius,
               onPressed: onDisableClick,
-              backgroundColor: SmAppTheme.isDarkMode(context)
-                  ? SmColorDarkTheme.primaryColor
-                  : SmColorLightTheme.primaryColor,
-              foregroundColor: isActive
-                  ? SmAppTheme.isDarkMode(context)
-                      ? SmColorDarkTheme.backgroundColor
-                      : SmColorLightTheme.backgroundColor
-                  : SmCommonColors.secondaryColor,
+              backgroundColor: primaryColor,
+              foregroundColor:
+                  isActive ? backgroundColor : SmCommonColors.secondaryColor,
               icon: isActive
                   ? Icons.lock_person_rounded
                   : Icons.person_add_rounded,
@@ -55,16 +66,20 @@ class ClientCardView extends StatelessWidget {
                   : StringConst.provideAuth,
             ),
             SlidableAction(
-              padding: EdgeInsets.symmetric(
-                  horizontal: SmTextTheme.getResponsiveSize(context, 4.0),
-                  vertical: SmTextTheme.getResponsiveSize(context, 12.0)),
-              borderRadius: BorderRadius.circular(
-                  SmTextTheme.getResponsiveSize(context, 12.0)),
+              padding: padding,
+              borderRadius: borderRadius,
+              onPressed: onResetClick,
+              backgroundColor: SmCommonColors.secondaryColor,
+              foregroundColor: backgroundColor,
+              icon: Icons.lock_reset,
+              label: StringConst.resetAccount,
+            ),
+            SlidableAction(
+              padding: padding,
+              borderRadius: borderRadius,
               onPressed: onDeleteClick,
               backgroundColor: SmCommonColors.errorColor,
-              foregroundColor: SmAppTheme.isDarkMode(context)
-                  ? SmColorDarkTheme.backgroundColor
-                  : SmColorLightTheme.backgroundColor,
+              foregroundColor: backgroundColor,
               icon: Icons.delete,
               label: StringConst.deleteActionTxt,
             ),
@@ -92,7 +107,9 @@ class ClientCardView extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       text: TextSpan(
                         text: name,
-                        style: SmTextTheme.labelStyle3(context),
+                        style: SmTextTheme.labelStyle3(context).copyWith(
+                            fontSize:
+                                SmTextTheme.getResponsiveSize(context, 16.0)),
                       )),
                   SizedBox(
                       height: SmTextTheme.getResponsiveSize(context, 10.0)),

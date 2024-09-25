@@ -101,6 +101,12 @@ class ClientListPage extends StatelessWidget implements AutoRouteWrapper {
                                     clientList[item].userId!,
                                     !clientList[item].userDetail!.isActive!);
                               },
+                              onResetClick: (context) async {
+                                await context
+                                    .read<ClientCubit>()
+                                    .resetClientPassword(
+                                        clientList[item].userId!);
+                              },
                               onDeleteClick: (context) async {
                                 isDeleteAction = true;
                                 await context

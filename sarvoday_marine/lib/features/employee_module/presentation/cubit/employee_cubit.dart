@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sarvoday_marine/features/authentication_module/domain/use_cases/reset_password_use_case.dart';
 import 'package:sarvoday_marine/features/employee_module/domain/use_cases/add_employee_use_case.dart';
 import 'package:sarvoday_marine/features/employee_module/domain/use_cases/delete_employee_use_case.dart';
 import 'package:sarvoday_marine/features/employee_module/domain/use_cases/enable_disable_use_case.dart';
@@ -13,6 +14,7 @@ class EmployeeCubit extends Cubit<EmployeeState> {
       this.getAllEmployeesUseCase,
       this.addEmployeeUseCase,
       this.deleteEmployeeUseCase,
+      this.resetPasswordUseCase,
       this.updateEmployeeUseCase,
       this.enableDisableEmployeeUseCase)
       : super(EmployeeInitial());
@@ -22,6 +24,7 @@ class EmployeeCubit extends Cubit<EmployeeState> {
   final DeleteEmployeeUseCase deleteEmployeeUseCase;
   final UpdateEmployeeUseCase updateEmployeeUseCase;
   final EnableDisableEmployeeUseCase enableDisableEmployeeUseCase;
+  final ResetPasswordUseCase resetPasswordUseCase;
 
   getAllEmployee({bool needFetchData = false}) async {
     if (needFetchData) {
@@ -30,6 +33,17 @@ class EmployeeCubit extends Cubit<EmployeeState> {
     var res = await getAllEmployeesUseCase.call();
     res.fold((employee) {
       emit(EmpStateOnSuccess(employee));
+    }, (error) {
+      emit(EmpStateErrorGeneral(error.toString()));
+    });
+  }
+
+  resetEmployeePassword(String userId) async {
+    emit(EmpStateNoData());
+    var res = await resetPasswordUseCase.call(userId);
+    res.fold((client) {
+      emit(EmpStateOnCrudSuccess(
+          "Reset password successfully sent to the Employee!"));
     }, (error) {
       emit(EmpStateErrorGeneral(error.toString()));
     });

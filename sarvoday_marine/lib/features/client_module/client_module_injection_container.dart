@@ -13,8 +13,8 @@ import 'package:sarvoday_marine/features/client_module/presentation/cubit/client
 GetIt clientSl = GetIt.instance;
 
 Future<void> init() async {
-  clientSl.registerFactory(() =>
-      ClientCubit(clientSl(), clientSl(), clientSl(), clientSl(), clientSl()));
+  clientSl.registerFactory(() => ClientCubit(
+      clientSl(), clientSl(), clientSl(), clientSl(), clientSl(), clientSl()));
 
   clientSl.registerLazySingleton(() => GetAllClientsUseCase(clientSl()));
   clientSl.registerLazySingleton(() => AddClientUseCase(clientSl()));

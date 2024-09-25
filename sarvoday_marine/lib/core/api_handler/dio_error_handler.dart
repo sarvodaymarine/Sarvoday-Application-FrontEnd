@@ -44,7 +44,7 @@ class DioErrorHandler {
       case 403:
         return message ?? "You do not have permission to access this resource.";
       case 404:
-        return "The requested resource could not be found.";
+        return message ?? "The requested resource could not be found.";
       case 500:
         return "The server encountered an error. Please try again later.";
       case 502:

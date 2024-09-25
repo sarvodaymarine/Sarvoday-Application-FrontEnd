@@ -21,11 +21,10 @@ class StringConst {
   static String editActionTxt = 'Edit';
   static String provideAuth = '\tAccess\nAccount';
   static String disableAccount = 'Disable\nAccount';
+  static String resetAccount = '\t\tReset\nPassword';
   static String deleteActionTxt = 'Delete';
   static String loadingTxt = 'Loading...';
 
-  static String backEndBaseURL = /*'http://10.0.2.2:3000/api/'*/
-  /*'http://192.168.74.75:3000/api/'*/ /*'http://43.205.215.141:3000/api/'*/
-
-  'http://192.168.43.82:3000/api/';
+  static String backEndBaseURL =
+      'http://43.205.215.141:4000/api/' /* 'http://192.168.43.82:4000/api/'*/;
 }

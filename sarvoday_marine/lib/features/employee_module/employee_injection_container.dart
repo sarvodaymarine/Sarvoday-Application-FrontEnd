@@ -13,8 +13,8 @@ import 'package:sarvoday_marine/features/employee_module/presentation/cubit/empl
 GetIt employeeSl = GetIt.instance;
 
 Future<void> init() async {
-  employeeSl.registerFactory(() => EmployeeCubit(
-      employeeSl(), employeeSl(), employeeSl(), employeeSl(), employeeSl()));
+  employeeSl.registerFactory(() => EmployeeCubit(employeeSl(), employeeSl(),
+      employeeSl(), employeeSl(), employeeSl(), employeeSl()));
 
   employeeSl.registerLazySingleton(() => GetAllEmployeesUseCase(employeeSl()));
   employeeSl.registerLazySingleton(() => AddEmployeeUseCase(employeeSl()));

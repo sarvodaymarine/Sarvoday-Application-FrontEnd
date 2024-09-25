@@ -7,4 +7,6 @@ abstract class SignInRepository {
   Future<Either<String, bool>> changePassword(String password);
 
   Future<Either<String, UserModel>> getUserInfo();
+
+  Future<Either<bool, String>> resetPassword(String id);
 }

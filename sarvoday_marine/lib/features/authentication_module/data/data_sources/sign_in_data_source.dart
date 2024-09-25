@@ -7,4 +7,6 @@ abstract class SignInDataSource {
   Future<Either<String, bool>> changePassword(String newPassword);
 
   Future<Either<String, UserModel>> getUserInfo();
+
+  Future<Either<bool, String>> resetPassword(String id);
 }

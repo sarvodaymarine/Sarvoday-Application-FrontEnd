@@ -6,6 +6,7 @@ import 'package:sarvoday_marine/features/authentication_module/data/repositories
 import 'package:sarvoday_marine/features/authentication_module/domain/repositories/sign_in_repository.dart';
 import 'package:sarvoday_marine/features/authentication_module/domain/use_cases/change_password_use_case.dart';
 import 'package:sarvoday_marine/features/authentication_module/domain/use_cases/login_use_case.dart';
+import 'package:sarvoday_marine/features/authentication_module/domain/use_cases/reset_password_use_case.dart';
 import 'package:sarvoday_marine/features/authentication_module/presentation/cubit/sign_in_cubit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -19,6 +20,8 @@ Future<void> init() async {
       .registerLazySingleton(() => LoginUseCase(authenticationSl()));
   authenticationSl
       .registerLazySingleton(() => ChangePasswordUseCase(authenticationSl()));
+  authenticationSl
+      .registerLazySingleton(() => ResetPasswordUseCase(authenticationSl()));
 
   authenticationSl.registerLazySingleton<SignInRepository>(
       () => SignInRepositoryImpl(authenticationSl()));

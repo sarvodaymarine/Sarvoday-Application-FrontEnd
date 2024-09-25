@@ -14,6 +14,11 @@ class SignInRepositoryImpl implements SignInRepository {
   }
 
   @override
+  Future<Either<bool, String>> resetPassword(String id) async {
+    return await signInDataSource.resetPassword(id);
+  }
+
+  @override
   Future<Either<String, UserModel>> getUserInfo() async {
     return await signInDataSource.getUserInfo();
   }

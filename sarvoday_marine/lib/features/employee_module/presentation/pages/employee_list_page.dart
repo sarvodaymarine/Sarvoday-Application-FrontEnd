@@ -96,6 +96,12 @@ class EmployeeListPage extends StatelessWidget implements AutoRouteWrapper {
                                   '${employeeList[item].userDetail?.countryCode} ${employeeList[item].userDetail?.mobile}',
                               date: employeeList[item].createdAt ?? "",
                               email: employeeList[item].userDetail?.email ?? "",
+                              onResetClick: (context) async {
+                                await context
+                                    .read<EmployeeCubit>()
+                                    .resetEmployeePassword(
+                                        employeeList[item].userId!);
+                              },
                               onDisableClick: (context) async {
                                 await context
                                     .read<EmployeeCubit>()

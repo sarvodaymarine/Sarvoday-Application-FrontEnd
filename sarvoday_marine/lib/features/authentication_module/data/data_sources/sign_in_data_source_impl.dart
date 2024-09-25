@@ -29,7 +29,8 @@ class SignInDataSourceImpl implements SignInDataSource {
         final apiResponse = await userApiCall();
         if (apiResponse.statusCode == 200) {
           final UserModel user = UserModel.fromJson(apiResponse.data);
-          return Right(user.isFirstLogin ?? false);
+          return Right(((user.isFirstLogin ?? false) ||
+              (user.isPasswordReset ?? false)));
         } else {
           dropLocalStorage();
           return const Left("Something went to wrong! Please try again later!");
@@ -66,6 +67,21 @@ class SignInDataSourceImpl implements SignInDataSource {
       final response =
           await dio.get('${StringConst.backEndBaseURL}users/$userUID/get');
       return response;
+    }
+  }
+
+  @override
+  Future<Either<bool, String>> resetPassword(String id) async {
+    try {
+      final response = await dio
+          .post('${StringConst.backEndBaseURL}users/resetPassword/$id');
+      if (response.statusCode == 200) {
+        return left(true);
+      } else {
+        return right(response.statusMessage.toString());
+      }
+    } catch (error) {
+      return right(CommonMethods.commonErrorHandler(error));
     }
   }
 

@@ -8,6 +8,7 @@ class UserModel {
       String? countryCode,
       bool? isActive,
       bool? isFirstLogin,
+      bool? isPasswordReset,
       bool? isDeleted,
       String? designation,
       String? updatedAt,
@@ -20,6 +21,7 @@ class UserModel {
     _isFirstLogin = isFirstLogin;
     _countryCode = countryCode;
     _isActive = isActive;
+    _isPasswordReset = isPasswordReset;
     _isDeleted = isDeleted;
     _designation = designation;
     _updatedAt = updatedAt;
@@ -34,6 +36,7 @@ class UserModel {
     _mobile = json['mobile'];
     _countryCode = json['countryCode'];
     _isActive = json['isActive'];
+    _isPasswordReset = json['isPasswordReset'] ?? false;
     _isDeleted = json['isDeleted'];
     _designation = json['userRole'];
     _createdAt = json['createdAt'];
@@ -49,6 +52,7 @@ class UserModel {
   String? _email;
   String? _countryCode;
   bool? _isActive;
+  bool? _isPasswordReset;
   bool? _isDeleted;
   String? _designation;
   String? _updatedAt;
@@ -63,6 +67,7 @@ class UserModel {
           String? email,
           String? countryCode,
           bool? isActive,
+          bool? isPasswordReset,
           bool? isDeleted,
           bool? isFirstLogin,
           String? designation,
@@ -78,6 +83,7 @@ class UserModel {
           isDeleted: isDeleted ?? _isDeleted,
           isFirstLogin: isFirstLogin ?? _isFirstLogin,
           isActive: isActive ?? _isActive,
+          isPasswordReset: isPasswordReset ?? _isPasswordReset,
           updatedAt: updatedAt ?? _updatedAt,
           createdAt: createdAt ?? _createdAt);
 
@@ -94,6 +100,8 @@ class UserModel {
   String? get countryCode => _countryCode;
 
   bool? get isActive => _isActive;
+
+  bool? get isPasswordReset => _isPasswordReset;
 
   bool? get isFirstLogin => _isFirstLogin;
 
@@ -117,6 +125,7 @@ class UserModel {
     map['isDeleted'] = _isDeleted;
     map['designation'] = _designation;
     map['createdAt'] = _createdAt;
+    map['isPasswordReset'] = _isPasswordReset;
     map['isFirstLogin'] = _isFirstLogin;
     map['updatedAt'] = _updatedAt;
     return map;
