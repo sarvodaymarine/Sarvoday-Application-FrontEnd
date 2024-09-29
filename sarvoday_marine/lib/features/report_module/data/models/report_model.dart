@@ -78,6 +78,7 @@ class ReportModel {
 class ServiceReportMetaData {
   String? _serviceName;
   String? _reportStatus;
+  bool? _isReportGenerated;
   String? _serviceId;
   String? _id;
 
@@ -85,16 +86,19 @@ class ServiceReportMetaData {
       {String? serviceName,
       String? reportStatus,
       String? serviceId,
+      bool? isReportGenerated,
       String? id}) {
     _serviceName = serviceName;
     _reportStatus = reportStatus;
     _serviceId = serviceId;
+    _isReportGenerated = isReportGenerated;
     _id = id;
   }
 
   ServiceReportMetaData.fromJson(Map<String, dynamic> json) {
     _id:
     json['id'];
+    _isReportGenerated = json['isReportGenerated'];
     _serviceName = json['serviceName'];
     _reportStatus = json['reportStatus'];
     _serviceId = json['serviceId'];
@@ -106,6 +110,7 @@ class ServiceReportMetaData {
     map['serviceName'] = _serviceName;
     map['reportStatus'] = _reportStatus;
     map['serviceId'] = _serviceId;
+    map['isReportGenerated'] = _isReportGenerated;
     return map;
   }
 
@@ -113,18 +118,22 @@ class ServiceReportMetaData {
       {String? serviceName,
       String? reportStatus,
       String? serviceId,
+      bool? isReportGenerated,
       String? id}) {
     return ServiceReportMetaData(
       id: id ?? _id,
       serviceName: serviceName ?? _serviceName,
       reportStatus: reportStatus ?? _reportStatus,
       serviceId: serviceId ?? _serviceId,
+      isReportGenerated: isReportGenerated ?? _isReportGenerated,
     );
   }
 
   String? get serviceName => _serviceName;
 
   String? get reportStatus => _reportStatus;
+
+  bool? get isReportGenerated => _isReportGenerated;
 
   String? get serviceId => _serviceId;
 

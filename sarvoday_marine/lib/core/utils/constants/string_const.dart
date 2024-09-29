@@ -26,5 +26,5 @@ class StringConst {
   static String loadingTxt = 'Loading...';
 
   static String backEndBaseURL =
-      'http://43.205.215.141:4000/api/' /* 'http://192.168.43.82:4000/api/'*/;
+      /*'http://43.205.215.141:4000/api/'*/ 'http://192.168.43.82:4000/api/';
 }

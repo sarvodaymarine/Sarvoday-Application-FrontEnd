@@ -20,6 +20,8 @@ class StateImageUploaded<T> extends ReportState {
 
 class StateNoData extends ReportState {}
 
+class StateSendReportSuccess extends ReportState {}
+
 class RefreshDropDownChange extends ReportState {
   final String response;
 

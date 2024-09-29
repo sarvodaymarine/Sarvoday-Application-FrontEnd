@@ -31,6 +31,37 @@ class ReportDataSourceImpl implements ReportDataSource {
   }
 
   @override
+  Future<Either<bool, String>> sendReport(String reportId) async {
+    try {
+      final response = await dio
+          .post('${StringConst.backEndBaseURL}reports/$reportId/sendReport');
+      if (response.statusCode == 200) {
+        return left(true);
+      } else {
+        return right(CommonMethods.commonErrorHandler(response));
+      }
+    } catch (error) {
+      return right(CommonMethods.commonErrorHandler(error));
+    }
+  }
+
+  @override
+  Future<Either<ReportModel, String>> generateServiceReport(
+      String reportId, String serviceId) async {
+    try {
+      final response = await dio.post(
+          '${StringConst.backEndBaseURL}reports/$reportId/serviceReport/$serviceId/generateReport');
+      if (response.statusCode == 200) {
+        return left(ReportModel.fromJson(response.data));
+      } else {
+        return right(CommonMethods.commonErrorHandler(response));
+      }
+    } catch (error) {
+      return right(CommonMethods.commonErrorHandler(error));
+    }
+  }
+
+  @override
   Future<Either<String, ServiceContainerModel>> updateReport(String reportId,
       String serviceId, ServiceContainerModel param, bool isReviewed) async {
     try {

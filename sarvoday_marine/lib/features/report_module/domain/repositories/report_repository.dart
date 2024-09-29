@@ -8,6 +8,11 @@ abstract class ReportRepository {
   Future<Either<ServiceContainerModel, String>> getServiceReport(
       String serviceId);
 
+  Future<Either<bool, String>> sendReport(String reportId);
+
+  Future<Either<ReportModel, String>> generateServiceReport(
+      String reportId, String serviceId);
+
   Future<Either<String, ServiceContainerModel>> updateReport(String reportId,
       String serviceId, ServiceContainerModel param, bool isReviewed);
 }

@@ -5,19 +5,28 @@ import 'package:sarvoday_marine/core/utils/widgets/image_upload_aws_s3_service.d
 import 'package:sarvoday_marine/features/report_module/data/models/container_model.dart';
 import 'package:sarvoday_marine/features/report_module/data/models/image_config_model.dart';
 import 'package:sarvoday_marine/features/report_module/data/models/service_report.dart';
+import 'package:sarvoday_marine/features/report_module/domain/use_cases/generate_service_report_use_case.dart';
 import 'package:sarvoday_marine/features/report_module/domain/use_cases/get_report_use_case.dart';
 import 'package:sarvoday_marine/features/report_module/domain/use_cases/get_service_report_use_case.dart';
+import 'package:sarvoday_marine/features/report_module/domain/use_cases/send_report_use_case.dart';
 import 'package:sarvoday_marine/features/report_module/domain/use_cases/update_report_use_case.dart';
 
 part 'report_state.dart';
 
 class ReportCubit extends Cubit<ReportState> {
-  ReportCubit(this.getReportUseCases, this.updateReportUseCases,
-      this.getServiceReportUseCases)
+  ReportCubit(
+      this.getReportUseCases,
+      this.updateReportUseCases,
+      this.getServiceReportUseCases,
+      this.generateServiceReportUseCases,
+      this.sendReportUseCases)
       : super(ReportInitial());
   final GetReportUseCases getReportUseCases;
   final UpdateReportUseCases updateReportUseCases;
   final GetServiceReportUseCases getServiceReportUseCases;
+  final GenerateServiceReportUseCases generateServiceReportUseCases;
+  final SendReportUseCases sendReportUseCases;
+
   String user = '';
   Map<String, dynamic> images = {};
 
@@ -25,6 +34,26 @@ class ReportCubit extends Cubit<ReportState> {
     var res = await getReportUseCases.call(orderId);
     res.fold((orders) {
       emit(StateOnSuccess(orders));
+    }, (error) {
+      emit(StateErrorGeneral(error.toString()));
+    });
+  }
+
+  sendReportDetail(String reportId) async {
+    emit(StateNoData());
+    var res = await sendReportUseCases.call(reportId);
+    res.fold((orders) {
+      emit(StateSendReportSuccess());
+    }, (error) {
+      emit(StateErrorGeneral(error.toString()));
+    });
+  }
+
+  generateServiceReportDetail(String reportId, String serviceId) async {
+    emit(StateNoData());
+    var res = await generateServiceReportUseCases.call(reportId, serviceId);
+    res.fold((orders) {
+      emit(StateOnSuccess2(orders));
     }, (error) {
       emit(StateErrorGeneral(error.toString()));
     });

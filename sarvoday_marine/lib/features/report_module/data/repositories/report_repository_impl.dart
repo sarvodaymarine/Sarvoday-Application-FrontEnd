@@ -26,4 +26,15 @@ class ReportRepositoryImpl implements ReportRepository {
       String serviceId) async {
     return await reportDataSource.getServiceReport(serviceId);
   }
+
+  @override
+  Future<Either<ReportModel, String>> generateServiceReport(
+      String reportId, String serviceId) async {
+    return await reportDataSource.generateServiceReport(reportId, serviceId);
+  }
+
+  @override
+  Future<Either<bool, String>> sendReport(String reportId) async {
+    return await reportDataSource.sendReport(reportId);
+  }
 }

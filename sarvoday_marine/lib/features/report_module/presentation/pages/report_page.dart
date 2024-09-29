@@ -1,12 +1,15 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sarvoday_marine/core/api_handler/token_manager.dart';
 import 'package:sarvoday_marine/core/navigation/app_route.gr.dart';
 import 'package:sarvoday_marine/core/theme/sm_color_theme.dart';
 import 'package:sarvoday_marine/core/theme/sm_text_theme.dart';
+import 'package:sarvoday_marine/core/utils/common/common_loading_dialog.dart';
 import 'package:sarvoday_marine/core/utils/common/common_methods.dart';
 import 'package:sarvoday_marine/core/utils/constants/string_const.dart';
 import 'package:sarvoday_marine/core/utils/widgets/common_app_bar.dart';
+import 'package:sarvoday_marine/core/utils/widgets/custom_sm_button.dart';
 import 'package:sarvoday_marine/core/utils/widgets/custom_sm_no_available_widget.dart';
 import 'package:sarvoday_marine/features/report_module/data/models/report_model.dart';
 import 'package:sarvoday_marine/features/report_module/presentation/cubit/report_cubit.dart';
@@ -32,12 +35,17 @@ class ReportPage extends StatefulWidget implements AutoRouteWrapper {
 
 class _ReportPageState extends State<ReportPage> {
   ReportModel? reportDetail;
+  String userRole = "";
+  bool isFromAction = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await context.read<ReportCubit>().getReportDetail(widget.orderId);
+      userRole = await TokenManager.getUserRole() ?? "";
+      if (mounted) {
+        await context.read<ReportCubit>().getReportDetail(widget.orderId);
+      }
     });
   }
 
@@ -51,13 +59,31 @@ class _ReportPageState extends State<ReportPage> {
       ).appBar(),
       body: BlocConsumer<ReportCubit, ReportState>(
         listener: (context, state) {
-          if (state is StateErrorGeneral) {
+          if (state is StateNoData) {
+            showLoadingDialog(context);
+          } else if (state is StateErrorGeneral) {
+            if (isFromAction) {
+              hideLoadingDialog(context);
+            }
             CommonMethods.showToast(context, state.errorMsg);
+          } else if (state is StateSendReportSuccess) {
+            hideLoadingDialog(context);
+            CommonMethods.showToast(context, "Report Sent successfully");
+          } else if (state is StateOnSuccess2) {
+            hideLoadingDialog(context);
+            CommonMethods.showToast(
+                context, "Service report generated successfully");
           }
         },
         builder: (context, state) {
           if (state is StateOnSuccess) {
             reportDetail = state.response;
+          } else if (state is StateOnSuccess2) {
+            isFromAction = false;
+            reportDetail = state.response;
+          } else if (state is StateSendReportSuccess ||
+              state is StateErrorGeneral) {
+            isFromAction = false;
           } else if (state is StateLoading) {
             return const Center(child: CircularProgressIndicator());
           }
@@ -126,6 +152,27 @@ class _ReportPageState extends State<ReportPage> {
                                       text: reportDetail
                                           ?.serviceReports?[index].serviceName,
                                       style: SmTextTheme.labelStyle3(context))),
+                              subtitle: Visibility(
+                                visible: !(reportDetail?.serviceReports?[index]
+                                            .isReportGenerated ??
+                                        false) &&
+                                    reportDetail?.serviceReports?[index]
+                                            .reportStatus ==
+                                        "Reviewed",
+                                child: CustomSmButton(
+                                    text: "Generate Report",
+                                    onTap: () {
+                                      isFromAction = true;
+                                      context
+                                          .read<ReportCubit>()
+                                          .generateServiceReportDetail(
+                                              reportDetail?.id ?? "",
+                                              reportDetail
+                                                      ?.serviceReports?[index]
+                                                      .serviceId ??
+                                                  "");
+                                    }),
+                              ),
                               onTap: () {
                                 AutoRouter.of(context).push(ServiceDetailRoute(
                                     serviceId: reportDetail
@@ -138,6 +185,31 @@ class _ReportPageState extends State<ReportPage> {
                             ),
                           );
                         },
+                      ),
+                      Visibility(
+                        visible: userRole == "superAdmin" &&
+                            reportDetail != null &&
+                            reportDetail!.serviceReports != null &&
+                            reportDetail!.serviceReports!.every(((element) =>
+                                (element.isReportGenerated ?? false))),
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                              vertical:
+                                  SmTextTheme.getResponsiveSize(context, 12),
+                              horizontal:
+                                  SmTextTheme.getResponsiveSize(context, 12)),
+                          child: SizedBox(
+                              width: double.infinity,
+                              child: CustomSmButton(
+                                  text: "Send",
+                                  onTap: () async {
+                                    isFromAction = true;
+                                    context
+                                        .read<ReportCubit>()
+                                        .sendReportDetail(
+                                            reportDetail?.id ?? "");
+                                  })),
+                        ),
                       ),
                     ],
                   )

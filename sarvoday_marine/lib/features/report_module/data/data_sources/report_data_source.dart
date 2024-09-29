@@ -5,6 +5,11 @@ import 'package:sarvoday_marine/features/report_module/data/models/service_repor
 abstract class ReportDataSource {
   Future<Either<ReportModel, String>> getReport(String id);
 
+  Future<Either<bool, String>> sendReport(String reportId);
+
+  Future<Either<ReportModel, String>> generateServiceReport(
+      String reportId, String serviceId);
+
   Future<Either<ServiceContainerModel, String>> getServiceReport(
       String serviceId);
 

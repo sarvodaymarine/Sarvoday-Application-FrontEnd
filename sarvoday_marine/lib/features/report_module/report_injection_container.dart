@@ -3,20 +3,25 @@ import 'package:sarvoday_marine/features/report_module/data/data_sources/report_
 import 'package:sarvoday_marine/features/report_module/data/data_sources/report_data_source_impl.dart';
 import 'package:sarvoday_marine/features/report_module/data/repositories/report_repository_impl.dart';
 import 'package:sarvoday_marine/features/report_module/domain/repositories/report_repository.dart';
+import 'package:sarvoday_marine/features/report_module/domain/use_cases/generate_service_report_use_case.dart';
 import 'package:sarvoday_marine/features/report_module/domain/use_cases/get_report_use_case.dart';
 import 'package:sarvoday_marine/features/report_module/domain/use_cases/get_service_report_use_case.dart';
+import 'package:sarvoday_marine/features/report_module/domain/use_cases/send_report_use_case.dart';
 import 'package:sarvoday_marine/features/report_module/domain/use_cases/update_report_use_case.dart';
 import 'package:sarvoday_marine/features/report_module/presentation/cubit/report_cubit.dart';
 
 GetIt reportSl = GetIt.instance;
 
 Future<void> init() async {
-  reportSl
-      .registerFactory(() => ReportCubit(reportSl(), reportSl(), reportSl()));
+  reportSl.registerFactory(() =>
+      ReportCubit(reportSl(), reportSl(), reportSl(), reportSl(), reportSl()));
 
   reportSl.registerLazySingleton(() => GetReportUseCases(reportSl()));
   reportSl.registerLazySingleton(() => UpdateReportUseCases(reportSl()));
   reportSl.registerLazySingleton(() => GetServiceReportUseCases(reportSl()));
+  reportSl
+      .registerLazySingleton(() => GenerateServiceReportUseCases(reportSl()));
+  reportSl.registerLazySingleton(() => SendReportUseCases(reportSl()));
 
   reportSl.registerLazySingleton<ReportRepository>(
       () => ReportRepositoryImpl(reportSl()));
