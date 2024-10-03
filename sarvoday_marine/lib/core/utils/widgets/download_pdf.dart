@@ -9,6 +9,8 @@ import 'package:sarvoday_marine/core/theme/sm_color_theme.dart';
 import 'package:sarvoday_marine/core/theme/sm_text_theme.dart';
 import 'package:sarvoday_marine/core/utils/common/common_methods.dart';
 
+import '../common/common_loading_dialog.dart';
+
 class DownloadPDFButton extends StatefulWidget {
   final String signedUrl;
   final String fileName;
@@ -26,6 +28,7 @@ class DownloadPDFButtonState extends State<DownloadPDFButton> {
   Future<String> _downloadPDF(BuildContext context) async {
     setState(() {
       _isDownloading = true;
+      showLoadingDialog(context);
     });
     final dio = Dio();
     final response = await dio.get(widget.signedUrl,
@@ -42,6 +45,7 @@ class DownloadPDFButtonState extends State<DownloadPDFButton> {
       file.writeAsBytes(response.data);
       setState(() {
         _isDownloading = false;
+        hideLoadingDialog(context);
       });
 
       final result = await OpenFile.open(file.path);
@@ -54,6 +58,7 @@ class DownloadPDFButtonState extends State<DownloadPDFButton> {
     } else {
       setState(() {
         _isDownloading = false;
+        hideLoadingDialog(context);
       });
       return 'Download failed.';
     }
